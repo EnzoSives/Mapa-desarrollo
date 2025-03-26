@@ -1,5 +1,5 @@
 <template>
-  <div class="full-height">
+  <q-page class="full-height">
     <div ref="mapContainer" class="mapa"></div>
 
     <!-- Panel de información del marcador -->
@@ -58,7 +58,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -97,19 +97,38 @@ let map: Map;
 let vectorSource = new VectorSource();
 
 onMounted(() => {
-  if (!mapContainer.value) return;
+  vectorSource = new VectorSource();
+
+  // Agregar marcadores almacenados en el store
+  gisStore.marcadores.forEach(agregarMarcadorAlMapa);
+
+  const vectorLayer = new VectorLayer({ source: vectorSource });
 
   map = new Map({
-    target: mapContainer.value,
-    layers: [new TileLayer({ source: new OSM() })],
+    target: mapContainer.value as HTMLElement,
+    layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
       center: fromLonLat([-56.9057, -37.139]),
       zoom: 12,
     }),
-    controls: [],
+    controls: [], // Eliminar controles del mapa
   });
 
-  map.updateSize(); // Asegura que el tamaño del mapa se actualice correctamente
+  // Evento click en el mapa para agregar marcador
+  map.on('singleclick', (event) => {
+    const coords = toLonLat(event.coordinate);
+    abrirModal(coords);
+  });
+
+  // Evento click en un marcador
+  map.on('singleclick', (event) => {
+    map.forEachFeatureAtPixel(event.pixel, (feature) => {
+      const id = feature.get('id') as number;
+      if (id) {
+        gisStore.seleccionarMarcador(id);
+      }
+    });
+  });
 });
 
 function abrirModal(coords: [number, number]) {
@@ -144,7 +163,7 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
     new Style({
       image: new Icon({
         src: '/marker-icon.png',
-        scale: 0.05,
+        scale: 0.2,
       }),
     })
   );
@@ -156,10 +175,7 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
 <style scoped>
 .mapa {
   width: 100%;
-  height: 100vh; /* Asegúrate de que tome toda la altura de la ventana */
-  min-height: 400px;
-  background-color: rgba(0, 255, 0, 0.1);
-  border: 2px solid red;
+  height: 100vh;
 }
 
 .info-panel {
