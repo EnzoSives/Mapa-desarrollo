@@ -73,7 +73,7 @@ import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
-import { Style, Icon } from 'ol/style';
+import { Style, Icon, Fill, Stroke } from 'ol/style';
 
 export interface Marcador {
   id: number;
@@ -108,7 +108,8 @@ onMounted(() => {
     target: mapContainer.value as HTMLElement,
     layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
-      center: fromLonLat([-56.9057, -37.139]),
+      // Usamos las coordenadas de General Juan Madariaga
+      center: fromLonLat([-57.13391564591709, -37.001727792889845]),
       zoom: 12,
     }),
     controls: [], // Eliminar controles del mapa
@@ -117,7 +118,11 @@ onMounted(() => {
   // Evento click en el mapa para agregar marcador
   map.on('singleclick', (event) => {
     const coords = toLonLat(event.coordinate);
-    abrirModal(coords);
+
+    // Solo abrir el modal si no hay marcador seleccionado
+    if (!gisStore.marcadorSeleccionado) {
+      abrirModal(coords);
+    }
   });
 
   // Evento click en un marcador
@@ -127,6 +132,35 @@ onMounted(() => {
       if (id) {
         gisStore.seleccionarMarcador(id);
       }
+    });
+  });
+
+  // Detectar hover sobre los marcadores
+  map.on('pointermove', (event) => {
+    map.forEachFeatureAtPixel(event.pixel, (feature) => {
+      // Cuando el puntero está sobre un marcador
+      feature.setStyle(
+        new Style({
+          image: new Icon({
+            src: '/marker-icon.png',
+            scale: 0.3, // Aumentamos el tamaño en hover
+          }),
+        })
+      );
+    });
+  });
+
+  // Cuando el puntero se sale del marcador
+  map.on('pointerout', (event) => {
+    map.forEachFeatureAtPixel(event.pixel, (feature) => {
+      feature.setStyle(
+        new Style({
+          image: new Icon({
+            src: '/marker-icon.png',
+            scale: 0.2, // Tamaño por defecto
+          }),
+        })
+      );
     });
   });
 });
@@ -163,7 +197,7 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
     new Style({
       image: new Icon({
         src: '/marker-icon.png',
-        scale: 0.2,
+        scale: 0.2, // Tamaño por defecto
       }),
     })
   );
