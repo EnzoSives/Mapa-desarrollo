@@ -108,37 +108,36 @@ onMounted(() => {
     target: mapContainer.value as HTMLElement,
     layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
-      // Usamos las coordenadas de General Juan Madariaga
       center: fromLonLat([-57.13391564591709, -37.001727792889845]),
       zoom: 12,
     }),
     controls: [], // Eliminar controles del mapa
   });
 
-  // Evento click en el mapa para agregar marcador
+  // Unificar evento de click en el mapa
   map.on('singleclick', (event) => {
-    const coords = toLonLat(event.coordinate);
+    let marcadorSeleccionado = false;
 
-    // Solo abrir el modal si no hay marcador seleccionado
-    if (!gisStore.marcadorSeleccionado) {
-      abrirModal(coords);
-    }
-  });
-
-  // Evento click en un marcador
-  map.on('singleclick', (event) => {
     map.forEachFeatureAtPixel(event.pixel, (feature) => {
       const id = feature.get('id') as number;
       if (id) {
         gisStore.seleccionarMarcador(id);
+        marcadorSeleccionado = true;
       }
     });
+
+    if (!marcadorSeleccionado) {
+      const coords = toLonLat(event.coordinate);
+      abrirModal(coords);
+    }
   });
 
   // Detectar hover sobre los marcadores
   map.on('pointermove', (event) => {
+    let isOverMarker = false;
+
     map.forEachFeatureAtPixel(event.pixel, (feature) => {
-      // Cuando el puntero está sobre un marcador
+      isOverMarker = true;
       feature.setStyle(
         new Style({
           image: new Icon({
@@ -148,20 +147,19 @@ onMounted(() => {
         })
       );
     });
-  });
 
-  // Cuando el puntero se sale del marcador
-  map.on('pointerout', (event) => {
-    map.forEachFeatureAtPixel(event.pixel, (feature) => {
-      feature.setStyle(
-        new Style({
-          image: new Icon({
-            src: '/marker-icon.png',
-            scale: 0.2, // Tamaño por defecto
-          }),
-        })
-      );
-    });
+    if (!isOverMarker) {
+      vectorSource.getFeatures().forEach((feature) => {
+        feature.setStyle(
+          new Style({
+            image: new Icon({
+              src: '/marker-icon.png',
+              scale: 0.2, // Tamaño por defecto
+            }),
+          })
+        );
+      });
+    }
   });
 });
 
