@@ -46,6 +46,13 @@
             label="Descripción"
             type="textarea"
           />
+          <!-- Selector de color -->
+          <q-input
+            v-model="nuevoMarcador.color"
+            label="Color del marcador"
+            type="color"
+            :value="nuevoMarcador.color"
+          />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
@@ -74,6 +81,7 @@ import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon, Fill, Stroke } from 'ol/style';
+import { getWidth, getHeight } from 'ol/extent';
 
 export interface Marcador {
   id: number;
@@ -81,6 +89,7 @@ export interface Marcador {
   descripcion: string;
   latitud: number;
   longitud: number;
+  color: string; // Agregar propiedad color
 }
 
 const gisStore = useGisStore();
@@ -92,6 +101,7 @@ const nuevoMarcador = ref<Marcador>({
   descripcion: '',
   latitud: 0,
   longitud: 0,
+  color: '#FF0000', // Color por defecto
 });
 let map: Map;
 let vectorSource = new VectorSource();
@@ -104,14 +114,27 @@ onMounted(() => {
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
 
+  const extent = [
+    fromLonLat([-57.3, -37.2]), // Esquina inferior izquierda (menos lejos)
+    fromLonLat([-56.95, -36.85]), // Esquina superior derecha (menos lejos)
+  ];
+
   map = new Map({
     target: mapContainer.value as HTMLElement,
     layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
-      center: fromLonLat([-57.13391564591709, -37.001727792889845]),
-      zoom: 12,
+      center: fromLonLat([-57.1339, -37.0017]), // Centro de la localidad
+      zoom: 15, // Un poco más de zoom para ver menos área
+      minZoom: 5, // Evitamos alejar demasiado
+      maxZoom: 18,
+      extent: [
+        extent[0][0],
+        extent[0][1], // Min X, Min Y
+        extent[1][0],
+        extent[1][1], // Max X, Max Y
+      ],
     }),
-    controls: [], // Eliminar controles del mapa
+    controls: [], // Eliminamos controles del mapa
   });
 
   // Unificar evento de click en el mapa
@@ -170,6 +193,7 @@ function abrirModal(coords: [number, number]) {
     descripcion: '',
     latitud: coords[1],
     longitud: coords[0],
+    color: '#FF0000', // Color por defecto
   };
   modalVisible.value = true;
 }
@@ -196,6 +220,7 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
       image: new Icon({
         src: '/marker-icon.png',
         scale: 0.2, // Tamaño por defecto
+        color: marcador.color, // Usar el color seleccionado
       }),
     })
   );
