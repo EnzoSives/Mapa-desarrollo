@@ -33,34 +33,83 @@
       </q-card-actions>
     </q-card>
 
-    <!-- Modal para ingresar información del marcador -->
-    <q-dialog v-model="modalVisible">
-      <q-card class="q-pa-md">
-        <q-card-section>
-          <div class="text-h6">Nuevo marcador</div>
+    <q-card class="reference-card">
+      <q-card-section>
+        <div class="text-h6">Referencias</div>
+      </q-card-section>
+      <q-card-section>
+        <p class="reference-item">
+          <q-img src="public/marker-icon.png" class="reference-img"></q-img>
+          Icono 1
+        </p>
+        <p class="reference-item">
+          <q-img src="public/marker-icon-2.png" class="reference-img"></q-img>
+          Icono 2
+        </p>
+        <p class="reference-item">
+          <q-img src="public/marker-icon-3.png" class="reference-img"></q-img>
+          Icono 3
+        </p>
+      </q-card-section>
+    </q-card>
+
+    <q-dialog v-model="modalVisible" persistent>
+      <q-card class="q-pa-md q-gutter-md q-mx-auto" style="width: 400px">
+        <!-- Título del modal -->
+        <q-card-section class="text-center">
+          <div class="text-h6 q-mb-md">Nuevo marcador</div>
         </q-card-section>
+
+        <!-- Sección de entrada de datos -->
         <q-card-section>
-          <q-input v-model="nuevoMarcador.nombre" label="Nombre" />
+          <q-input
+            v-model="nuevoMarcador.nombre"
+            label="Nombre"
+            dense
+            outlined
+            class="q-mb-md"
+          />
           <q-input
             v-model="nuevoMarcador.descripcion"
             label="Descripción"
             type="textarea"
+            dense
+            outlined
+            class="q-mb-md"
           />
-          <!-- Selector de color -->
-          <q-input
-            v-model="nuevoMarcador.color"
-            label="Color del marcador"
-            type="color"
-            :value="nuevoMarcador.color"
+          <!-- Selector de íconos -->
+          <q-select
+            v-model="nuevoMarcador.icono"
+            label="Ícono del marcador"
+            :options="iconosDisponibles"
+            option-value="value"
+            option-label="label"
+            emit-value
+            map-options
+            type="radio"
+            inline
+            outlined
+            dense
+            class="q-mb-md"
           />
         </q-card-section>
+
+        <!-- Acciones del modal -->
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
+          <q-btn
+            flat
+            label="Cancelar"
+            @click="cerrarModal"
+            color="negative"
+            class="q-mr-sm"
+            rounded
+          />
           <q-btn
             flat
             label="Guardar"
             @click="guardarMarcador"
             color="positive"
+            rounded
           />
         </q-card-actions>
       </q-card>
@@ -81,7 +130,6 @@ import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon, Fill, Stroke } from 'ol/style';
-import { getWidth, getHeight } from 'ol/extent';
 
 export interface Marcador {
   id: number;
@@ -89,7 +137,7 @@ export interface Marcador {
   descripcion: string;
   latitud: number;
   longitud: number;
-  color: string; // Agregar propiedad color
+  icono: string; // Usamos icono en vez de color
 }
 
 const gisStore = useGisStore();
@@ -101,8 +149,16 @@ const nuevoMarcador = ref<Marcador>({
   descripcion: '',
   latitud: 0,
   longitud: 0,
-  color: '#FF0000', // Color por defecto
+  icono: null, // Ícono por defecto
 });
+
+const iconosDisponibles = [
+  { label: 'Ícono 1', value: '/marker-icon.png' },
+  { label: 'Ícono 2', value: '/marker-icon-2.png' },
+  { label: 'Ícono 3', value: '/marker-icon-3.png' },
+  // Agrega más íconos según sea necesario
+];
+
 let map: Map;
 let vectorSource = new VectorSource();
 
@@ -114,30 +170,18 @@ onMounted(() => {
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
 
-  const extent = [
-    fromLonLat([-57.3, -37.2]), // Esquina inferior izquierda (menos lejos)
-    fromLonLat([-56.95, -36.85]), // Esquina superior derecha (menos lejos)
-  ];
-
   map = new Map({
     target: mapContainer.value as HTMLElement,
     layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
-      center: fromLonLat([-57.1339, -37.0017]), // Centro de la localidad
-      zoom: 15, // Un poco más de zoom para ver menos área
-      minZoom: 5, // Evitamos alejar demasiado
+      center: fromLonLat([-57.1339, -37.0017]),
+      zoom: 15,
+      minZoom: 5,
       maxZoom: 18,
-      extent: [
-        extent[0][0],
-        extent[0][1], // Min X, Min Y
-        extent[1][0],
-        extent[1][1], // Max X, Max Y
-      ],
     }),
-    controls: [], // Eliminamos controles del mapa
+    controls: [],
   });
 
-  // Unificar evento de click en el mapa
   map.on('singleclick', (event) => {
     let marcadorSeleccionado = false;
 
@@ -154,36 +198,6 @@ onMounted(() => {
       abrirModal(coords);
     }
   });
-
-  // Detectar hover sobre los marcadores
-  map.on('pointermove', (event) => {
-    let isOverMarker = false;
-
-    map.forEachFeatureAtPixel(event.pixel, (feature) => {
-      isOverMarker = true;
-      feature.setStyle(
-        new Style({
-          image: new Icon({
-            src: '/marker-icon.png',
-            scale: 0.3, // Aumentamos el tamaño en hover
-          }),
-        })
-      );
-    });
-
-    if (!isOverMarker) {
-      vectorSource.getFeatures().forEach((feature) => {
-        feature.setStyle(
-          new Style({
-            image: new Icon({
-              src: '/marker-icon.png',
-              scale: 0.2, // Tamaño por defecto
-            }),
-          })
-        );
-      });
-    }
-  });
 });
 
 function abrirModal(coords: [number, number]) {
@@ -193,7 +207,7 @@ function abrirModal(coords: [number, number]) {
     descripcion: '',
     latitud: coords[1],
     longitud: coords[0],
-    color: '#FF0000', // Color por defecto
+    icono: null, // Ícono por defecto
   };
   modalVisible.value = true;
 }
@@ -218,9 +232,8 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
   feature.setStyle(
     new Style({
       image: new Icon({
-        src: '/marker-icon.png',
-        scale: 0.2, // Tamaño por defecto
-        color: marcador.color, // Usar el color seleccionado
+        src: `${marcador.icono}`, // Usar el ícono seleccionado
+        scale: 0.2,
       }),
     })
   );
@@ -243,5 +256,33 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.reference-card {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 250px;
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.reference-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px; /* Espacio entre los elementos */
+}
+
+.reference-img {
+  width: 40px; /* Ajusta el tamaño de la imagen */
+  height: 40px; /* Mantén la proporción de la imagen */
+  margin-right: 8px; /* Espacio entre la imagen y el texto */
+}
+
+.q-dialog__backdrop {
+  backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 </style>
