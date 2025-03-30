@@ -207,7 +207,7 @@ function abrirModal(coords: [number, number]) {
     descripcion: '',
     latitud: coords[1],
     longitud: coords[0],
-    icono: null, // Ícono por defecto
+    icono: null,
   };
   modalVisible.value = true;
 }
