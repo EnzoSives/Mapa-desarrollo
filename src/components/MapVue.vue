@@ -39,15 +39,15 @@
       </q-card-section>
       <q-card-section>
         <p class="reference-item">
-          <q-img src="public/marker-icon.png" class="reference-img"></q-img>
+          <q-img src="/marker-icon.png" class="reference-img"></q-img>
           Icono 1
         </p>
         <p class="reference-item">
-          <q-img src="public/marker-icon-2.png" class="reference-img"></q-img>
+          <q-img src="/marker-icon-2.png" class="reference-img"></q-img>
           Icono 2
         </p>
         <p class="reference-item">
-          <q-img src="public/marker-icon-3.png" class="reference-img"></q-img>
+          <q-img src="/marker-icon-3.png" class="reference-img"></q-img>
           Icono 3
         </p>
       </q-card-section>
