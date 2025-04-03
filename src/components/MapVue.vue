@@ -328,5 +328,4 @@ function eliminarMarcadores() {
   padding-top: 10px;
 }
 
-
 </style>
