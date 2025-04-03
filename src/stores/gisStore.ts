@@ -10,20 +10,24 @@ export interface Marcador {
 
 export const useGisStore = defineStore('gis', {
   state: () => ({
-    marcadores: JSON.parse(localStorage.getItem('marcadores') || '[]'),
-    marcadorSeleccionado: null,
+    marcadores: JSON.parse(localStorage.getItem('marcadores') || '[]') as Marcador[],
+    marcadorSeleccionado: null as Marcador | null,
   }),
   actions: {
-    agregarMarcador(marcador: any) {
+    agregarMarcador(marcador: Marcador) {
       this.marcadores.push(marcador);
       localStorage.setItem('marcadores', JSON.stringify(this.marcadores));
     },
-    seleccionarMarcador(id: any) {
+    seleccionarMarcador(id: number) {
       this.marcadorSeleccionado =
         this.marcadores.find((m: Marcador) => m.id === id) || null;
     },
     cerrarInfo() {
       this.marcadorSeleccionado = null;
     },
-  },
+    limpiarMarcadores() {
+      this.marcadores = []; 
+      localStorage.removeItem('marcadores');
+    }
+  }
 });

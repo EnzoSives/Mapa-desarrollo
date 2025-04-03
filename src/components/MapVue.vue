@@ -2,6 +2,15 @@
   <q-page class="full-height">
     <div ref="mapContainer" class="mapa"></div>
 
+    <q-btn
+  class="clear-btn"
+  label="Eliminar marcadores"
+  color="negative"
+  icon="delete"
+  @click="eliminarMarcadores"
+/>
+
+
     <!-- Panel de información del marcador -->
     <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
       <q-card-section>
@@ -240,6 +249,12 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
 
   vectorSource.addFeature(feature);
 }
+
+function eliminarMarcadores() {
+  gisStore.limpiarMarcadores();
+  vectorSource.clear();
+}
+
 </script>
 
 <style scoped>
@@ -285,4 +300,12 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
   backdrop-filter: blur(5px);
   background-color: rgba(0, 0, 0, 0.3);
 }
+
+.clear-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
 </style>
