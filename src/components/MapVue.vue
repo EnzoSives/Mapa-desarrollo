@@ -60,6 +60,21 @@
           Icono 3
         </p>
       </q-card-section>
+
+      <q-card-section class="marcadores-list">
+    <div class="text-h6">Marcadores Guardados</div>
+    <q-scroll-area style="height: 150px; max-width: 250px">
+      <q-list>
+        <q-item v-for="marcador in gisStore.marcadores" :key="marcador.id" clickable @click="gisStore.seleccionarMarcador(marcador.id)">
+          <q-item-section>
+            <q-item-label>{{ marcador.nombre }}</q-item-label>
+            <q-item-label caption>{{ marcador.descripcion }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-scroll-area>
+  </q-card-section>
+
     </q-card>
 
     <q-dialog v-model="modalVisible" persistent>
@@ -307,5 +322,11 @@ function eliminarMarcadores() {
   left: 20px;
   z-index: 1000;
 }
+
+.marcadores-list {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
 
 </style>
