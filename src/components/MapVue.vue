@@ -2,45 +2,23 @@
   <q-page class="full-height">
     <div ref="mapContainer" class="mapa"></div>
 
-    <q-btn
-  class="clear-btn"
-  label="Eliminar marcadores"
-  color="negative"
-  icon="delete"
-  @click="eliminarMarcadores"
-/>
-
-
     <!-- Panel de información del marcador -->
     <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
-      <q-card-section>
-        <div class="text-h6">Información del marcador</div>
-      </q-card-section>
-      <q-card-section>
-        <p>
-          <strong>Nombre:</strong> {{ gisStore.marcadorSeleccionado.nombre }}
-        </p>
-        <p>
-          <strong>Descripción:</strong>
-          {{ gisStore.marcadorSeleccionado.descripcion }}
-        </p>
-        <p>
-          <strong>Latitud:</strong> {{ gisStore.marcadorSeleccionado.latitud }}
-        </p>
-        <p>
-          <strong>Longitud:</strong>
-          {{ gisStore.marcadorSeleccionado.longitud }}
-        </p>
-      </q-card-section>
-      <q-card-actions>
-        <q-btn
-          flat
-          label="Cerrar"
-          @click="gisStore.cerrarInfo"
-          color="primary"
-        />
-      </q-card-actions>
-    </q-card>
+  <q-card-section>
+    <div class="text-h6">Información del marcador</div>
+  </q-card-section>
+  <q-card-section>
+    <p><strong>Nombre:</strong> {{ gisStore.marcadorSeleccionado.nombre }}</p>
+    <p><strong>Descripción:</strong> {{ gisStore.marcadorSeleccionado.descripcion }}</p>
+    <p><strong>Latitud:</strong> {{ gisStore.marcadorSeleccionado.latitud }}</p>
+    <p><strong>Longitud:</strong> {{ gisStore.marcadorSeleccionado.longitud }}</p>
+  </q-card-section>
+  <q-card-actions>
+    <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
+    <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative" />
+  </q-card-actions>
+</q-card>
+
 
     <q-card class="reference-card">
       <q-card-section>
@@ -65,12 +43,18 @@
     <div class="text-h6">Marcadores Guardados</div>
     <q-scroll-area style="height: 150px; max-width: 250px">
       <q-list>
-        <q-item v-for="marcador in gisStore.marcadores" :key="marcador.id" clickable @click="gisStore.seleccionarMarcador(marcador.id)">
-          <q-item-section>
-            <q-item-label>{{ marcador.nombre }}</q-item-label>
-            <q-item-label caption>{{ marcador.descripcion }}</q-item-label>
-          </q-item-section>
-        </q-item>
+        <q-item
+  v-for="marcador in gisStore.marcadores"
+  :key="marcador.id"
+  clickable
+  @click="gisStore.seleccionarMarcador(marcador.id)"
+>
+  <q-item-section>
+    <q-item-label>{{ marcador.nombre }}</q-item-label>
+    <q-item-label caption>{{ marcador.descripcion }}</q-item-label>
+  </q-item-section>
+</q-item>
+
       </q-list>
     </q-scroll-area>
   </q-card-section>
@@ -265,10 +249,30 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
   vectorSource.addFeature(feature);
 }
 
-function eliminarMarcadores() {
-  gisStore.limpiarMarcadores();
-  vectorSource.clear();
+function eliminarMarcadorSeleccionado() {
+  if (!gisStore.marcadorSeleccionado) return;
+
+  const marcadorId = gisStore.marcadorSeleccionado.id;
+
+  // Eliminar del store
+  gisStore.eliminarMarcador(marcadorId);
+
+  // Eliminar del mapa
+  const featureToRemove = vectorSource.getFeatures().find(feature =>
+    feature.get('id') === marcadorId
+  );
+
+  if (featureToRemove) {
+    vectorSource.removeFeature(featureToRemove);
+  }
+
+  // Cerrar el panel de información
+  gisStore.cerrarInfo();
+
+
 }
+
+
 
 </script>
 
