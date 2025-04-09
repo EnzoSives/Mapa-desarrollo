@@ -1,3 +1,4 @@
+// src/stores/gisStore.ts
 import { defineStore } from 'pinia';
 
 export interface Marcador {
@@ -6,6 +7,7 @@ export interface Marcador {
   descripcion: string;
   latitud: number;
   longitud: number;
+  icono: string;
 }
 
 export const useGisStore = defineStore('gis', {
@@ -17,28 +19,36 @@ export const useGisStore = defineStore('gis', {
   actions: {
     agregarMarcador(marcador: Marcador) {
       this.marcadores.push(marcador);
-      localStorage.setItem('marcadores', JSON.stringify(this.marcadores));
+      this.guardarLocalStorage();
+    },
+
+    editarMarcador(marcadorEditado: Marcador) {
+      const index = this.marcadores.findIndex(m => m.id === marcadorEditado.id);
+      if (index !== -1) {
+        this.marcadores[index] = marcadorEditado;
+        this.guardarLocalStorage();
+        this.marcadorSeleccionado = null;
+      }
+    },
+
+    eliminarMarcador(id: number) {
+      this.marcadores = this.marcadores.filter(m => m.id !== id);
+      this.guardarLocalStorage();
+      if (this.marcadorSeleccionado?.id === id) {
+        this.marcadorSeleccionado = null;
+      }
     },
 
     seleccionarMarcador(id: number) {
-      this.marcadorSeleccionado =
-        this.marcadores.find((m: Marcador) => m.id === id) || null;
+      this.marcadorSeleccionado = this.marcadores.find(m => m.id === id) || null;
     },
 
     cerrarInfo() {
       this.marcadorSeleccionado = null;
     },
 
-    eliminarMarcador(id: number) {
-      const index = this.marcadores.findIndex(m => m.id === id);
-      if (index !== -1) {
-        this.marcadores.splice(index, 1); 
-        localStorage.setItem('marcadores', JSON.stringify(this.marcadores));
-
-        if (this.marcadorSeleccionado?.id === id) {
-          this.marcadorSeleccionado = null;
-        }
-      }
+    guardarLocalStorage() {
+      localStorage.setItem('marcadores', JSON.stringify(this.marcadores));
     }
   }
 });
