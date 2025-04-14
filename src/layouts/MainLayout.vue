@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="no-scroll">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -11,15 +11,14 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Mapa Madariaga </q-toolbar-title>
-
+        <q-toolbar-title>Mapa Madariaga</q-toolbar-title>
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header>Essential Links</q-item-label>
 
         <EssentialLink
           v-for="link in essentialLinks"
@@ -29,8 +28,8 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container class="full-height">
-      <router-view />
+    <q-page-container class="no-scroll full-height">
+      <router-view class="no-scroll full-height" />
     </q-page-container>
   </q-layout>
 </template>
@@ -104,3 +103,16 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* ✨ Estilo global para remover scrolls no deseados */
+html, body, #q-app {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.no-scroll {
+  overflow: hidden !important;
+}
+</style>
