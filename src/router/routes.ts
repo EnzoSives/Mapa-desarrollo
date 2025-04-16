@@ -1,17 +1,19 @@
-import { RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('pages/LoginPage.vue'), // Ahora la raíz muestra el login
+    component: () => import('pages/LoginPage.vue'), // Login por defecto
   },
   {
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true }, // Protege esta ruta
     children: [
       {
         path: '',
-        component: () => import('pages/IndexPage.vue')
+        component: () => import('pages/IndexPage.vue'),
+        meta: { requiresAuth: true } // Protege el contenido también
       }
     ]
   },
@@ -19,6 +21,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue')
   }
-]
+];
 
-export default routes
+export default routes;
