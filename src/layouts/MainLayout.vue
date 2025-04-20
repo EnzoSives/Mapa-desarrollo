@@ -12,7 +12,15 @@
         />
 
         <q-toolbar-title>Mapa Madariaga</q-toolbar-title>
-        <div>Quasar v{{ $q.version }}</div>
+        <!-- <div>Quasar v{{ $q.version }}</div> -->
+        <q-btn
+          flat
+          dense
+          icon="logout"
+          label="Cerrar Sesión"
+          class="q-ml-md"
+          @click="logout"
+        />
       </q-toolbar>
     </q-header>
 
@@ -37,6 +45,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import EssentialLink from 'components/EssentialLink.vue';
+import { useRouter } from 'vue-router';
 
 const linksList = [
   {
@@ -93,7 +102,17 @@ export default defineComponent({
   setup() {
     const leftDrawerOpen = ref(false);
 
+    const router = useRouter();
+
+    const logout = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('rol');
+      router.push('/');
+    };
+
     return {
+      logout,
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
@@ -106,7 +125,9 @@ export default defineComponent({
 
 <style>
 /* ✨ Estilo global para remover scrolls no deseados */
-html, body, #q-app {
+html,
+body,
+#q-app {
   height: 100%;
   margin: 0;
   overflow: hidden;
