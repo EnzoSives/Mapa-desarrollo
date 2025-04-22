@@ -46,9 +46,17 @@
     </q-card>
 
     <!-- Panel de Referencias (derecha arriba) -->
-    <q-card class="referencias-panel">
+    <q-card v-if="mostrarReferencias" class="referencias-panel">
       <q-card-section>
-        <div class="text-subtitle1">Referencias</div>
+        <div class="row justify-between items-center">
+          <div class="text-subtitle1">Referencias</div>
+          <q-btn
+            dense
+            flat
+            icon="chevron_right"
+            @click="mostrarReferencias = false"
+          />
+        </div>
         <div class="row q-mt-sm">
           <div
             v-for="icono in iconosDisponibles"
@@ -62,10 +70,28 @@
       </q-card-section>
     </q-card>
 
+    <q-btn
+      v-if="!mostrarReferencias"
+      icon="pin_drop"
+      class="fixed-top-right q-mt-sm q-mr-sm"
+      style="top: 50px"
+      color="primary"
+      @click="mostrarReferencias = true"
+      ><q-tooltip> Ver referencias </q-tooltip>
+    </q-btn>
+
     <!-- Panel Datos Actuales (derecha abajo) -->
-    <q-card class="datos-actuales-panel">
+    <q-card v-if="mostrarDatosActuales" class="datos-actuales-panel">
       <q-card-section>
-        <div class="text-subtitle1">Datos cargados</div>
+        <div class="row justify-between items-center">
+          <div class="text-subtitle1">Datos cargados</div>
+          <q-btn
+            dense
+            flat
+            icon="chevron_right"
+            @click="mostrarDatosActuales = false"
+          />
+        </div>
         <div class="scroll-contenido">
           <div
             v-for="(marcador, index) in gisStore.marcadores.slice().reverse()"
@@ -81,6 +107,15 @@
         </div>
       </q-card-section>
     </q-card>
+
+    <q-btn
+      v-if="!mostrarDatosActuales"
+      icon="view_list"
+      class="fixed-bottom-right q-mb-sm q-mr-sm"
+      color="primary"
+      @click="mostrarDatosActuales = true"
+      ><q-tooltip> Datos guardados </q-tooltip>
+    </q-btn>
 
     <!-- Modal -->
     <q-dialog v-model="modalVisible" persistent>
@@ -155,6 +190,8 @@ const gisStore = useGisStore();
 const mapContainer = ref<HTMLElement | null>(null);
 const modalVisible = ref(false);
 const editando = ref(false);
+const mostrarReferencias = ref(false);
+const mostrarDatosActuales = ref(false);
 
 const nuevoMarcador = ref<Marcador>({
   id: 0,
