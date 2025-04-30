@@ -209,6 +209,7 @@ const iconosDisponibles = [
 ];
 
 let map: Map;
+let hoveredFeature: Feature | null = null;
 let vectorSource = new VectorSource();
 
 onMounted(() => {
@@ -234,6 +235,51 @@ onMounted(() => {
     },
     { immediate: true }
   );
+
+  map.on('pointermove', (event) => {
+    const pixel = event.pixel;
+    let featureFound = false;
+
+    map.forEachFeatureAtPixel(pixel, (feature) => {
+      if (hoveredFeature !== feature) {
+        if (hoveredFeature) {
+          hoveredFeature.setStyle(
+            new Style({
+              image: new Icon({
+                src: hoveredFeature.get('icono'),
+                scale: 0.2,
+              }),
+            })
+          );
+        }
+
+        hoveredFeature = feature;
+
+        hoveredFeature.setStyle(
+          new Style({
+            image: new Icon({
+              src: hoveredFeature.get('icono'),
+              scale: 0.3,
+            }),
+          })
+        );
+      }
+
+      featureFound = true;
+    });
+
+    if (!featureFound && hoveredFeature) {
+      hoveredFeature.setStyle(
+        new Style({
+          image: new Icon({
+            src: hoveredFeature.get('icono'),
+            scale: 0.2,
+          }),
+        })
+      );
+      hoveredFeature = null;
+    }
+  });
 
   map.on('singleclick', (event) => {
     let marcadorSeleccionado = false;
@@ -293,15 +339,14 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
     id: marcador.id,
   });
 
-  feature.setStyle(
-    new Style({
-      image: new Icon({
-        src: marcador.icono,
-        scale: 0.2,
-      }),
-    })
-  );
+  feature.set('icono', marcador.icono);
 
+  const icon = new Icon({
+    src: marcador.icono,
+    scale: 0.2,
+  });
+
+  feature.setStyle(new Style({ image: icon }));
   vectorSource.addFeature(feature);
 }
 
