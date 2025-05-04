@@ -62,6 +62,6 @@ const columns = [
     field: 'descripcion',
   },
   { name: 'icono', label: 'Ícono', align: 'center', field: 'icono' },
-  { name: 'verMapa', label: 'Mapa', align: 'center' },
+  // { name: 'verMapa', label: 'Mapa', align: 'center' },
 ];
 </script>
