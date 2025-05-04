@@ -26,6 +26,13 @@
 
     <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="text-h6 text-bold"
+              >Mapa Madariaga</q-item-label
+            >
+          </q-item-section>
+        </q-item>
         <q-item
           clickable
           @click="$router.push('/home')"
