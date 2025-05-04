@@ -315,7 +315,7 @@ function cerrarModal() {
   modalVisible.value = false;
 }
 
-function guardarMarcador() {
+async function guardarMarcador() {
   const marcador = { ...nuevoMarcador.value };
 
   if (!marcador.icono) {
@@ -323,11 +323,13 @@ function guardarMarcador() {
   }
 
   if (editando.value) {
-    gisStore.editarMarcador(marcador);
-    recargarMarcadores();
+    await gisStore.editarMarcador(marcador);
+    recargarMarcadores(); // puede quedarse como está
   } else {
-    gisStore.agregarMarcador(marcador);
-    agregarMarcadorAlMapa(marcador);
+    const nuevo = await gisStore.agregarMarcador(marcador);
+    if (nuevo?.id) {
+      agregarMarcadorAlMapa(nuevo); // Usamos el que viene del backend
+    }
   }
 
   cerrarModal();
@@ -338,6 +340,7 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
     geometry: new Point(fromLonLat([marcador.longitud, marcador.latitud])),
     id: marcador.id,
   });
+  console.log('Marcador agregado:', marcador);
 
   feature.set('icono', marcador.icono);
 

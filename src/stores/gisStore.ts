@@ -33,8 +33,13 @@ export const useGisStore = defineStore('gis', {
           'http://179.43.127.133:3006/marcador',
           marcador
         );
-        this.marcadores.push(response.data);
+        const nuevoMarcador: Marcador = response.data;
+
+        this.marcadores.push(nuevoMarcador);
+        this.marcadorSeleccionado = nuevoMarcador;
         this.guardarLocalStorage();
+
+        return nuevoMarcador; // <-- Esto es clave
       } catch (error) {
         console.error('Error al agregar marcador:', error);
       }

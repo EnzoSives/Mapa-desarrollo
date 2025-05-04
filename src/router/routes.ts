@@ -13,14 +13,19 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: { requiresAuth: true } // Protege el contenido también
-      }
-    ]
+        meta: { requiresAuth: true }, // Protege el contenido también
+      },
+      {
+        path: '/tabla',
+        component: () => import('pages/TablaMarcadores.vue'),
+        meta: { requiresAuth: true }, // Protege el contenido también
+      },
+    ],
   },
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
-  }
+    component: () => import('pages/ErrorNotFound.vue'),
+  },
 ];
 
 export default routes;
