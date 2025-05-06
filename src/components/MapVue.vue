@@ -85,18 +85,14 @@
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Datos cargados</div>
-          <q-btn
-            dense
-            flat
-            icon="chevron_right"
-            @click="mostrarDatosActuales = false"
-          />
+          <q-btn dense flat icon="chevron_right" @click="mostrarDatosActuales = false" />
         </div>
         <div class="scroll-contenido">
           <div
             v-for="(marcador, index) in gisStore.marcadores.slice().reverse()"
             :key="marcador.id"
-            class="q-mb-sm"
+            class="q-mb-sm cursor-pointer"
+            @click="verInfoMarcador(marcador)"
           >
             <div>
               <strong>{{ index + 1 }}.</strong> {{ marcador.nombre }}
@@ -107,6 +103,7 @@
         </div>
       </q-card-section>
     </q-card>
+
 
     <q-btn
       v-if="!mostrarDatosActuales"
@@ -378,6 +375,11 @@ function eliminarMarcadorSeleccionado() {
   });
 
   gisStore.cerrarInfo();
+}
+
+// 👉 NUEVA función para mostrar info al hacer clic en lista
+function verInfoMarcador(marcador: Marcador) {
+  gisStore.seleccionarMarcador(marcador.id);
 }
 </script>
 
