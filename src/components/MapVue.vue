@@ -384,38 +384,76 @@ function eliminarMarcadorSeleccionado() {
 <style scoped>
 .mapa {
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+/* Paneles */
+.info-panel,
+.referencias-panel,
+.datos-actuales-panel {
   position: absolute;
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .info-panel {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-  width: 300px;
+  top: 1rem;
+  left: 1rem;
+  width: 250px;
 }
 
 .referencias-panel {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
-  width: 300px;
+  top: 1rem;
+  right: 1rem;
+  width: 280px;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .datos-actuales-panel {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 10;
-  width: 300px;
-  height: 450px;
-  overflow: hidden;
+  right: 1rem;
+  top: calc(1rem + 20vh + 0.5rem);
+  /* fija desde arriba */
+  max-height: calc(100vh - (1rem + 13vh + 8rem));
+  bottom: 1rem;
+  /* se adapta hasta el borde inferior */
+  width: 280px;
+  z-index: 9;
+  overflow-y: auto;
+  /* scroll solo si el contenido es mayor */
 }
 
-.scroll-contenido {
-  overflow-y: auto;
-  max-height: 420px;
+
+
+@media (max-width: 768px) {
+
+  .info-panel,
+  .referencias-panel,
+  .datos-actuales-panel {
+    width: 90vw;
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+  }
+
+  .referencias-panel {
+    top: 1rem;
+    max-height: 35vh;
+  }
+
+
+  .info-panel {
+    top: calc(1rem + 36vh + 1rem);
+  }
 }
+
 </style>

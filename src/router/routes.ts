@@ -8,17 +8,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
-    meta: { requiresAuth: true }, // Protege esta ruta
+
     children: [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: { requiresAuth: true }, // Protege el contenido también
+
       },
       {
         path: '/tabla',
         component: () => import('pages/TablaMarcadores.vue'),
-        meta: { requiresAuth: true }, // Protege el contenido también
+
       },
     ],
   },
