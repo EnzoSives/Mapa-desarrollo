@@ -377,9 +377,16 @@ function eliminarMarcadorSeleccionado() {
   gisStore.cerrarInfo();
 }
 
-// 👉 NUEVA función para mostrar info al hacer clic en lista
 function verInfoMarcador(marcador: Marcador) {
   gisStore.seleccionarMarcador(marcador.id);
+
+  // Centrar el mapa en el marcador seleccionado
+  const coordenadas = fromLonLat([marcador.longitud, marcador.latitud]);
+  map.getView().animate({
+    center: coordenadas,
+    duration: 500, // animación suave en milisegundos
+    zoom: 17       // puedes ajustar el nivel de zoom si lo deseas
+  });
 }
 </script>
 
