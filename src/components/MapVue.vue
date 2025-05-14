@@ -24,24 +24,9 @@
         </p>
       </q-card-section>
       <q-card-actions>
-        <q-btn
-          flat
-          label="Cerrar"
-          @click="gisStore.cerrarInfo"
-          color="primary"
-        />
-        <q-btn
-          flat
-          label="Editar"
-          @click="editarMarcadorSeleccionado"
-          color="warning"
-        />
-        <q-btn
-          flat
-          label="Eliminar"
-          @click="eliminarMarcadorSeleccionado"
-          color="negative"
-        />
+        <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
+        <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" />
+        <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative" />
       </q-card-actions>
     </q-card>
 
@@ -50,19 +35,10 @@
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Referencias</div>
-          <q-btn
-            dense
-            flat
-            icon="chevron_right"
-            @click="mostrarReferencias = false"
-          />
+          <q-btn dense flat icon="chevron_right" @click="mostrarReferencias = false" />
         </div>
         <div class="row q-mt-sm">
-          <div
-            v-for="icono in iconosDisponibles"
-            :key="icono.value"
-            class="column items-center q-mr-md"
-          >
+          <div v-for="icono in iconosDisponibles" :key="icono.value" class="column items-center q-mr-md">
             <img :src="icono.value" width="24" height="24" />
             <div class="text-caption">{{ icono.label }}</div>
           </div>
@@ -70,14 +46,8 @@
       </q-card-section>
     </q-card>
 
-    <q-btn
-      v-if="!mostrarReferencias"
-      icon="pin_drop"
-      class="fixed-top-right q-mt-sm q-mr-sm"
-      style="top: 50px"
-      color="primary"
-      @click="mostrarReferencias = true"
-      ><q-tooltip> Ver referencias </q-tooltip>
+    <q-btn v-if="!mostrarReferencias" icon="pin_drop" class="fixed-top-right q-mt-sm q-mr-sm" style="top: 50px"
+      color="primary" @click="mostrarReferencias = true"><q-tooltip> Ver referencias </q-tooltip>
     </q-btn>
 
     <!-- Panel Datos Actuales (derecha abajo) -->
@@ -88,12 +58,8 @@
           <q-btn dense flat icon="chevron_right" @click="mostrarDatosActuales = false" />
         </div>
         <div class="scroll-contenido">
-          <div
-            v-for="(marcador, index) in gisStore.marcadores.slice().reverse()"
-            :key="marcador.id"
-            class="q-mb-sm cursor-pointer"
-            @click="verInfoMarcador(marcador)"
-          >
+          <div v-for="(marcador, index) in gisStore.marcadores.slice().reverse()" :key="marcador.id"
+            class="q-mb-sm cursor-pointer" @click="verInfoMarcador(marcador)">
             <div>
               <strong>{{ index + 1 }}.</strong> {{ marcador.nombre }}
             </div>
@@ -105,13 +71,8 @@
     </q-card>
 
 
-    <q-btn
-      v-if="!mostrarDatosActuales"
-      icon="view_list"
-      class="fixed-bottom-right q-mb-sm q-mr-sm"
-      color="primary"
-      @click="mostrarDatosActuales = true"
-      ><q-tooltip> Datos guardados </q-tooltip>
+    <q-btn v-if="!mostrarDatosActuales" icon="view_list" class="fixed-bottom-right q-mb-sm q-mr-sm" color="primary"
+      @click="mostrarDatosActuales = true"><q-tooltip> Datos guardados </q-tooltip>
     </q-btn>
 
     <!-- Modal -->
@@ -124,45 +85,17 @@
         </q-card-section>
 
         <q-card-section>
-          <q-input
-            v-model="nuevoMarcador.nombre"
-            label="Nombre"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-input
-            v-model="nuevoMarcador.descripcion"
-            label="Descripción"
-            type="textarea"
-            dense
-            outlined
-            class="q-mb-md"
-          />
-          <q-select
-            v-model="nuevoMarcador.icono"
-            label="Ícono del marcador"
-            :options="iconosDisponibles"
-            option-value="value"
-            option-label="label"
-            emit-value
-            map-options
-            type="radio"
-            inline
-            outlined
-            dense
-            class="q-mb-md"
-          />
+          <q-input v-model="nuevoMarcador.nombre" label="Nombre" dense outlined class="q-mb-md" />
+          <q-input v-model="nuevoMarcador.descripcion" label="Descripción" type="textarea" dense outlined
+            class="q-mb-md" />
+          <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
+            option-value="value" option-label="label" emit-value map-options type="radio" inline outlined dense
+            class="q-mb-md" />
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
-          <q-btn
-            flat
-            :label="editando ? 'Guardar cambios' : 'Guardar'"
-            @click="guardarMarcador"
-            color="positive"
-          />
+          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="guardarMarcador" color="positive" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -182,6 +115,7 @@ import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon } from 'ol/style';
+import { Geometry } from 'ol/geom';
 
 const gisStore = useGisStore();
 const mapContainer = ref<HTMLElement | null>(null);
@@ -238,7 +172,8 @@ onMounted(() => {
     let featureFound = false;
 
     map.forEachFeatureAtPixel(pixel, (feature) => {
-      if (hoveredFeature !== feature) {
+      const actualFeature = feature as Feature<Geometry>; // Aseguramos el tipo
+      if (hoveredFeature !== actualFeature) {
         if (hoveredFeature) {
           hoveredFeature.setStyle(
             new Style({
@@ -250,7 +185,7 @@ onMounted(() => {
           );
         }
 
-        hoveredFeature = feature;
+        hoveredFeature = actualFeature;
 
         hoveredFeature.setStyle(
           new Style({
@@ -290,7 +225,7 @@ onMounted(() => {
     });
 
     if (!marcadorSeleccionado) {
-      const coords = toLonLat(event.coordinate);
+      const coords = toLonLat(event.coordinate) as [number, number];
       abrirModal(coords);
     }
   });
@@ -298,6 +233,7 @@ onMounted(() => {
 
 function abrirModal(coords: [number, number]) {
   nuevoMarcador.value = {
+    id: 0, // Agregar un valor predeterminado para id
     nombre: '',
     descripcion: '',
     latitud: coords[1],
@@ -464,5 +400,4 @@ function verInfoMarcador(marcador: Marcador) {
     top: calc(1rem + 36vh + 1rem);
   }
 }
-
 </style>
