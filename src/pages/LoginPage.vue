@@ -51,7 +51,7 @@ const goToHome = async () => {
   errorMessage.value = '';
 
   try {
-    const response = await axios.post('http://179.43.127.133:3006/auth/login', {
+    const response = await axios.post('http://localhost:3006/auth/login', {
       name: username.value,
       password: password.value,
     });

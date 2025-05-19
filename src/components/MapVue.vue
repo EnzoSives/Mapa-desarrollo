@@ -3,32 +3,51 @@
     <div ref="mapContainer" class="mapa"></div>
 
     <!-- Panel Info del marcador (izquierda arriba) -->
-    <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
-      <q-card-section>
-        <div class="text-h6">Información del marcador</div>
-      </q-card-section>
-      <q-card-section>
-        <p>
-          <strong>Nombre:</strong> {{ gisStore.marcadorSeleccionado.nombre }}
-        </p>
-        <p>
-          <strong>Descripción:</strong>
-          {{ gisStore.marcadorSeleccionado.descripcion }}
-        </p>
-        <p>
-          <strong>Latitud:</strong> {{ gisStore.marcadorSeleccionado.latitud }}
-        </p>
-        <p>
-          <strong>Longitud:</strong>
-          {{ gisStore.marcadorSeleccionado.longitud }}
-        </p>
-      </q-card-section>
-      <q-card-actions>
-        <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
-        <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" />
-        <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative" />
-      </q-card-actions>
-    </q-card>
+   <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
+  <q-card-section>
+    <div class="text-h6">Información del marcador</div>
+  </q-card-section>
+
+  <q-card-section>
+    <p><strong>Nombre:</strong> {{ gisStore.marcadorSeleccionado.nombreApellido }}</p>
+    <p><strong>Dirección:</strong> {{ gisStore.marcadorSeleccionado.direccion }}</p>
+    <p><strong>Teléfono:</strong> {{ gisStore.marcadorSeleccionado.telefono }}</p>
+    <p><strong>DNI:</strong> {{ gisStore.marcadorSeleccionado.dni }}</p>
+    <p><strong>Notas:</strong> {{ gisStore.marcadorSeleccionado.notas || 'N/A' }}</p>
+
+    <p><strong>Ayudas:</strong>
+      <span v-if="gisStore.marcadorSeleccionado.ayudas && gisStore.marcadorSeleccionado.ayudas.length > 0">
+        {{ gisStore.marcadorSeleccionado.ayudas.join(', ') }}
+      </span>
+      <span v-else>Ninguna</span>
+    </p>
+
+    <!-- <p><strong>Latitud:</strong> {{ gisStore.marcadorSeleccionado.latitud }}</p>
+    <p><strong>Longitud:</strong> {{ gisStore.marcadorSeleccionado.longitud }}</p>
+    <p><strong>Ícono:</strong> {{ gisStore.marcadorSeleccionado.icono }}</p> -->
+
+    <div>
+      <strong>Integrantes:</strong>
+      <div v-if="gisStore.marcadorSeleccionado.integrantes && gisStore.marcadorSeleccionado.integrantes.length > 0">
+        <ul>
+          <li v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index">
+            {{ integrante.nombre }} {{ integrante.apellido }}, Edad: {{ integrante.edad }}, DNI: {{ integrante.dni }}
+          </li>
+        </ul>
+      </div>
+      <div v-else>
+        No hay integrantes.
+      </div>
+    </div>
+  </q-card-section>
+
+  <q-card-actions>
+    <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
+    <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" />
+    <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative" />
+  </q-card-actions>
+</q-card>
+
 
     <!-- Panel de Referencias (derecha arriba) -->
     <q-card v-if="mostrarReferencias" class="referencias-panel">
@@ -76,29 +95,83 @@
     </q-btn>
 
     <!-- Modal -->
-    <q-dialog v-model="modalVisible" persistent>
-      <q-card class="q-pa-md q-gutter-md q-mx-auto" style="width: 400px">
-        <q-card-section class="text-center">
-          <div class="text-h6 q-mb-md">
-            {{ editando ? 'Editar marcador' : 'Nuevo marcador' }}
-          </div>
-        </q-card-section>
+  <q-dialog v-model="modalVisible" persistent>
+  <q-card class="q-pa-md q-gutter-md q-mx-auto" style="width: 500px; max-height: 90vh; overflow-y: auto;">
+    <q-card-section class="text-center">
+      <div class="text-h6 q-mb-md">
+        {{ editando ? 'Editar marcador' : 'Nuevo marcador' }}
+      </div>
+    </q-card-section>
 
-        <q-card-section>
-          <q-input v-model="nuevoMarcador.nombre" label="Nombre" dense outlined class="q-mb-md" />
-          <q-input v-model="nuevoMarcador.descripcion" label="Descripción" type="textarea" dense outlined
-            class="q-mb-md" />
-          <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
-            option-value="value" option-label="label" emit-value map-options type="radio" inline outlined dense
-            class="q-mb-md" />
-        </q-card-section>
+    <q-card-section>
+      <q-input v-model="nuevoMarcador.nombreApellido" label="Nombre y Apellido" dense outlined class="q-mb-md" />
+      <q-input v-model="nuevoMarcador.direccion" label="Dirección" dense outlined class="q-mb-md" />
+      <q-input v-model="nuevoMarcador.telefono" label="Teléfono" dense outlined class="q-mb-md" />
+      <q-input v-model="nuevoMarcador.dni" label="DNI" dense outlined class="q-mb-md" />
+      <q-input v-model="nuevoMarcador.notas" label="Notas" type="textarea" dense outlined class="q-mb-md" />
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
-          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="guardarMarcador" color="positive" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <q-input
+        v-model="ayudasTexto"
+        label="Ayudas (separadas por comas)"
+        dense
+        outlined
+        class="q-mb-md"
+        @blur="actualizarAyudas"
+      />
+
+      <div class="q-mb-md">
+        <div class="text-subtitle2 q-mb-sm">Integrantes</div>
+        <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index" class="row q-gutter-sm items-center q-mb-sm">
+          <q-input v-model="integrante.nombre" label="Nombre" dense outlined class="col" />
+          <q-input v-model="integrante.apellido" label="Apellido" dense outlined class="col" />
+          <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined class="col" />
+          <q-input v-model="integrante.dni" label="DNI" dense outlined class="col" />
+          <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarIntegrante(index)" />
+        </div>
+        <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
+      </div>
+
+      <q-input
+        v-model.number="nuevoMarcador.latitud"
+        label="Latitud"
+        dense
+        outlined
+        class="q-mb-md"
+        type="number"
+      />
+      <q-input
+        v-model.number="nuevoMarcador.longitud"
+        label="Longitud"
+        dense
+        outlined
+        class="q-mb-md"
+        type="number"
+      />
+
+      <q-select
+        v-model="nuevoMarcador.icono"
+        label="Ícono del marcador"
+        :options="iconosDisponibles"
+        option-value="value"
+        option-label="label"
+        emit-value
+        map-options
+        type="radio"
+        inline
+        outlined
+        dense
+        class="q-mb-md"
+      />
+    </q-card-section>
+
+    <q-card-actions align="right">
+      <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
+      <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="guardarMarcador" color="positive" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+
+
   </q-page>
 </template>
 
@@ -124,12 +197,16 @@ const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 
-const nuevoMarcador = ref<Marcador>({
-  id: 0,
-  nombre: '',
-  descripcion: '',
-  latitud: 0,
-  longitud: 0,
+const nuevoMarcador = ref({
+  nombreApellido: '',
+  direccion: '',
+  telefono: '',
+  dni: '',
+  notas: '',
+  ayudas: [] as string[],
+  integrantes: [] as Array<{ nombre: string; apellido: string; edad: number | null; dni: string }>,
+  latitud: null as number | null,
+  longitud: null as number | null,
   icono: '',
 });
 
@@ -324,6 +401,52 @@ function verInfoMarcador(marcador: Marcador) {
     zoom: 17       // puedes ajustar el nivel de zoom si lo deseas
   });
 }
+// Variables auxiliares para manejar los inputs de texto separados por comas
+const ayudasTexto = ref('');
+const integrantesTexto = ref('');
+
+// Al cargar un marcador para editar, debes sincronizar estas variables:
+function cargarMarcador(marcador) {
+  Object.assign(nuevoMarcador.value, marcador);
+  ayudasTexto.value = marcador.ayudas?.join(', ') || '';
+  if (!nuevoMarcador.value.integrantes) {
+    nuevoMarcador.value.integrantes = [];
+  }
+}
+
+
+// Funciones para actualizar los arrays a partir del texto
+function actualizarAyudas() {
+  nuevoMarcador.value.ayudas = ayudasTexto.value
+    .split(',')
+    .map((a) => a.trim())
+    .filter((a) => a.length > 0);
+}
+
+function actualizarIntegrantes() {
+  nuevoMarcador.value.integrantes = integrantesTexto.value
+    .split(',')
+    .map((i) => i.trim())
+    .filter((i) => i.length > 0);
+}
+
+function agregarIntegrante() {
+  if (!nuevoMarcador.value.integrantes) {
+    nuevoMarcador.value.integrantes = [];
+  }
+  nuevoMarcador.value.integrantes.push({
+    nombre: '',
+    apellido: '',
+    edad: null,
+    dni: '',
+  });
+}
+
+
+function eliminarIntegrante(index: number) {
+  nuevoMarcador.value.integrantes.splice(index, 1);
+}
+
 </script>
 
 <style scoped>
@@ -352,7 +475,7 @@ function verInfoMarcador(marcador: Marcador) {
 .info-panel {
   top: 1rem;
   left: 1rem;
-  width: 250px;
+  width: 350px;
 }
 
 .referencias-panel {
