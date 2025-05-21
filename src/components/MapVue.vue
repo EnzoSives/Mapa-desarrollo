@@ -3,7 +3,7 @@
     <div ref="mapContainer" class="mapa"></div>
 
     <!-- Panel Info del marcador (izquierda arriba) -->
-   <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
+  <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
   <q-card-section>
     <div class="text-h6">Información del marcador</div>
   </q-card-section>
@@ -22,15 +22,12 @@
       <span v-else>Ninguna</span>
     </p>
 
-    <!-- <p><strong>Latitud:</strong> {{ gisStore.marcadorSeleccionado.latitud }}</p>
-    <p><strong>Longitud:</strong> {{ gisStore.marcadorSeleccionado.longitud }}</p>
-    <p><strong>Ícono:</strong> {{ gisStore.marcadorSeleccionado.icono }}</p> -->
-
     <div>
       <strong>Integrantes:</strong>
       <div v-if="gisStore.marcadorSeleccionado.integrantes && gisStore.marcadorSeleccionado.integrantes.length > 0">
-        <ul>
+        <ul class="q-pl-md">
           <li v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index">
+            <q-icon name="person" color="primary" size="xs" class="q-mr-sm" />
             {{ integrante.nombre }} {{ integrante.apellido }}, Edad: {{ integrante.edad }}, DNI: {{ integrante.dni }}
           </li>
         </ul>
@@ -41,12 +38,13 @@
     </div>
   </q-card-section>
 
-  <q-card-actions>
+  <q-card-actions align="right">
     <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
     <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" />
     <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative" />
   </q-card-actions>
 </q-card>
+
 
 
     <!-- Panel de Referencias (derecha arriba) -->
@@ -80,9 +78,9 @@
           <div v-for="(marcador, index) in gisStore.marcadores.slice().reverse()" :key="marcador.id"
             class="q-mb-sm cursor-pointer" @click="verInfoMarcador(marcador)">
             <div>
-              <strong>{{ index + 1 }}.</strong> {{ marcador.nombre }}
+              <strong>{{ index + 1 }}.</strong> {{ marcador.nombreApellido }}
             </div>
-            <div class="text-caption ellipsis">{{ marcador.descripcion }}</div>
+            <div class="text-caption ellipsis">{{ marcador.direccion }}</div>
             <q-separator spaced />
           </div>
         </div>
@@ -130,24 +128,6 @@
         </div>
         <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
       </div>
-
-      <q-input
-        v-model.number="nuevoMarcador.latitud"
-        label="Latitud"
-        dense
-        outlined
-        class="q-mb-md"
-        type="number"
-      />
-      <q-input
-        v-model.number="nuevoMarcador.longitud"
-        label="Longitud"
-        dense
-        outlined
-        class="q-mb-md"
-        type="number"
-      />
-
       <q-select
         v-model="nuevoMarcador.icono"
         label="Ícono del marcador"
@@ -403,16 +383,7 @@ function verInfoMarcador(marcador: Marcador) {
 }
 // Variables auxiliares para manejar los inputs de texto separados por comas
 const ayudasTexto = ref('');
-const integrantesTexto = ref('');
 
-// Al cargar un marcador para editar, debes sincronizar estas variables:
-function cargarMarcador(marcador) {
-  Object.assign(nuevoMarcador.value, marcador);
-  ayudasTexto.value = marcador.ayudas?.join(', ') || '';
-  if (!nuevoMarcador.value.integrantes) {
-    nuevoMarcador.value.integrantes = [];
-  }
-}
 
 
 // Funciones para actualizar los arrays a partir del texto
@@ -423,12 +394,6 @@ function actualizarAyudas() {
     .filter((a) => a.length > 0);
 }
 
-function actualizarIntegrantes() {
-  nuevoMarcador.value.integrantes = integrantesTexto.value
-    .split(',')
-    .map((i) => i.trim())
-    .filter((i) => i.length > 0);
-}
 
 function agregarIntegrante() {
   if (!nuevoMarcador.value.integrantes) {
@@ -465,7 +430,6 @@ function eliminarIntegrante(index: number) {
 .referencias-panel,
 .datos-actuales-panel {
   position: absolute;
-  background: white;
   padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);

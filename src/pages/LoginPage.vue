@@ -64,7 +64,7 @@ const goToHome = async () => {
     localStorage.setItem('rol', rol);
 
     router.push('/home');
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error de login:', error);
     errorMessage.value = 'Usuario o contraseña incorrectos';
   } finally {
