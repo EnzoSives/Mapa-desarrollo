@@ -24,7 +24,7 @@ export const useGisStore = defineStore('gis', {
   actions: {
     async cargarMarcadoresDesdeAPI() {
       try {
-        const response = await axios.get('http://localhost:3006/marcador');
+        const response = await axios.get('http://179.43.127.133:3006/marcador');
         this.marcadores = response.data;
         this.guardarLocalStorage();
       } catch (error) {
@@ -35,7 +35,7 @@ export const useGisStore = defineStore('gis', {
     async agregarMarcador(marcador: Omit<Marcador, 'id'>) {
       try {
         const response = await axios.post(
-          'http://localhost:3006/marcador',
+          'http://179.43.127.133:3006/marcador',
           marcador
         );
         const nuevoMarcador: Marcador = response.data;
@@ -53,7 +53,7 @@ export const useGisStore = defineStore('gis', {
     async editarMarcador(marcadorEditado: Marcador) {
       try {
         await axios.put(
-          `http://localhost:3006/marcador/${marcadorEditado.id}`,
+          `http://179.43.127.133:3006/marcador/${marcadorEditado.id}`,
           marcadorEditado
         );
         const index = this.marcadores.findIndex(
@@ -71,7 +71,7 @@ export const useGisStore = defineStore('gis', {
 
     async eliminarMarcador(id: number) {
       try {
-        await axios.delete(`http://localhost:3006/marcador/${id}`);
+        await axios.delete(`http://179.43.127.133:3006/marcador/${id}`);
         this.marcadores = this.marcadores.filter((m) => m.id !== id);
         this.guardarLocalStorage();
         if (this.marcadorSeleccionado?.id === id) {
