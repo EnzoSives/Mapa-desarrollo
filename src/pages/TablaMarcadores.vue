@@ -53,13 +53,37 @@ function centrarEnMapa(lat: number, lon: number) {
 }
 
 const columns = [
-  { name: 'id', label: 'ID', align: 'left', field: 'id' },
-  { name: 'nombre', label: 'Nombre', align: 'left', field: 'nombre' },
+  // { name: 'id', label: 'ID', align: 'left', field: 'id' },
+  { name: 'nombre', label: 'Nombre', align: 'left', field: 'nombreApellido' },
   {
-    name: 'descripcion',
-    label: 'Descripción',
+    name: 'direccion',
+    label: 'Direccion',
     align: 'left',
-    field: 'descripcion',
+    field: 'direccion',
+  },
+  {
+    name: 'telefono',
+    label: 'Telefono',
+    align: 'left',
+    field: 'telefono',
+  },
+  {
+    name: 'dni',
+    label: 'DNI',
+    align: 'left',
+    field: 'dni',
+  },
+  {
+    name: 'notas',
+    label: 'Notas',
+    align: 'left',
+    field: 'notas',
+  },
+  {
+    name: 'ayudas',
+    label: 'Ayudas',
+    align: 'left',
+    field: 'ayudas',
   },
   { name: 'icono', label: 'Ícono', align: 'center', field: 'icono' },
   // { name: 'verMapa', label: 'Mapa', align: 'center' },

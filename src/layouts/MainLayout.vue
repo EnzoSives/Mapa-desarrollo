@@ -71,9 +71,17 @@
             <q-item-label>Marcadores</q-item-label>
           </q-item-section>
         </q-item>
-        <q-btn icon="dark_mode" class="fixed-top-right q-mt-md q-mr-sm" color="dark" @click="$q.dark.toggle()">
-  <q-tooltip>Modo oscuro</q-tooltip>
-</q-btn>
+        <q-btn
+          :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+          class="fixed-top-right q-mt-md q-mr-sm"
+          :color="$q.dark.isActive ? 'white' : 'dark'"
+          :text-color="$q.dark.isActive ? 'black' : 'white'"
+          @click="$q.dark.toggle()"
+        >
+          <q-tooltip>
+            {{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}
+          </q-tooltip>
+        </q-btn>
 
       </q-list>
     </q-drawer>
