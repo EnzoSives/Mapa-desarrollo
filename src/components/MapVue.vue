@@ -109,7 +109,7 @@
       <q-input v-model="nuevoMarcador.notas" label="Notas" type="textarea" dense outlined class="q-mb-md" />
 
       <q-input
-        v-model="ayudasTexto"
+        v-model="nuevoMarcador.ayudas"
         label="Ayudas (separadas por comas)"
         dense
         outlined
