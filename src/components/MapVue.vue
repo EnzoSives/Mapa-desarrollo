@@ -126,7 +126,6 @@
       ><q-tooltip> Ver referencias </q-tooltip>
     </q-btn>
 
-    <!-- Panel Datos Actuales (derecha abajo) -->
     <q-card v-if="mostrarDatosActuales" class="datos-actuales-panel">
       <q-card-section>
         <div class="row justify-between items-center">
@@ -138,9 +137,21 @@
             @click="mostrarDatosActuales = false"
           />
         </div>
+
+        <q-input
+          dense
+          outlined
+          debounce="300"
+          v-model="searchTerm"
+          placeholder="Buscar por nombre o dirección"
+          class="q-mt-sm q-mb-sm"
+          clearable
+          prepend-inner-icon="search"
+        />
+
         <div class="scroll-contenido">
           <div
-            v-for="(marcador, index) in gisStore.marcadores.slice().reverse()"
+            v-for="(marcador, index) in marcadoresFiltrados"
             :key="marcador.id"
             class="q-mb-sm cursor-pointer"
             @click="verInfoMarcador(marcador)"
@@ -313,7 +324,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useGisStore, Marcador } from 'src/stores/gisStore';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
@@ -337,6 +348,7 @@ const modalVisible = ref(false);
 const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
+const searchTerm = ref('');
 
 const nuevoMarcador = ref({
   nombreApellido: '',
@@ -365,6 +377,19 @@ const iconosDisponibles = [
 let map: Map;
 let hoveredFeature: Feature | null = null;
 let vectorSource = new VectorSource();
+
+const marcadoresFiltrados = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return gisStore.marcadores
+    .filter((m) => {
+      return (
+        m.nombreApellido.toLowerCase().includes(term) ||
+        m.direccion.toLowerCase().includes(term)
+      );
+    })
+    .slice()
+    .reverse();
+});
 
 onMounted(() => {
   gisStore.cargarMarcadoresDesdeAPI();
@@ -502,6 +527,7 @@ function desactivarEdicionTemporal() {
 function abrirModal(coords: [number, number]) {
   const [lon, lat] = coords;
 
+  // Establecer el valor por defecto del nuevo marcador
   nuevoMarcador.value = {
     nombreApellido: '',
     direccion: '',
@@ -512,28 +538,36 @@ function abrirModal(coords: [number, number]) {
     integrantes: [],
     latitud: lat,
     longitud: lon,
-    icono: iconosDisponibles[0].value,
+    icono: iconosDisponibles[0].value, // Este será el ícono final
   };
 
-  // Crear marcador temporal que se puede mover
+  // Si hay un marcador temporal anterior, lo eliminamos
   if (marcadorTemporal) {
     vectorSource.removeFeature(marcadorTemporal);
   }
+
+  // Ícono especial para edición temporal (distinto del definitivo)
+  const iconoEdicion = 'public/marker-icon-7.png'; // Podés usar uno con borde rojo, por ejemplo
 
   marcadorTemporal = new Feature({
     geometry: new Point(fromLonLat([lon, lat])),
   });
 
+  // Guardamos el ícono temporal en la propiedad 'icono'
+  marcadorTemporal.set('icono', iconoEdicion);
+
   marcadorTemporal.setStyle(
     new Style({
       image: new Icon({
-        src: nuevoMarcador.value.icono,
-        scale: 0.2,
+        src: iconoEdicion,
+        scale: 0.25,
       }),
     })
   );
+
   vectorSource.addFeature(marcadorTemporal);
-  activarEdicionTemporal(); // <-- aquí
+
+  activarEdicionTemporal(); // Activás el movimiento del marcador temporal
   modalVisible.value = true;
   editando.value = false;
 }
