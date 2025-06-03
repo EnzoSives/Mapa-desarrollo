@@ -1,36 +1,25 @@
 <template>
   <q-page class="q-pa-md">
-    <q-table
-      title="Listado de marcadores"
-      :rows="gisStore.marcadores"
-      :columns="columns"
-      row-key="id"
-      flat
-      bordered
-    >
-      <!-- Ícono personalizado -->
-      <template v-slot:body-cell-icono="props">
-        <q-td>
-          <img :src="props.row.icono" alt="icono" width="24" height="24" />
-        </q-td>
-      </template>
+    <div style="max-height: 600px; overflow-y: auto;">
+      <q-table title="Listado de marcadores" :rows="gisStore.marcadores" :columns="columns" row-key="id" flat bordered>
+        <!-- Ícono personalizado -->
+        <template v-slot:body-cell-icono="props">
+          <q-td>
+            <img :src="props.row.icono" alt="icono" width="24" height="24" />
+          </q-td>
+        </template>
 
-      <!-- Botón para centrar en el mapa -->
-      <template v-slot:body-cell-verMapa="props">
-        <q-td align="center">
-          <q-btn
-            color="primary"
-            icon="place"
-            size="sm"
-            round
-            flat
-            @click="centrarEnMapa(props.row.latitud, props.row.longitud)"
-          >
-            <q-tooltip>Ver en el mapa</q-tooltip>
-          </q-btn>
-        </q-td>
-      </template>
-    </q-table>
+        <!-- Botón para centrar en el mapa -->
+        <template v-slot:body-cell-verMapa="props">
+          <q-td align="center">
+            <q-btn color="primary" icon="place" size="sm" round flat
+              @click="centrarEnMapa(props.row.latitud, props.row.longitud)">
+              <q-tooltip>Ver en el mapa</q-tooltip>
+            </q-btn>
+          </q-td>
+        </template>
+      </q-table>
+    </div>
   </q-page>
 </template>
 
