@@ -204,7 +204,7 @@ const loading = ref(false);
 const filtro = ref('');
 const mostrarModal = ref(false);
 const marcadorSeleccionado = ref(null);
-const rol = ref(localStorage.getItem('rol') || 'Visor');
+const rol = ref(localStorage.getItem('rol') || 'visor');
 
 const permisos = computed(() => {
   return {
