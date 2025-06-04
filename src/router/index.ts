@@ -21,14 +21,16 @@ export default route(function (/* { store, ssrContext } */) {
 
   // ✅ Protección de rutas
   Router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
-    if (to.meta.requiresAuth && !token) {
-      next('/login'); // Redirige a login si no hay token
-    } else {
-      next(); // Continúa con la navegación
-    }
-  });
-
+  if (to.meta.requiresAuth && !token) {
+    next('/'); // Cambiado de '/login' a '/'
+  } else if (to.path === '/' && token) {
+    // Si ya está autenticado, no dejar que vuelva al login
+    next('/home');
+  } else {
+    next();
+  }
+});
   return Router;
 });

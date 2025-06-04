@@ -6,14 +6,8 @@
         <h4 class="text-h5 q-my-sm">Lista de Marcadores</h4>
       </div>
       <div class="col-12 col-md-6">
-        <q-input
-          v-model="filtro"
-          outlined
-          dense
-          placeholder="Buscar por nombre, dirección, teléfono..."
-          debounce="300"
-          clearable
-        >
+        <q-input v-model="filtro" outlined dense placeholder="Buscar por nombre, dirección, teléfono..." debounce="300"
+          clearable>
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
@@ -21,52 +15,25 @@
       </div>
     </div>
 
-    <q-table
-      :rows="marcadoresFiltrados"
-      :columns="columnsQuasar"
-      :loading="loading"
-      row-key="dni"
-      class="full-width custom-table cursor-pointer"
-      bordered
-      :rows-per-page-options="[10, 25, 50, 100]"
-      :pagination="{ rowsPerPage: 10 }"
-      @row-click="abrirModalInfo"
-    >
+    <q-table :rows="marcadoresFiltrados" :columns="columnsQuasar" :loading="loading" row-key="dni"
+      class="full-width custom-table cursor-pointer" bordered :rows-per-page-options="[10, 25, 50, 100]"
+      :pagination="{ rowsPerPage: 10 }" @row-click="abrirModalInfo" virtual-scroll color="primary">
       <template #body-cell-icono="props">
         <q-td :props="props">
-          <img
-            v-if="props.value"
-            :src="props.value"
-            width="24"
-            height="24"
-            alt="icono"
-            style="object-fit: contain"
-          />
+          <img v-if="props.value" :src="props.value" width="24" height="24" alt="icono" style="object-fit: contain" />
         </q-td>
       </template>
 
       <template #body-cell-mapa="props">
         <q-td :props="props">
-          <q-btn
-            flat
-            dense
-            icon="place"
-            @click.stop="centrarEnMapa(props.row.latitud, props.row.longitud)"
-            :disable="!props.row.latitud || !props.row.longitud"
-          />
+          <q-btn flat dense icon="place" @click.stop="centrarEnMapa(props.row.latitud, props.row.longitud)"
+            :disable="!props.row.latitud || !props.row.longitud" />
         </q-td>
       </template>
 
       <template #body-cell-acciones="props">
         <q-td :props="props">
-          <q-btn
-            flat
-            dense
-            icon="info"
-            @click.stop="abrirModalInfo(null, props.row)"
-            color="primary"
-            size="sm"
-          >
+          <q-btn flat dense icon="info" @click.stop="abrirModalInfo(null, props.row)" color="primary" size="sm">
             <q-tooltip>Ver información</q-tooltip>
           </q-btn>
         </q-td>
@@ -75,11 +42,7 @@
 
     <!-- Modal de información -->
     <q-dialog v-model="mostrarModal" persistent>
-      <q-card
-        v-if="marcadorSeleccionado"
-        class="info-panel"
-        style="min-width: 400px; max-width: 600px"
-      >
+      <q-card v-if="marcadorSeleccionado" class="info-panel" style="min-width: 400px; max-width: 600px">
         <q-card-section>
           <div class="text-h6">Información del marcador</div>
         </q-card-section>
@@ -105,21 +68,17 @@
 
           <p>
             <strong>Ayudas:</strong>
-            <span
-              v-if="
-                marcadorSeleccionado.ayudas &&
-                Array.isArray(marcadorSeleccionado.ayudas) &&
-                marcadorSeleccionado.ayudas.length > 0
-              "
-            >
+            <span v-if="
+              marcadorSeleccionado.ayudas &&
+              Array.isArray(marcadorSeleccionado.ayudas) &&
+              marcadorSeleccionado.ayudas.length > 0
+            ">
               {{ marcadorSeleccionado.ayudas.join(', ') }}
             </span>
-            <span
-              v-else-if="
-                marcadorSeleccionado.ayudas &&
-                typeof marcadorSeleccionado.ayudas === 'string'
-              "
-            >
+            <span v-else-if="
+              marcadorSeleccionado.ayudas &&
+              typeof marcadorSeleccionado.ayudas === 'string'
+            ">
               {{ marcadorSeleccionado.ayudas }}
             </span>
             <span v-else>Ninguna</span>
@@ -127,27 +86,17 @@
 
           <div>
             <strong>Integrantes:</strong>
-            <div
-              v-if="
-                marcadorSeleccionado.integrantes &&
-                marcadorSeleccionado.integrantes.length > 0
-              "
-            >
+            <div v-if="
+              marcadorSeleccionado.integrantes &&
+              marcadorSeleccionado.integrantes.length > 0
+            ">
               <ul class="q-pl-md">
-                <li
-                  v-for="(
-                    integrante, index
-                  ) in marcadorSeleccionado.integrantes"
-                  :key="index"
-                >
-                  <q-icon
-                    name="person"
-                    color="primary"
-                    size="xs"
-                    class="q-mr-sm"
-                  />
-                  {{ integrante.nombre }} {{ integrante.apellido }}, Edad:
-                  {{ integrante.edad }}, DNI: {{ integrante.dni }}
+                <li v-for="(integrante, index) in marcadorSeleccionado.integrantes" :key="index"
+                  style="list-style: none; margin-left: 0;">
+                  <q-icon name="person" color="primary" size="xs" class="q-mr-sm" />
+                  <strong>Nombre:</strong> {{ integrante.nombre }} {{ integrante.apellido }}<br /><strong>
+                    Edad:</strong>
+                  {{ integrante.edad }}<br /><strong> DNI:</strong> {{ integrante.dni }}
                 </li>
               </ul>
             </div>
@@ -155,13 +104,11 @@
           </div>
 
           <!-- Coordenadas (opcional) -->
-          <p
-            v-if="marcadorSeleccionado.latitud && marcadorSeleccionado.longitud"
-          >
+          <!-- <p v-if="marcadorSeleccionado.latitud && marcadorSeleccionado.longitud">
             <strong>Coordenadas:</strong>
             {{ marcadorSeleccionado.latitud }},
             {{ marcadorSeleccionado.longitud }}
-          </p>
+          </p> -->
         </q-card-section>
 
         <q-card-actions align="right">
@@ -175,7 +122,7 @@
               !marcadorSeleccionado.latitud || !marcadorSeleccionado.longitud
             "
           /> -->
-          <q-btn
+          <!-- <q-btn
             flat
             label="Editar"
             @click="editarMarcadorSeleccionado"
@@ -188,7 +135,7 @@
             @click="eliminarMarcadorSeleccionado"
             color="negative"
             v-if="permisos.puedeEliminar"
-          />
+          /> -->
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -203,7 +150,28 @@ const gisStore = useGisStore();
 const loading = ref(false);
 const filtro = ref('');
 const mostrarModal = ref(false);
-const marcadorSeleccionado = ref(null);
+interface Integrante {
+  nombre: string;
+  apellido: string;
+  edad: number;
+  dni: string;
+}
+
+interface Marcador {
+  nombreApellido: string;
+  direccion: string;
+  telefono: string;
+  dni: string;
+  notas?: string;
+  ayudas?: string[] | string;
+  icono?: string;
+  latitud?: number;
+  longitud?: number;
+  integrantes?: Integrante[];
+  [key: string]: any;
+}
+
+const marcadorSeleccionado = ref<Marcador | null>(null);
 const rol = ref(localStorage.getItem('rol') || 'visor');
 
 const permisos = computed(() => {
@@ -306,16 +274,17 @@ const columnsQuasar = [
     name: 'nombreApellido',
     label: 'Nombre',
     field: 'nombreApellido',
-    align: 'left',
+    align: 'left' as const,
+    sortable: true
   },
-  { name: 'direccion', label: 'Dirección', field: 'direccion', align: 'left' },
-  { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'left' },
-  { name: 'dni', label: 'DNI', field: 'dni', align: 'left' },
-  { name: 'notas', label: 'Notas', field: 'notas', align: 'left' },
-  // { name: 'ayudas', label: 'Ayudas', field: 'ayudas', align: 'left' },
-  { name: 'icono', label: 'Ícono', field: 'icono', align: 'center' },
-  // { name: 'mapa', label: 'Ver en mapa', field: '', align: 'center' },
-  // { name: 'acciones', label: 'Acciones', field: '', align: 'center' },
+  { name: 'direccion', label: 'Dirección', field: 'direccion', align: 'left' as const, sortable: true },
+  { name: 'telefono', label: 'Teléfono', field: 'telefono', align: 'left' as const, sortable: true },
+  { name: 'dni', label: 'DNI', field: 'dni', align: 'left' as const, sortable: true },
+  { name: 'notas', label: 'Notas', field: 'notas', align: 'left' as const, sortable: true },
+  // { name: 'ayudas', label: 'Ayudas', field: 'ayudas', align: 'left' as const },
+  { name: 'icono', label: 'Ícono', field: 'icono', align: 'center' as const },
+  // { name: 'mapa', label: 'Ver en mapa', field: '', align: 'center' as const },
+  // { name: 'acciones', label: 'Acciones', field: '', align: 'center' as const },
 ];
 
 // Función para abrir el modal con la información
@@ -398,7 +367,7 @@ onMounted(async () => {
 }
 
 .cursor-pointer tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(141, 141, 141, 0.936);
 }
 
 .info-panel {

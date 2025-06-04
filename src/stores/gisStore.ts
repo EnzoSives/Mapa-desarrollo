@@ -19,6 +19,8 @@ export const useGisStore = defineStore('gis', {
   state: () => ({
     marcadores: [] as Marcador[],
     marcadorSeleccionado: null as Marcador | null,
+    coordenadasSeleccionadas: null as [number, number] | null, // <-- Permite null o una tupla de dos números
+    panelActivo: 'mapa' as string, // <-- Añadido para evitar el error
   }),
 
   actions: {
