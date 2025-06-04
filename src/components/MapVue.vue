@@ -742,26 +742,30 @@ function eliminarIntegrante(index: number) {
 <style scoped>
 .tooltip-marcador {
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, #667eea 0%, rgb(230, 20, 20) 100%);
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  animation: tooltipFadeIn 0.2s ease-out;
 }
 
-.tooltip-marcador::before {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 4px solid transparent;
-  border-top-color: rgba(0, 0, 0, 0.8);
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .mapa {
   width: 100%;
