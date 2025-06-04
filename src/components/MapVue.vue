@@ -2,6 +2,18 @@
   <q-page class="full-height no-scroll">
     <div ref="mapContainer" class="mapa"></div>
 
+    <!-- Tooltip para mostrar el nombre del marcador -->
+    <div
+      v-if="tooltipVisible"
+      class="tooltip-marcador"
+      :style="{
+        left: tooltipPosition.x + 'px',
+        top: tooltipPosition.y + 'px',
+      }"
+    >
+      {{ tooltipContent }}
+    </div>
+
     <!-- Panel Info del marcador (izquierda arriba) -->
     <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel">
       <q-card-section>
@@ -29,23 +41,30 @@
 
         <p>
           <strong>Ayudas:</strong>
-          <span v-if="
-            gisStore.marcadorSeleccionado.ayudas &&
-            gisStore.marcadorSeleccionado.ayudas.length > 0
-          ">
+          <span
+            v-if="
+              gisStore.marcadorSeleccionado.ayudas &&
+              gisStore.marcadorSeleccionado.ayudas.length > 0
+            "
+          >
             {{ gisStore.marcadorSeleccionado.ayudas.join(', ') }}
           </span>
           <span v-else>Ninguna</span>
         </p>
 
         <strong>Integrantes:</strong>
-        <div v-if="
-          gisStore.marcadorSeleccionado.integrantes &&
-          gisStore.marcadorSeleccionado.integrantes.length > 0
-        ">
+        <div
+          v-if="
+            gisStore.marcadorSeleccionado.integrantes &&
+            gisStore.marcadorSeleccionado.integrantes.length > 0
+          "
+        >
           <ul class="q-pl-md">
-            <li v-for="(integrante, index) in gisStore.marcadorSeleccionado
-              .integrantes" :key="index">
+            <li
+              v-for="(integrante, index) in gisStore.marcadorSeleccionado
+                .integrantes"
+              :key="index"
+            >
               <q-icon name="person" color="primary" size="xs" class="q-mr-sm" />
               {{ integrante.nombre }} {{ integrante.apellido }}, Edad:
               {{ integrante.edad }}, DNI: {{ integrante.dni }}
@@ -53,16 +72,30 @@
           </ul>
         </div>
         <div v-else>No hay integrantes.</div>
-
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
-        <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" v-if="permisos.puedeEditar" />
+        <q-btn
+          flat
+          label="Cerrar"
+          @click="gisStore.cerrarInfo"
+          color="primary"
+        />
+        <q-btn
+          flat
+          label="Editar"
+          @click="editarMarcadorSeleccionado"
+          color="warning"
+          v-if="permisos.puedeEditar"
+        />
 
-        <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative"
-          v-if="permisos.puedeEliminar" />
-
+        <q-btn
+          flat
+          label="Eliminar"
+          @click="eliminarMarcadorSeleccionado"
+          color="negative"
+          v-if="permisos.puedeEliminar"
+        />
       </q-card-actions>
     </q-card>
 
@@ -71,10 +104,19 @@
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Referencias</div>
-          <q-btn dense flat icon="chevron_right" @click="mostrarReferencias = false" />
+          <q-btn
+            dense
+            flat
+            icon="chevron_right"
+            @click="mostrarReferencias = false"
+          />
         </div>
         <div class="row q-mt-sm">
-          <div v-for="icono in iconosDisponibles" :key="icono.value" class="column items-center q-mr-md">
+          <div
+            v-for="icono in iconosDisponibles"
+            :key="icono.value"
+            class="column items-center q-mr-md"
+          >
             <img :src="icono.value" width="24" height="24" />
             <div class="text-caption">{{ icono.label }}</div>
           </div>
@@ -82,23 +124,46 @@
       </q-card-section>
     </q-card>
 
-    <q-btn v-if="!mostrarReferencias" icon="pin_drop" class="fixed-top-right q-mt-sm q-mr-sm" style="top: 50px"
-      color="primary" @click="mostrarReferencias = true"><q-tooltip> Ver referencias </q-tooltip>
+    <q-btn
+      v-if="!mostrarReferencias"
+      icon="pin_drop"
+      class="fixed-top-right q-mt-sm q-mr-sm"
+      style="top: 50px"
+      color="primary"
+      @click="mostrarReferencias = true"
+      ><q-tooltip> Ver referencias </q-tooltip>
     </q-btn>
 
     <q-card v-if="mostrarDatosActuales" class="datos-actuales-panel">
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Datos cargados</div>
-          <q-btn dense flat icon="chevron_right" @click="mostrarDatosActuales = false" />
+          <q-btn
+            dense
+            flat
+            icon="chevron_right"
+            @click="mostrarDatosActuales = false"
+          />
         </div>
 
-        <q-input dense outlined debounce="300" v-model="searchTerm" placeholder="Buscar por nombre o dirección"
-          class="q-mt-sm q-mb-sm" clearable prepend-inner-icon="search" />
+        <q-input
+          dense
+          outlined
+          debounce="300"
+          v-model="searchTerm"
+          placeholder="Buscar por nombre o dirección"
+          class="q-mt-sm q-mb-sm"
+          clearable
+          prepend-inner-icon="search"
+        />
 
         <div class="scroll-contenido">
-          <div v-for="(marcador, index) in marcadoresFiltrados" :key="marcador.id" class="q-mb-sm cursor-pointer"
-            @click="verInfoMarcador(marcador)">
+          <div
+            v-for="(marcador, index) in marcadoresFiltrados"
+            :key="marcador.id"
+            class="q-mb-sm cursor-pointer"
+            @click="verInfoMarcador(marcador)"
+          >
             <div>
               <strong>{{ index + 1 }}.</strong> {{ marcador.nombreApellido }}
             </div>
@@ -109,49 +174,155 @@
       </q-card-section>
     </q-card>
 
-    <q-btn v-if="!mostrarDatosActuales" icon="view_list" class="fixed-bottom-right q-mb-sm q-mr-sm" color="primary"
-      @click="mostrarDatosActuales = true"><q-tooltip> Datos guardados </q-tooltip>
+    <q-btn
+      v-if="!mostrarDatosActuales"
+      icon="view_list"
+      class="fixed-bottom-right q-mb-sm q-mr-sm"
+      color="primary"
+      @click="mostrarDatosActuales = true"
+      ><q-tooltip> Datos guardados </q-tooltip>
     </q-btn>
 
     <!-- Modal -->
-    <q-drawer v-model="modalVisible" side="right" :width="450" overlay bordered behavior="desktop"
-      v-if="!permisos.soloLectura">
+    <q-drawer
+      v-model="modalVisible"
+      side="right"
+      :width="450"
+      overlay
+      bordered
+      behavior="desktop"
+      v-if="!permisos.soloLectura"
+    >
       <q-card class="q-pa-md q-gutter-md">
-
         <div class="text-h6 q-mb-md text-center">
           {{ editando ? 'Editar marcador' : 'Nuevo marcador' }}
         </div>
 
         <q-card-section class="scroll">
           <q-card-section>
-            <q-input v-model="nuevoMarcador.nombreApellido" label="Nombre y Apellido" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.direccion" label="Dirección" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.telefono" label="Teléfono" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.dni" label="DNI" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.notas" label="Notas" type="textarea" dense outlined class="q-mb-md" />
+            <q-input
+              v-model="nuevoMarcador.nombreApellido"
+              label="Nombre y Apellido"
+              dense
+              outlined
+              class="q-mb-md"
+            />
+            <q-input
+              v-model="nuevoMarcador.direccion"
+              label="Dirección"
+              dense
+              outlined
+              class="q-mb-md"
+            />
+            <q-input
+              v-model="nuevoMarcador.telefono"
+              label="Teléfono"
+              dense
+              outlined
+              class="q-mb-md"
+            />
+            <q-input
+              v-model="nuevoMarcador.dni"
+              label="DNI"
+              dense
+              outlined
+              class="q-mb-md"
+            />
+            <q-input
+              v-model="nuevoMarcador.notas"
+              label="Notas"
+              type="textarea"
+              dense
+              outlined
+              class="q-mb-md"
+            />
 
-            <q-select v-model="nuevoMarcador.ayudas" label="Ayudas (presione enter para agregar)" multiple use-input
-              use-chips new-value-mode="add" input-debounce="0" dropdown-icon="" />
+            <q-select
+              v-model="nuevoMarcador.ayudas"
+              label="Ayudas (presione enter para agregar)"
+              multiple
+              use-input
+              use-chips
+              new-value-mode="add"
+              input-debounce="0"
+              dropdown-icon=""
+            />
 
             <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm" style="padding-top: 10px;">Integrantes</div>
-              <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index"
-                class="row q-gutter-sm items-center q-mb-sm">
-                <q-input v-model="integrante.nombre" label="Nombre" dense outlined class="col" />
-                <q-input v-model="integrante.apellido" label="Apellido" dense outlined class="col" />
-                <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined class="col" />
-                <q-input v-model="integrante.dni" label="DNI" dense outlined class="col" />
-                <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarIntegrante(index)" />
+              <div class="text-subtitle2 q-mb-sm" style="padding-top: 10px">
+                Integrantes
               </div>
-              <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
+              <div
+                v-for="(integrante, index) in nuevoMarcador.integrantes"
+                :key="index"
+                class="row q-gutter-sm items-center q-mb-sm"
+              >
+                <q-input
+                  v-model="integrante.nombre"
+                  label="Nombre"
+                  dense
+                  outlined
+                  class="col"
+                />
+                <q-input
+                  v-model="integrante.apellido"
+                  label="Apellido"
+                  dense
+                  outlined
+                  class="col"
+                />
+                <q-input
+                  v-model.number="integrante.edad"
+                  label="Edad"
+                  type="number"
+                  dense
+                  outlined
+                  class="col"
+                />
+                <q-input
+                  v-model="integrante.dni"
+                  label="DNI"
+                  dense
+                  outlined
+                  class="col"
+                />
+                <q-btn
+                  icon="remove_circle"
+                  color="negative"
+                  flat
+                  dense
+                  @click="eliminarIntegrante(index)"
+                />
+              </div>
+              <q-btn
+                icon="add_circle"
+                label="Agregar integrante"
+                color="primary"
+                flat
+                @click="agregarIntegrante"
+              />
             </div>
-            <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
-              option-value="value" option-label="label" emit-value map-options outlined dense class="q-mb-md">
+            <q-select
+              v-model="nuevoMarcador.icono"
+              label="Ícono del marcador"
+              :options="iconosDisponibles"
+              option-value="value"
+              option-label="label"
+              emit-value
+              map-options
+              outlined
+              dense
+              class="q-mb-md"
+            >
               <!-- Slot para opciones con imágenes -->
               <template v-slot:option="scope">
                 <q-item clickable v-bind="scope.itemProps">
                   <q-item-section avatar>
-                    <q-img :src="scope.opt.value" :alt="scope.opt.label" style="width: 32px; height: 32px;" />
+                    <q-img
+                      :src="scope.opt.value"
+                      :alt="scope.opt.label"
+                      style="width: 32px; height: 32px"
+                    />
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -162,18 +333,26 @@
               <!-- Slot para mostrar la imagen seleccionada -->
               <template v-slot:selected-item="scope">
                 <q-chip dense square class="q-ma-none">
-                  <q-img :src="scope.opt.value" style="width: 20px; height: 20px;" class="q-mr-sm" />
+                  <q-img
+                    :src="scope.opt.value"
+                    style="width: 20px; height: 20px"
+                    class="q-mr-sm"
+                  />
                   {{ scope.opt.label }}
                 </q-chip>
               </template>
             </q-select>
-
           </q-card-section>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
-          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="guardarMarcador" color="positive" />
+          <q-btn
+            flat
+            :label="editando ? 'Guardar cambios' : 'Guardar'"
+            @click="guardarMarcador"
+            color="positive"
+          />
         </q-card-actions>
       </q-card>
     </q-drawer>
@@ -207,17 +386,24 @@ const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 const searchTerm = ref('');
 
+// Variables para el tooltip
+const tooltipVisible = ref(false);
+const tooltipContent = ref('');
+const tooltipPosition = ref({ x: 0, y: 0 });
+
 const rol = ref(localStorage.getItem('rol') || 'Visor');
 
 const permisos = computed(() => {
   return {
-    puedeCrear: rol.value === 'superadmin' || rol.value === 'admin' || rol.value === 'user',
+    puedeCrear:
+      rol.value === 'superadmin' ||
+      rol.value === 'admin' ||
+      rol.value === 'user',
     puedeEditar: rol.value === 'superadmin' || rol.value === 'admin',
     puedeEliminar: rol.value === 'superadmin' || rol.value === 'admin',
     soloLectura: rol.value === 'visor',
   };
 });
-
 
 const nuevoMarcador = ref({
   nombreApellido: '',
@@ -289,7 +475,16 @@ onMounted(() => {
     let featureFound = false;
 
     map.forEachFeatureAtPixel(pixel, (feature) => {
-      const actualFeature = feature as Feature<Geometry>; // Aseguramos el tipo
+      const actualFeature = feature as Feature<Geometry>;
+
+      // Mostrar tooltip con el nombre del marcador
+      const nombreApellido = actualFeature.get('nombreApellido');
+      if (nombreApellido) {
+        tooltipContent.value = nombreApellido;
+        tooltipPosition.value = { x: pixel[0] + 10, y: pixel[1] - 10 };
+        tooltipVisible.value = true;
+      }
+
       if (hoveredFeature !== actualFeature) {
         if (hoveredFeature) {
           hoveredFeature.setStyle(
@@ -317,16 +512,21 @@ onMounted(() => {
       featureFound = true;
     });
 
-    if (!featureFound && hoveredFeature) {
-      hoveredFeature.setStyle(
-        new Style({
-          image: new Icon({
-            src: hoveredFeature.get('icono'),
-            scale: 0.2,
-          }),
-        })
-      );
-      hoveredFeature = null;
+    if (!featureFound) {
+      // Ocultar tooltip cuando no hay marcador
+      tooltipVisible.value = false;
+
+      if (hoveredFeature) {
+        hoveredFeature.setStyle(
+          new Style({
+            image: new Icon({
+              src: hoveredFeature.get('icono'),
+              scale: 0.2,
+            }),
+          })
+        );
+        hoveredFeature = null;
+      }
     }
   });
 
@@ -346,25 +546,10 @@ onMounted(() => {
       abrirModal(coords);
     }
   });
-  // modifyInteraction = new Modify({
-  //   source: vectorSource,
-  //   filter: (feature) => feature === marcadorTemporal,
-  // });
-  // map.addInteraction(modifyInteraction);
-
-  // modifyInteraction.on('modifyend', () => {
-  //   if (marcadorTemporal) {
-  //     const coords = toLonLat(
-  //       (marcadorTemporal.getGeometry() as Point).getCoordinates()
-  //     );
-  //     nuevoMarcador.value.longitud = coords[0];
-  //     nuevoMarcador.value.latitud = coords[1];
-  //   }
-  // });
 });
 
 function activarEdicionTemporal() {
-  desactivarEdicionTemporal(); // asegúrate de eliminar cualquier interacción anterior
+  desactivarEdicionTemporal();
 
   if (marcadorTemporal) {
     modifyInteraction = new Modify({
@@ -396,7 +581,6 @@ function desactivarEdicionTemporal() {
 function abrirModal(coords: [number, number]) {
   const [lon, lat] = coords;
 
-  // Establecer el valor por defecto del nuevo marcador
   nuevoMarcador.value = {
     nombreApellido: '',
     direccion: '',
@@ -407,22 +591,19 @@ function abrirModal(coords: [number, number]) {
     integrantes: [],
     latitud: lat,
     longitud: lon,
-    icono: iconosDisponibles[0].value, // Este será el ícono final
+    icono: iconosDisponibles[0].value,
   };
 
-  // Si hay un marcador temporal anterior, lo eliminamos
   if (marcadorTemporal) {
     vectorSource.removeFeature(marcadorTemporal);
   }
 
-  // Ícono especial para edición temporal (distinto del definitivo)
-  const iconoEdicion = 'public/marker-icon-7.png'; // Podés usar uno con borde rojo, por ejemplo
+  const iconoEdicion = 'public/marker-icon-7.png';
 
   marcadorTemporal = new Feature({
     geometry: new Point(fromLonLat([lon, lat])),
   });
 
-  // Guardamos el ícono temporal en la propiedad 'icono'
   marcadorTemporal.set('icono', iconoEdicion);
 
   marcadorTemporal.setStyle(
@@ -436,7 +617,7 @@ function abrirModal(coords: [number, number]) {
 
   vectorSource.addFeature(marcadorTemporal);
 
-  activarEdicionTemporal(); // Activás el movimiento del marcador temporal
+  activarEdicionTemporal();
   modalVisible.value = true;
   editando.value = false;
 }
@@ -457,18 +638,18 @@ async function guardarMarcador() {
     marcador.icono = iconosDisponibles[0].value;
   }
   if (marcadorTemporal) {
-    desactivarEdicionTemporal(); // <-- aquí
+    desactivarEdicionTemporal();
     vectorSource.removeFeature(marcadorTemporal);
     marcadorTemporal = null;
   }
 
   if (editando.value) {
     await gisStore.editarMarcador(marcador);
-    recargarMarcadores(); // puede quedarse como está
+    recargarMarcadores();
   } else {
     const nuevo = await gisStore.agregarMarcador(marcador);
     if (nuevo?.id) {
-      agregarMarcadorAlMapa(nuevo); // Usamos el que viene del backend
+      agregarMarcadorAlMapa(nuevo);
     }
   }
 
@@ -480,8 +661,9 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
     geometry: new Point(fromLonLat([marcador.longitud, marcador.latitud])),
     id: marcador.id,
   });
-  console.log('Marcador agregado:', marcador);
 
+  // Agregar el nombreApellido al feature para el tooltip
+  feature.set('nombreApellido', marcador.nombreApellido);
   feature.set('icono', marcador.icono);
 
   const icon = new Icon({
@@ -523,18 +705,16 @@ function eliminarMarcadorSeleccionado() {
 function verInfoMarcador(marcador: Marcador) {
   gisStore.seleccionarMarcador(marcador.id);
 
-  // Centrar el mapa en el marcador seleccionado
   const coordenadas = fromLonLat([marcador.longitud, marcador.latitud]);
   map.getView().animate({
     center: coordenadas,
-    duration: 500, // animación suave en milisegundos
-    zoom: 17, // puedes ajustar el nivel de zoom si lo deseas
+    duration: 500,
+    zoom: 17,
   });
 }
-// Variables auxiliares para manejar los inputs de texto separados por comas
+
 const ayudasTexto = ref('');
 
-// Funciones para actualizar los arrays a partir del texto
 function actualizarAyudas() {
   nuevoMarcador.value.ayudas = ayudasTexto.value
     .split(',')
@@ -560,6 +740,29 @@ function eliminarIntegrante(index: number) {
 </script>
 
 <style scoped>
+.tooltip-marcador {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip-marcador::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
 .mapa {
   width: 100%;
   height: 100vh;
@@ -592,7 +795,6 @@ function eliminarIntegrante(index: number) {
   right: 1rem;
   width: 300px;
   max-height: 20vh;
-
 }
 
 .datos-actuales-panel {
@@ -619,7 +821,6 @@ function eliminarIntegrante(index: number) {
 }
 
 @media (max-width: 768px) {
-
   .info-panel,
   .referencias-panel,
   .datos-actuales-panel {
