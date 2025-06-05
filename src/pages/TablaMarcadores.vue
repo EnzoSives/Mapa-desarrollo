@@ -40,102 +40,111 @@
       </template>
     </q-table>
 
-    <!-- Modal de información -->
+    <!-- Modal de información mejorado visualmente -->
     <q-dialog v-model="mostrarModal" persistent>
-      <q-card v-if="marcadorSeleccionado" class="info-panel" style="min-width: 400px; max-width: 600px">
-        <q-card-section>
-          <div class="text-h6">Información del marcador</div>
+      <q-card v-if="marcadorSeleccionado" class="info-panel" style="min-width: 400px; max-width: 700px">
+
+        <!-- Encabezado -->
+        <q-card-section class="bg-primary text-white row items-center q-pa-sm">
+          <q-avatar v-if="marcadorSeleccionado.icono" size="48px" class="q-mr-md">
+            <img :src="marcadorSeleccionado.icono" alt="Ícono" />
+          </q-avatar>
+          <div>
+            <div class="text-h6">{{ marcadorSeleccionado.nombreApellido }}</div>
+            <div class="text-caption">{{ marcadorSeleccionado.direccion }}</div>
+          </div>
         </q-card-section>
 
+        <q-separator spaced />
+
+        <!-- Información principal -->
         <q-card-section>
-          <p>
-            <strong>Nombre:</strong>
-            {{ marcadorSeleccionado.nombreApellido }}
-          </p>
-          <p>
-            <strong>Dirección:</strong>
-            {{ marcadorSeleccionado.direccion }}
-          </p>
-          <p>
-            <strong>Teléfono:</strong>
-            {{ marcadorSeleccionado.telefono }}
-          </p>
-          <p><strong>DNI:</strong> {{ marcadorSeleccionado.dni }}</p>
-          <p>
-            <strong>Notas:</strong>
-            {{ marcadorSeleccionado.notas || 'N/A' }}
-          </p>
+          <div class="row q-col-gutter-md">
 
-          <p>
-            <strong>Ayudas:</strong>
-            <span v-if="
-              marcadorSeleccionado.ayudas &&
-              Array.isArray(marcadorSeleccionado.ayudas) &&
-              marcadorSeleccionado.ayudas.length > 0
-            ">
-              {{ marcadorSeleccionado.ayudas.join(', ') }}
-            </span>
-            <span v-else-if="
-              marcadorSeleccionado.ayudas &&
-              typeof marcadorSeleccionado.ayudas === 'string'
-            ">
-              {{ marcadorSeleccionado.ayudas }}
-            </span>
-            <span v-else>Ninguna</span>
-          </p>
+            <!-- Columna 1 -->
+            <div class="col-12 col-md-6">
+              <q-item dense>
+                <q-item-section avatar>
+                  <q-icon name="phone" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label><strong>Teléfono:</strong> {{ marcadorSeleccionado.telefono || 'N/A'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
 
-          <div>
-            <strong>Integrantes:</strong>
-            <div v-if="
-              marcadorSeleccionado.integrantes &&
-              marcadorSeleccionado.integrantes.length > 0
-            ">
-              <ul class="q-pl-md">
-                <li v-for="(integrante, index) in marcadorSeleccionado.integrantes" :key="index"
-                  style="list-style: none; margin-left: 0;">
-                  <q-icon name="person" color="primary" size="xs" class="q-mr-sm" />
-                  <strong>Nombre:</strong> {{ integrante.nombre }} {{ integrante.apellido }}<br /><strong>
-                    Edad:</strong>
-                  {{ integrante.edad }}<br /><strong> DNI:</strong> {{ integrante.dni }}
-                </li>
-              </ul>
+              <q-item dense>
+                <q-item-section avatar>
+                  <q-icon name="badge" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label><strong>DNI:</strong> {{ marcadorSeleccionado.dni }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
             </div>
-            <div v-else>No hay integrantes.</div>
           </div>
 
-          <!-- Coordenadas (opcional) -->
-          <!-- <p v-if="marcadorSeleccionado.latitud && marcadorSeleccionado.longitud">
-            <strong>Coordenadas:</strong>
-            {{ marcadorSeleccionado.latitud }},
-            {{ marcadorSeleccionado.longitud }}
-          </p> -->
+          <!-- Integrantes -->
+          <div>
+            <strong>Integrantes:</strong>
+            <div v-if="marcadorSeleccionado.integrantes?.length" class="q-mt-sm">
+              <q-list dense bordered>
+                <q-item v-for="(integrante, index) in marcadorSeleccionado.integrantes" :key="index">
+                  <q-item-section avatar>
+                    <q-icon name="person" color="primary" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>
+                      <strong>{{ integrante.nombre }} {{ integrante.apellido }}</strong>
+                    </q-item-label>
+                    <q-item-label caption>
+                      Edad: {{ integrante.edad }} &nbsp;|&nbsp; DNI: {{ integrante.dni }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+            <div v-else class="text-grey-7 q-mt-sm">No hay integrantes.</div>
+          </div>
         </q-card-section>
 
+        <q-separator spaced class="q-mt-md" />
+
+        <q-item dense>
+          <q-item-section avatar>
+            <q-icon name="assignment" color="primary" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>
+              <strong>Programas:</strong>
+              <div v-if="marcadorSeleccionado.programas?.length" class="q-mt-xs">
+                <q-chip v-for="(programa, index) in marcadorSeleccionado.programas" :key="index" dense color="primary"
+                  text-color="white" size="sm" class="q-mr-xs q-mb-xs">
+                  <span style="min-width: max-content; display: inline-block;">
+                    {{ programa.tipo }}: {{ programa.ayuda }}
+                  </span>
+                </q-chip>
+              </div>
+              <div v-else class="text-grey-7 q-mt-xs">Ninguno</div>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item dense>
+          <q-item-section avatar>
+            <q-icon name="notes" color="primary" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label><strong>Notas:</strong> {{ marcadorSeleccionado.notas || 'N/A' }}</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <!-- Acciones -->
         <q-card-actions align="right">
           <q-btn flat label="Cerrar" @click="cerrarModal" color="primary" />
-          <!-- <q-btn
-            flat
-            label="Ver en mapa"
-            @click="verEnMapa"
-            color="info"
-            :disable="
-              !marcadorSeleccionado.latitud || !marcadorSeleccionado.longitud
-            "
-          /> -->
-          <!-- <q-btn
-            flat
-            label="Editar"
-            @click="editarMarcadorSeleccionado"
-            color="warning"
-            v-if="permisos.puedeEditar"
-          />
-          <q-btn
-            flat
-            label="Eliminar"
-            @click="eliminarMarcadorSeleccionado"
-            color="negative"
-            v-if="permisos.puedeEliminar"
-          /> -->
+          <!-- <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" v-if="permisos.puedeEditar" />
+        <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative"
+          v-if="permisos.puedeEliminar" /> -->
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -156,6 +165,10 @@ interface Integrante {
   edad: number;
   dni: string;
 }
+interface Programa {
+  tipo: string;
+  ayuda: string;
+}
 
 interface Marcador {
   nombreApellido: string;
@@ -168,6 +181,7 @@ interface Marcador {
   latitud?: number;
   longitud?: number;
   integrantes?: Integrante[];
+  programas?: Programa[];
   [key: string]: any;
 }
 

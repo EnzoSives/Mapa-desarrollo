@@ -56,9 +56,9 @@
         <!-- <div class="text-caption text-grey-6 text-weight-medium">
           Desarrollo Social
         </div> -->
-        <div class="text-caption text-grey-5">
+        <!-- <div class="text-caption text-grey-5">
           Sistema seguro y confiable
-        </div>
+        </div> -->
       </q-card-section>
     </q-card>
 

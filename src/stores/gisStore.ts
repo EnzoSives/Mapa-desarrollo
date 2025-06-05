@@ -13,6 +13,7 @@ export interface Marcador {
   longitud: number;
   icono: string;
   integrantes?: string[];
+  programas?: string[];
 }
 
 export const useGisStore = defineStore('gis', {
