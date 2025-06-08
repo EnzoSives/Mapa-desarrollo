@@ -11,112 +11,104 @@
     </div>
 
     <!-- Panel Info del marcador (izquierda arriba) -->
-    <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel q-mx-auto"
-      style="min-width: 400px; max-width: 700px">
-      <!-- Encabezado -->
-      <q-card-section class="bg-primary text-white row items-center q-pa-sm">
-        <q-avatar v-if="gisStore.marcadorSeleccionado.icono" size="48px" class="q-mr-md">
-          <img :src="gisStore.marcadorSeleccionado.icono" alt="Ícono" />
-        </q-avatar>
-        <div>
-          <div class="text-h6">{{ gisStore.marcadorSeleccionado.nombreApellido }}</div>
-          <div class="text-caption">{{ gisStore.marcadorSeleccionado.direccion }}</div>
-        </div>
-      </q-card-section>
+    <div id="area-imprimir">
+      <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel q-mx-auto"
+        style="min-width: 350px; max-width: 500px; border-radius: 12px;">
+        <q-card-section class="row items-center q-pb-none justify-end"
+          style="position: absolute; top: 0; right: 0; z-index: 2;">
+          <q-btn icon="close" round @click="gisStore.cerrarInfo" />
+        </q-card-section>
 
-      <q-separator spaced />
 
-      <!-- Información principal -->
-      <q-card-section>
-        <div class="row q-col-gutter-md">
-
-          <!-- Columna 1 -->
-          <div class="col-12 col-md-6">
-            <q-item dense>
-              <q-item-section avatar>
-                <q-icon name="phone" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label><strong>Teléfono:</strong> {{ gisStore.marcadorSeleccionado.telefono || 'N/A'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item dense>
-              <q-item-section avatar>
-                <q-icon name="badge" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label><strong>DNI:</strong> {{ gisStore.marcadorSeleccionado.dni }}</q-item-label>
-              </q-item-section>
-            </q-item>
-
-          </div>
-        </div>
-
-        <!-- Integrantes -->
-        <div>
-          <strong>Integrantes:</strong>
-          <div v-if="gisStore.marcadorSeleccionado.integrantes?.length" class="q-mt-sm">
-            <q-list dense bordered>
-              <q-item v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index">
-                <q-item-section avatar>
-                  <q-icon name="person" color="primary" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>
-                    <strong>{{ integrante.nombre }} {{ integrante.apellido }}</strong>
-                  </q-item-label>
-                  <q-item-label caption>
-                    Edad: {{ integrante.edad }} &nbsp;|&nbsp; DNI: {{ integrante.dni }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-          <div v-else class="text-grey-7 q-mt-sm">No hay integrantes.</div>
-        </div>
-      </q-card-section>
-
-      <q-separator spaced class="q-mt-md" />
-
-      <q-item dense>
-        <q-item-section avatar>
-          <q-icon name="assignment" color="primary" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>
-            <strong>Programas:</strong>
-            <div v-if="gisStore.marcadorSeleccionado.programas?.length" class="q-mt-xs">
-              <q-chip v-for="(programa, index) in gisStore.marcadorSeleccionado.programas" :key="index" dense
-                color="primary" text-color="white" size="sm" class="q-mr-xs q-mb-xs">
-                <span style="min-width: max-content; display: inline-block;">
-                  {{ programa.tipo }}: {{ programa.ayuda }}
-                </span>
-              </q-chip>
+        <!-- Encabezado simple -->
+        <q-card-section class="q-pa-md">
+          <div class="row items-center no-wrap">
+            <q-avatar v-if="gisStore.marcadorSeleccionado.icono" size="44px" class="q-mr-md">
+              <img :src="gisStore.marcadorSeleccionado.icono" alt="Ícono" />
+            </q-avatar>
+            <div class="col">
+              <div class="text-h6 text-weight-medium">
+                {{ gisStore.marcadorSeleccionado.nombreApellido }}
+              </div>
+              <div class="text-caption text-grey">
+                {{ gisStore.marcadorSeleccionado.direccion }}
+              </div>
             </div>
-            <div v-else class="text-grey-7 q-mt-xs">Ninguno</div>
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item dense>
-        <q-item-section avatar>
-          <q-icon name="notes" color="primary" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label><strong>Notas:</strong> {{ gisStore.marcadorSeleccionado.notas || 'N/A' }}</q-item-label>
-        </q-item-section>
-      </q-item>
+          </div>
 
-      <!-- Acciones -->
-      <q-card-actions align="right">
-        <q-btn flat label="Cerrar" @click="gisStore.cerrarInfo" color="primary" />
-        <q-btn flat label="Editar" @click="editarMarcadorSeleccionado" color="warning" v-if="permisos.puedeEditar" />
-        <q-btn flat label="Eliminar" @click="eliminarMarcadorSeleccionado" color="negative"
-          v-if="permisos.puedeEliminar" />
-      </q-card-actions>
-    </q-card>
+        </q-card-section>
 
+        <q-separator />
+
+        <!-- Información compacta -->
+        <q-card-section class="q-pa-md">
+
+          <!-- Contacto en una línea -->
+          <div class="row q-col-gutter-md q-mb-md">
+            <div class="col-6">
+              <div class="text-caption text-grey">Teléfono</div>
+              <div class="text-body2">{{ gisStore.marcadorSeleccionado.telefono || 'N/A' }}</div>
+            </div>
+            <div class="col-6">
+              <div class="text-caption text-grey">DNI</div>
+              <div class="text-body2">{{ gisStore.marcadorSeleccionado.dni }}</div>
+            </div>
+          </div>
+
+          <!-- Integrantes compactos -->
+          <div class="q-mb-md">
+            <div class="text-subtitle2 q-mb-sm">Integrantes</div>
+            <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
+              <div v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index"
+                class="row items-center q-py-xs">
+                <q-avatar size="28px" class="q-mr-sm" color="grey-5" text-color="white">
+                  {{ integrante.nombre.charAt(0) }}
+                </q-avatar>
+                <div class="col">
+                  <div class="text-body2">{{ integrante.nombre }} {{ integrante.apellido }}</div>
+                  <div class="text-caption text-grey">{{ integrante.edad }} años • {{ integrante.dni }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-caption text-grey">Sin integrantes</div>
+          </div>
+
+          <!-- Programas simples -->
+          <div class="q-mb-md">
+            <div class="text-subtitle2 q-mb-sm">Programas</div>
+            <div v-if="gisStore.marcadorSeleccionado.programas?.length">
+              <div v-for="(programa, index) in gisStore.marcadorSeleccionado.programas" :key="index"
+                class="text-body2 q-mb-xs">
+                • {{ programa.tipo }}: {{ programa.ayuda }}
+              </div>
+            </div>
+            <div v-else class="text-caption text-grey">Ninguno</div>
+          </div>
+
+          <!-- Notas simples -->
+          <div v-if="gisStore.marcadorSeleccionado.notas">
+            <div class="text-subtitle2 q-mb-sm">Notas</div>
+            <div class="text-body2">{{ gisStore.marcadorSeleccionado.notas }}</div>
+          </div>
+        </q-card-section>
+
+        <!-- Acciones minimalistas -->
+        <q-separator />
+        <q-card-actions class="q-pa-sm justify-end">
+          <q-btn flat round icon="print" @click="generarPDF" size="md">
+            <q-tooltip>Imprimir</q-tooltip>
+          </q-btn>
+
+          <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="yellow-6"
+            size="md" />
+
+          <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
+            size="md" />
+
+          <!-- <q-btns label="Cerrar" @click="gisStore.cerrarInfo" color="primary" size="md" /> -->
+        </q-card-actions>
+      </q-card>
+    </div>
 
     <!-- Panel de Referencias (derecha arriba) -->
     <q-card v-if="mostrarReferencias" class="referencias-panel">
@@ -280,6 +272,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon } from 'ol/style';
 import { Geometry } from 'ol/geom';
 import Modify from 'ol/interaction/Modify';
+import { jsPDF } from 'jspdf';
 
 let modifyInteraction: Modify | null = null;
 let marcadorTemporal: Feature<Point> | null = null;
@@ -510,6 +503,545 @@ function desactivarEdicionTemporal() {
   }
 }
 
+function imprimir() {
+  if (!gisStore.marcadorSeleccionado) return;
+
+  const marcador = gisStore.marcadorSeleccionado;
+
+  // Crear el HTML para imprimir con estilos
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Información del Marcador - ${marcador.nombreApellido}</title>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 20px;
+          color: #333;
+          line-height: 1.6;
+        }
+        
+        .header {
+          background: linear-gradient(135deg, #1976d2, #42a5f5);
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+        }
+        
+        .header img {
+          width: 48px;
+          height: 48px;
+          margin-right: 15px;
+          border-radius: 50%;
+          background: white;
+          padding: 4px;
+        }
+        
+        .header-content h1 {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 600;
+        }
+        
+        .header-content p {
+          margin: 5px 0 0 0;
+          opacity: 0.9;
+          font-size: 14px;
+        }
+        
+        .info-section {
+          background: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 15px;
+          border-left: 4px solid #1976d2;
+        }
+        
+        .info-row {
+          display: flex;
+          margin-bottom: 10px;
+          align-items: center;
+        }
+        
+        .info-row:last-child {
+          margin-bottom: 0;
+        }
+        
+        .info-label {
+          font-weight: 600;
+          min-width: 100px;
+          color: #1976d2;
+        }
+        
+        .info-value {
+          flex: 1;
+        }
+        
+        .integrantes-list {
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          margin-top: 10px;
+        }
+        
+        .integrante-item {
+          padding: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .integrante-item:last-child {
+          border-bottom: none;
+        }
+        
+        .integrante-name {
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 4px;
+        }
+        
+        .integrante-details {
+          color: #666;
+          font-size: 14px;
+        }
+        
+        .programas-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 10px;
+        }
+        
+        .programa-chip {
+          background: #1976d2;
+          color: white;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+        
+        .section-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1976d2;
+          margin: 20px 0 10px 0;
+          border-bottom: 2px solid #e3f2fd;
+          padding-bottom: 5px;
+        }
+        
+        .no-data {
+          color: #999;
+          font-style: italic;
+        }
+        
+        .footer {
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e0e0e0;
+          text-align: center;
+          color: #666;
+          font-size: 12px;
+        }
+        
+        @media print {
+          body { margin: 0; }
+          .header { break-inside: avoid; }
+          .info-section { break-inside: avoid; }
+          .integrantes-list { break-inside: avoid; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        ${marcador.icono ? `<img src="${marcador.icono}" alt="Ícono" onerror="this.style.display='none'">` : ''}
+        <div class="header-content">
+          <h1>${marcador.nombreApellido}</h1>
+          <p>${marcador.direccion}</p>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-label">📞 Teléfono:</span>
+          <span class="info-value">${marcador.telefono || 'N/A'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">🆔 DNI:</span>
+          <span class="info-value">${marcador.dni}</span>
+        </div>
+      </div>
+      
+      ${marcador.integrantes && marcador.integrantes.length > 0 ? `
+        <div class="section-title">👥 Integrantes</div>
+        <div class="integrantes-list">
+          ${marcador.integrantes.map(integrante => `
+            <div class="integrante-item">
+              <div class="integrante-name">${integrante.nombre} ${integrante.apellido}</div>
+              <div class="integrante-details">Edad: ${integrante.edad} | DNI: ${integrante.dni}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `
+        <div class="section-title">👥 Integrantes</div>
+        <div class="no-data">No hay integrantes registrados</div>
+      `}
+      
+      <div class="section-title">📋 Programas</div>
+      ${marcador.programas && marcador.programas.length > 0 ? `
+        <div class="programas-container">
+          ${marcador.programas.map(programa => `
+            <span class="programa-chip">${programa.tipo}: ${programa.ayuda}</span>
+          `).join('')}
+        </div>
+      ` : `
+        <div class="no-data">No hay programas asignados</div>
+      `}
+      
+      ${marcador.notas ? `
+        <div class="section-title">📝 Notas</div>
+        <div class="info-section">
+          ${marcador.notas.replace(/\n/g, '<br>')}
+        </div>
+      ` : ''}
+      
+      <div class="footer">
+        <p>Impreso el ${new Date().toLocaleDateString('es-ES', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Crear ventana de impresión
+  const ventanaImpresion = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+  if (ventanaImpresion) {
+    ventanaImpresion.document.write(htmlContent);
+    ventanaImpresion.document.close();
+
+    // Esperar a que se cargue el contenido antes de imprimir
+    ventanaImpresion.onload = function () {
+      ventanaImpresion.focus();
+      ventanaImpresion.print();
+
+      // Opcional: cerrar la ventana después de imprimir
+      ventanaImpresion.onafterprint = function () {
+        ventanaImpresion.close();
+      };
+    };
+  } else {
+    // Fallback si no se puede abrir la ventana
+    alert('No se pudo abrir la ventana de impresión. Verifique que no esté bloqueada por el navegador.');
+  }
+}
+
+// Función para generar PDF del marcador seleccionado
+async function generarPDF() {
+  if (!gisStore.marcadorSeleccionado) {
+    alert('No hay ningún marcador seleccionado');
+    return;
+  }
+
+  try {
+    // Importar jsPDF dinámicamente
+    const marcador = gisStore.marcadorSeleccionado;
+    const doc = new jsPDF();
+
+    // Configuración inicial
+    let yPos = 20;
+    const pageWidth = doc.internal.pageSize.width;
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+
+    // Función helper para añadir texto con wrap
+    function addTextWithWrap(text, x, y, maxWidth, fontSize = 12) {
+      doc.setFontSize(fontSize);
+      const lines = doc.splitTextToSize(text, maxWidth);
+      doc.text(lines, x, y);
+      return y + (lines.length * (fontSize * 0.4));
+    }
+
+    // Función helper para dibujar rectángulo con color
+    function drawColoredRect(x, y, width, height, color) {
+      doc.setFillColor(color);
+      doc.rect(x, y, width, height, 'F');
+    }
+
+    // ENCABEZADO
+    drawColoredRect(margin, yPos - 5, contentWidth, 25, '#1976d2');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('INFORMACIÓN DEL MARCADOR', margin + 5, yPos + 8);
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')}`, pageWidth - 60, yPos + 8);
+
+    yPos += 35;
+
+    // INFORMACIÓN PRINCIPAL
+    doc.setTextColor(0, 0, 0);
+    drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
+
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('DATOS PERSONALES', margin, yPos + 8);
+    yPos += 20;
+
+    // Nombre y Apellido
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Nombre:', margin, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(marcador.nombreApellido, margin + 25, yPos);
+    yPos += 10;
+
+    // Dirección
+    doc.setFont(undefined, 'bold');
+    doc.text('Dirección:', margin, yPos);
+    doc.setFont(undefined, 'normal');
+    yPos = addTextWithWrap(marcador.direccion, margin + 25, yPos, contentWidth - 25);
+    yPos += 5;
+
+    // Teléfono
+    doc.setFont(undefined, 'bold');
+    doc.text('Teléfono:', margin, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(marcador.telefono || 'N/A', margin + 25, yPos);
+    yPos += 10;
+
+    // DNI
+    doc.setFont(undefined, 'bold');
+    doc.text('DNI:', margin, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(marcador.dni.toString(), margin + 25, yPos);
+    yPos += 20;
+
+    // INTEGRANTES
+    if (marcador.integrantes && marcador.integrantes.length > 0) {
+      // Verificar si necesitamos nueva página
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('INTEGRANTES', margin, yPos + 8);
+      yPos += 20;
+
+      marcador.integrantes.forEach((integrante, index) => {
+        // Verificar si necesitamos nueva página
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Fondo alternado para cada integrante
+        if (index % 2 === 0) {
+          drawColoredRect(margin, yPos - 3, contentWidth, 15, '#f8f9fa');
+        }
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${index + 1}. ${integrante.nombre} ${integrante.apellido}`, margin + 2, yPos + 5);
+
+        doc.setFont(undefined, 'normal');
+        doc.text(`Edad: ${integrante.edad || 'N/A'}`, margin + 2, yPos + 12);
+        doc.text(`DNI: ${integrante.dni}`, margin + 50, yPos + 12);
+
+        yPos += 20;
+      });
+    } else {
+      drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('INTEGRANTES', margin, yPos + 8);
+      yPos += 20;
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'italic');
+      doc.setTextColor(128, 128, 128);
+      doc.text('No hay integrantes registrados', margin, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += 20;
+    }
+
+    // PROGRAMAS
+    if (yPos > 230) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('PROGRAMAS', margin, yPos + 8);
+    yPos += 20;
+
+    if (marcador.programas && marcador.programas.length > 0) {
+      marcador.programas.forEach((programa, index) => {
+        // Verificar si necesitamos nueva página
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Fondo para cada programa
+        drawColoredRect(margin, yPos - 3, contentWidth, 12, '#e8f4fd');
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${index + 1}. ${programa.tipo}`, margin + 2, yPos + 5);
+
+        doc.setFont(undefined, 'normal');
+        doc.text(`Ayuda: ${programa.ayuda}`, margin + 5, yPos + 10);
+
+        yPos += 18;
+      });
+    } else {
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'italic');
+      doc.setTextColor(128, 128, 128);
+      doc.text('No hay programas asignados', margin, yPos);
+      doc.setTextColor(0, 0, 0);
+      yPos += 20;
+    }
+
+    // NOTAS
+    if (marcador.notas) {
+      if (yPos > 220) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('NOTAS', margin, yPos + 8);
+      yPos += 20;
+
+      // Fondo para las notas
+      const notasLines = doc.splitTextToSize(marcador.notas, contentWidth - 10);
+      const notasHeight = notasLines.length * 5 + 10;
+      drawColoredRect(margin, yPos - 5, contentWidth, notasHeight, '#f8f9fa');
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      yPos = addTextWithWrap(marcador.notas, margin + 5, yPos, contentWidth - 10);
+    }
+
+    // FOOTER
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 30, doc.internal.pageSize.height - 10);
+      doc.text(`Sistema GIS - ${new Date().toLocaleDateString('es-ES')}`, margin, doc.internal.pageSize.height - 10);
+    }
+
+    // Guardar el PDF
+    // const fileName = `marcador_${marcador.nombreApellido.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    // doc.save(fileName);
+    // Abrir en nueva ventana y disparar impresión
+    const pdfBlob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    const printWindow = window.open(blobUrl);
+    if (printWindow) {
+      printWindow.onload = function () {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } else {
+      alert('No se pudo abrir la ventana de impresión. Verifica que no haya bloqueadores de pop-ups.');
+    }
+
+    // console.log(`PDF generado exitosamente: ${fileName}`);
+
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+    alert('Error al generar el PDF. Verifique la conexión a internet y que jsPDF esté disponible.');
+  }
+}
+
+// Función alternativa para generar PDF más simple (si la anterior falla)
+async function generarPDFSimple() {
+  if (!gisStore.marcadorSeleccionado) {
+    alert('No hay ningún marcador seleccionado');
+    return;
+  }
+
+  try {
+    const marcador = gisStore.marcadorSeleccionado;
+    const doc = new jsPDF();
+
+    let yPos = 20;
+
+    // Título
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('INFORMACIÓN DEL MARCADOR', 20, yPos);
+    yPos += 20;
+
+    // Información básica
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+
+    const info = [
+      `Nombre: ${marcador.nombreApellido}`,
+      `Dirección: ${marcador.direccion}`,
+      `Teléfono: ${marcador.telefono || 'N/A'}`,
+      `DNI: ${marcador.dni}`,
+      '',
+      'INTEGRANTES:',
+      ...(marcador.integrantes?.map(int =>
+        `• ${int.nombre} ${int.apellido} - Edad: ${int.edad} - DNI: ${int.dni}`
+      ) || ['No hay integrantes']),
+      '',
+      'PROGRAMAS:',
+      ...(marcador.programas?.map(prog =>
+        `• ${prog.tipo}: ${prog.ayuda}`
+      ) || ['No hay programas']),
+      '',
+      'NOTAS:',
+      marcador.notas || 'Sin notas'
+    ];
+
+    info.forEach(line => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(line, 20, yPos);
+      yPos += 7;
+    });
+
+    // Guardar
+    const fileName = `marcador_${marcador.nombreApellido.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
+
+  } catch (error) {
+    console.error('Error al generar PDF simple:', error);
+    alert('Error al generar el PDF');
+  }
+}
+
 function abrirModal(coords: [number, number]) {
   const [lon, lat] = coords;
 
@@ -686,9 +1218,99 @@ function resetearAyuda(index: number) {
 }
 </script>
 <style scoped>
+.header-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.bg-white-transparent {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.info-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.integrante-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.integrante-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.programa-card {
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background: linear-gradient(145deg, #f8f9ff 0%, #ffffff 100%);
+  transition: all 0.3s ease;
+}
+
+.programa-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.action-btn {
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.info-panel {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .info-panel {
+    min-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .header-gradient .absolute-top-right {
+    position: relative !important;
+    text-align: right;
+    padding: 0 !important;
+  }
+}
+
+
 .tooltip-marcador {
   position: absolute;
-  background: linear-gradient(135deg, #667eea 0%, rgb(230, 20, 20) 100%);
+  background: linear-gradient(135deg, #667eea 0%, rgb(0, 0, 0) 100%);
   color: white;
   padding: 8px 12px;
   border-radius: 8px;
