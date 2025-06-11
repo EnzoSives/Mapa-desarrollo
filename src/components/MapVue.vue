@@ -166,91 +166,129 @@
         </div>
 
         <q-card-section class="scroll">
-          <q-card-section>
-            <q-input v-model="nuevoMarcador.nombreApellido" label="Nombre y Apellido" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.direccion" label="Dirección" dense outlined class="q-mb-md" />
-            <q-input v-model="nuevoMarcador.telefono" label="Teléfono" type="number" dense outlined class="q-mb-md"
-              :min="0"
-              @update:model-value="val => { if (val !== null && Number(val) < 0) nuevoMarcador.telefono = 0 }" />
-            <q-input v-model="nuevoMarcador.dni" label="DNI" type="number" dense outlined class="q-mb-md" :min="0"
-              @update:model-value="val => { if (val !== null && Number(val) < 0) nuevoMarcador.dni = 0 }" />
+          <q-form ref="formulario" @submit="guardarMarcador">
+            <q-card-section>
+              <q-input v-model="nuevoMarcador.nombreApellido" label="Nombre y Apellido" dense outlined class="q-mb-md"
+                :rules="[
+                  val => !!val || 'El nombre y apellido es obligatorio',
+                  val => val.length >= 3 || 'Debe tener al menos 3 caracteres',
+                  val => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) || 'Solo se permiten letras y espacios'
+                ]" />
 
+              <q-input v-model="nuevoMarcador.direccion" label="Dirección" dense outlined class="q-mb-md" :rules="[
+                val => !!val || 'La dirección es obligatoria',
+                val => val.length >= 5 || 'Debe tener al menos 5 caracteres'
+              ]" />
 
-            <!-- Sección de Programas -->
-            <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm">
-                Programas
-              </div>
-              <div v-for="(programa, index) in nuevoMarcador.programas" :key="index"
-                class="row q-gutter-sm items-center q-mb-sm q-pa-sm">
+              <q-input v-model="nuevoMarcador.telefono" label="Teléfono" type="number" dense outlined class="q-mb-md"
+                :min="0"
+                @update:model-value="val => { if (val !== null && Number(val) < 0) nuevoMarcador.telefono = 0 }" :rules="[
+                  val => !!val || 'El teléfono es obligatorio',
+                  val => /^\d{8,12}$/.test(val) || 'Debe tener entre 8 y 12 dígitos'
+                ]" />
 
-                <!-- Selector de Tipo -->
-                <q-select v-model="programa.tipo" label="Tipo" :options="tiposPrograma" dense outlined class="col"
-                  @update:model-value="resetearAyuda(index)" />
+              <q-input v-model="nuevoMarcador.dni" label="DNI" type="number" dense outlined class="q-mb-md" :min="0"
+                @update:model-value="val => { if (val !== null && Number(val) < 0) nuevoMarcador.dni = 0 }" :rules="[
+                  val => !!val || 'El DNI es obligatorio',
+                  val => /^\d{7,8}$/.test(val) || 'El DNI debe tener 7 u 8 dígitos'
+                ]" />
 
-                <!-- Selector de Ayuda (dependiente del tipo) -->
-                <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
-                  outlined class="col" :disable="!programa.tipo" />
-
-                <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarPrograma(index)" />
-              </div>
-              <q-btn icon="add_circle" label="Agregar programa" color="primary" flat @click="agregarPrograma" />
-              <div class="q-mb-md" style="padding-top: 10px; padding-bottom: 10px;">
-                <q-input v-model="nuevoMarcador.notas" label="Notas" type="textarea" dense outlined class="q-mb-md" />
-              </div>
-            </div>
-
-
-            <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm" style="padding-top: 10px">
-                Integrantes
-              </div>
-              <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index"
-                class="row q-col-gutter-sm q-mb-sm">
-                <div class="col-12 col-md-6">
-                  <q-input v-model="integrante.nombre" label="Nombre" dense outlined class="q-mb-xs" />
-                  <q-input v-model="integrante.apellido" label="Apellido" dense outlined class="q-mb-xs" />
+              <!-- Sección de Programas -->
+              <div class="q-mb-md">
+                <div class="text-subtitle2 q-mb-sm">
+                  Programas *
                 </div>
-                <div class="col-12 col-md-6 row items-center">
-                  <div class="col">
-                    <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined
-                      class="q-mb-xs" />
-                    <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined class="q-mb-xs" />
+                <div v-for="(programa, index) in nuevoMarcador.programas" :key="index"
+                  class="row q-gutter-sm items-center q-mb-sm q-pa-sm">
+
+                  <!-- Selector de Tipo -->
+                  <q-select v-model="programa.tipo" label="Tipo" :options="tiposPrograma" dense outlined class="col"
+                    @update:model-value="resetearAyuda(index)" :rules="[val => !!val || 'Debe seleccionar un tipo']" />
+
+                  <!-- Selector de Ayuda (dependiente del tipo) -->
+                  <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
+                    outlined class="col" :disable="!programa.tipo"
+                    :rules="[val => !!val || 'Debe seleccionar una ayuda']" />
+
+                  <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarPrograma(index)" />
+                </div>
+                <q-btn icon="add_circle" label="Agregar programa" color="primary" flat @click="agregarPrograma" />
+
+                <div class="q-mb-md" style="padding-top: 10px; padding-bottom: 10px;">
+                  <q-input v-model="nuevoMarcador.notas" label="Notas" type="textarea" dense outlined class="q-mb-md"
+                    :rules="[
+                      val => !val || val.length <= 500 || 'Las notas no pueden exceder 500 caracteres'
+                    ]" />
+                </div>
+              </div>
+
+              <div class="q-mb-md">
+                <div class="text-subtitle2 q-mb-sm" style="padding-top: 10px">
+                  Integrantes *
+                </div>
+                <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index"
+                  class="row q-col-gutter-sm q-mb-sm">
+                  <div class="col-12 col-md-6">
+                    <q-input v-model="integrante.nombre" label="Nombre" dense outlined class="q-mb-xs" :rules="[
+                      val => !!val || 'El nombre es obligatorio',
+                      val => val.length >= 2 || 'Debe tener al menos 2 caracteres',
+                      val => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) || 'Solo se permiten letras y espacios'
+                    ]" />
+                    <q-input v-model="integrante.apellido" label="Apellido" dense outlined class="q-mb-xs" :rules="[
+                      val => !!val || 'El apellido es obligatorio',
+                      val => val.length >= 2 || 'Debe tener al menos 2 caracteres',
+                      val => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) || 'Solo se permiten letras y espacios'
+                    ]" />
                   </div>
-                  <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarIntegrante(index)"
-                    class="q-ml-sm" />
+                  <div class="col-12 col-md-6 row items-center">
+                    <div class="col">
+                      <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined
+                        class="q-mb-xs" :rules="[
+                          val => !!val || 'La edad es obligatoria',
+                          val => val >= 0 && val <= 120 || 'La edad debe estar entre 0 y 120 años'
+                        ]" />
+                      <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined class="q-mb-xs" :rules="[
+                        val => !!val || 'El DNI es obligatorio',
+                        val => /^\d{7,8}$/.test(val) || 'El DNI debe tener 7 u 8 dígitos'
+                      ]" />
+                    </div>
+                    <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarIntegrante(index)"
+                      class="q-ml-sm" />
+                  </div>
                 </div>
+                <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
               </div>
-              <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
-            </div>
-            <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
-              option-value="value" option-label="label" emit-value map-options outlined dense class="q-mb-md">
-              <!-- Slot para opciones con imágenes -->
-              <template v-slot:option="scope">
-                <q-item clickable v-bind="scope.itemProps">
-                  <q-item-section avatar>
-                    <q-img :src="scope.opt.value" :alt="scope.opt.label" style="width: 32px; height: 32px" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ scope.opt.label }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
 
-              <!-- Slot para mostrar la imagen seleccionada -->
-              <template v-slot:selected-item="scope">
-                <q-chip dense square class="q-ma-none">
-                  <q-img :src="scope.opt.value" style="width: 20px; height: 20px" class="q-mr-sm" />
-                  {{ scope.opt.label }}
-                </q-chip>
-              </template>
-            </q-select>
-          </q-card-section>
+              <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
+                option-value="value" option-label="label" emit-value map-options outlined dense class="q-mb-md"
+                :rules="[val => !!val || 'Debe seleccionar un ícono']">
+                <!-- Slot para opciones con imágenes -->
+                <template v-slot:option="scope">
+                  <q-item clickable v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <q-img :src="scope.opt.value" :alt="scope.opt.label" style="width: 32px; height: 32px" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ scope.opt.label }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+
+                <!-- Slot para mostrar la imagen seleccionada -->
+                <template v-slot:selected-item="scope">
+                  <q-chip dense square class="q-ma-none">
+                    <q-img :src="scope.opt.value" style="width: 20px; height: 20px" class="q-mr-sm" />
+                    {{ scope.opt.label }}
+                  </q-chip>
+                </template>
+              </q-select>
+            </q-card-section>
+          </q-form>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
-          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="guardarMarcador" color="positive" />
+          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="validarYGuardar" color="positive" />
         </q-card-actions>
       </q-card>
     </q-drawer>
@@ -273,10 +311,12 @@ import { Style, Icon } from 'ol/style';
 import { Geometry } from 'ol/geom';
 import Modify from 'ol/interaction/Modify';
 import { jsPDF } from 'jspdf';
+import { useQuasar } from 'quasar';
 
 let modifyInteraction: Modify | null = null;
 let marcadorTemporal: Feature<Point> | null = null;
 
+const $q = useQuasar();
 const gisStore = useGisStore();
 const mapContainer = ref<HTMLElement | null>(null);
 const modalVisible = ref(false);
@@ -284,6 +324,9 @@ const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 const searchTerm = ref('');
+
+// Ref para el formulario
+const formulario = ref();
 
 // Variables para el tooltip
 const tooltipVisible = ref(false);
@@ -472,6 +515,167 @@ onMounted(() => {
     }
   });
 });
+
+// ====== MÉTODOS DE VALIDACIÓN ======
+
+// Método principal para validar y guardar
+async function validarYGuardar() {
+  try {
+    // Validar el formulario principal
+    const esValido = await formulario.value?.validate();
+
+    if (!esValido) {
+      $q.notify({
+        type: 'negative',
+        message: 'Por favor corrige los errores en el formulario',
+        position: 'top'
+      });
+      return;
+    }
+
+    // Validaciones adicionales
+    if (!validarProgramas()) {
+      $q.notify({
+        type: 'negative',
+        message: 'Debe agregar al menos un programa',
+        position: 'top'
+      });
+      return;
+    }
+
+    if (!validarIntegrantes()) {
+      $q.notify({
+        type: 'negative',
+        message: 'Debe agregar al menos un integrante',
+        position: 'top'
+      });
+      return;
+    }
+
+    // Si todo está válido, proceder a guardar
+    await guardarMarcador();
+
+  } catch (error) {
+    console.error('Error en validación:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al validar el formulario',
+      position: 'top'
+    });
+  }
+}
+
+// Validar que haya al menos un programa
+function validarProgramas(): boolean {
+  return nuevoMarcador.value.programas && nuevoMarcador.value.programas.length > 0;
+}
+
+// Validar que haya al menos un integrante
+function validarIntegrantes(): boolean {
+  return nuevoMarcador.value.integrantes && nuevoMarcador.value.integrantes.length > 0;
+}
+
+// ====== MÉTODOS EXISTENTES MODIFICADOS ======
+
+function cerrarModal() {
+  modalVisible.value = false;
+  desactivarEdicionTemporal();
+
+  // Limpiar validaciones del formulario
+  if (formulario.value) {
+    formulario.value.resetValidation();
+  }
+
+  if (marcadorTemporal) {
+    vectorSource.removeFeature(marcadorTemporal);
+    marcadorTemporal = null;
+  }
+}
+
+async function guardarMarcador() {
+  const marcador = { ...nuevoMarcador.value };
+
+  if (!marcador.icono) {
+    marcador.icono = iconosDisponibles[0].value;
+  }
+  if (marcadorTemporal) {
+    desactivarEdicionTemporal();
+    vectorSource.removeFeature(marcadorTemporal);
+    marcadorTemporal = null;
+  }
+
+  try {
+    if (editando.value) {
+      await gisStore.editarMarcador(marcador);
+      recargarMarcadores();
+      $q.notify({
+        type: 'positive',
+        message: 'Marcador actualizado correctamente',
+        position: 'top'
+      });
+    } else {
+      const nuevo = await gisStore.agregarMarcador(marcador);
+      if (nuevo?.id) {
+        agregarMarcadorAlMapa(nuevo);
+        $q.notify({
+          type: 'positive',
+          message: 'Marcador creado correctamente',
+          position: 'top'
+        });
+      }
+    }
+
+    cerrarModal();
+  } catch (error) {
+    console.error('Error al guardar marcador:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al guardar el marcador',
+      position: 'top'
+    });
+  }
+}
+
+function agregarPrograma() {
+  if (!nuevoMarcador.value.programas) {
+    nuevoMarcador.value.programas = [];
+  }
+  nuevoMarcador.value.programas.push({
+    tipo: '',
+    ayuda: '',
+  });
+}
+
+function eliminarPrograma(index: number) {
+  nuevoMarcador.value.programas.splice(index, 1);
+}
+
+function agregarIntegrante() {
+  if (!nuevoMarcador.value.integrantes) {
+    nuevoMarcador.value.integrantes = [];
+  }
+  nuevoMarcador.value.integrantes.push({
+    nombre: '',
+    apellido: '',
+    edad: null,
+    dni: '',
+  });
+}
+
+function eliminarIntegrante(index: number) {
+  nuevoMarcador.value.integrantes.splice(index, 1);
+}
+
+// Función para obtener las opciones de ayuda según el tipo
+function getOpcionesAyuda(tipo: string) {
+  return opcionesAyuda[tipo as keyof typeof opcionesAyuda] || [];
+}
+
+// Función para resetear la ayuda cuando cambia el tipo
+function resetearAyuda(index: number) {
+  nuevoMarcador.value.programas[index].ayuda = '';
+}
+
 
 function activarEdicionTemporal() {
   desactivarEdicionTemporal();
@@ -1086,39 +1290,6 @@ function abrirModal(coords: [number, number]) {
   editando.value = false;
 }
 
-function cerrarModal() {
-  modalVisible.value = false;
-  desactivarEdicionTemporal();
-  if (marcadorTemporal) {
-    vectorSource.removeFeature(marcadorTemporal);
-    marcadorTemporal = null;
-  }
-}
-
-async function guardarMarcador() {
-  const marcador = { ...nuevoMarcador.value };
-
-  if (!marcador.icono) {
-    marcador.icono = iconosDisponibles[0].value;
-  }
-  if (marcadorTemporal) {
-    desactivarEdicionTemporal();
-    vectorSource.removeFeature(marcadorTemporal);
-    marcadorTemporal = null;
-  }
-
-  if (editando.value) {
-    await gisStore.editarMarcador(marcador);
-    recargarMarcadores();
-  } else {
-    const nuevo = await gisStore.agregarMarcador(marcador);
-    if (nuevo?.id) {
-      agregarMarcadorAlMapa(nuevo);
-    }
-  }
-
-  cerrarModal();
-}
 
 function agregarMarcadorAlMapa(marcador: Marcador) {
   const feature = new Feature({
@@ -1177,45 +1348,7 @@ function verInfoMarcador(marcador: Marcador) {
   });
 }
 
-function agregarPrograma() {
-  if (!nuevoMarcador.value.programas) {
-    nuevoMarcador.value.programas = [];
-  }
-  nuevoMarcador.value.programas.push({
-    tipo: '',
-    ayuda: '',
-  });
-}
 
-function eliminarPrograma(index: number) {
-  nuevoMarcador.value.programas.splice(index, 1);
-}
-
-function agregarIntegrante() {
-  if (!nuevoMarcador.value.integrantes) {
-    nuevoMarcador.value.integrantes = [];
-  }
-  nuevoMarcador.value.integrantes.push({
-    nombre: '',
-    apellido: '',
-    edad: null,
-    dni: '',
-  });
-}
-
-function eliminarIntegrante(index: number) {
-  nuevoMarcador.value.integrantes.splice(index, 1);
-}
-
-// Función para obtener las opciones de ayuda según el tipo
-function getOpcionesAyuda(tipo: string) {
-  return opcionesAyuda[tipo as keyof typeof opcionesAyuda] || [];
-}
-
-// Función para resetear la ayuda cuando cambia el tipo
-function resetearAyuda(index: number) {
-  nuevoMarcador.value.programas[index].ayuda = '';
-}
 </script>
 <style scoped>
 .header-gradient {
