@@ -554,6 +554,7 @@ async function validarYGuardar() {
 
     // Si todo está válido, proceder a guardar
     await guardarMarcador();
+    cerrarModal();
 
   } catch (error) {
     console.error('Error en validación:', error);
