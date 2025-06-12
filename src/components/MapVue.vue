@@ -99,7 +99,7 @@
             <q-tooltip>Imprimir</q-tooltip>
           </q-btn>
 
-          <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="yellow-6"
+          <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="orange-8"
             size="md" />
 
           <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
@@ -727,7 +727,7 @@ function imprimir() {
           color: #333;
           line-height: 1.6;
         }
-        
+
         .header {
           background: linear-gradient(135deg, #1976d2, #42a5f5);
           color: white;
@@ -737,7 +737,7 @@ function imprimir() {
           display: flex;
           align-items: center;
         }
-        
+
         .header img {
           width: 48px;
           height: 48px;
@@ -746,19 +746,19 @@ function imprimir() {
           background: white;
           padding: 4px;
         }
-        
+
         .header-content h1 {
           margin: 0;
           font-size: 24px;
           font-weight: 600;
         }
-        
+
         .header-content p {
           margin: 5px 0 0 0;
           opacity: 0.9;
           font-size: 14px;
         }
-        
+
         .info-section {
           background: #f8f9fa;
           padding: 15px;
@@ -766,61 +766,61 @@ function imprimir() {
           margin-bottom: 15px;
           border-left: 4px solid #1976d2;
         }
-        
+
         .info-row {
           display: flex;
           margin-bottom: 10px;
           align-items: center;
         }
-        
+
         .info-row:last-child {
           margin-bottom: 0;
         }
-        
+
         .info-label {
           font-weight: 600;
           min-width: 100px;
           color: #1976d2;
         }
-        
+
         .info-value {
           flex: 1;
         }
-        
+
         .integrantes-list {
           background: white;
           border: 1px solid #e0e0e0;
           border-radius: 6px;
           margin-top: 10px;
         }
-        
+
         .integrante-item {
           padding: 12px;
           border-bottom: 1px solid #f0f0f0;
         }
-        
+
         .integrante-item:last-child {
           border-bottom: none;
         }
-        
+
         .integrante-name {
           font-weight: 600;
           color: #333;
           margin-bottom: 4px;
         }
-        
+
         .integrante-details {
           color: #666;
           font-size: 14px;
         }
-        
+
         .programas-container {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
           margin-top: 10px;
         }
-        
+
         .programa-chip {
           background: #1976d2;
           color: white;
@@ -829,7 +829,7 @@ function imprimir() {
           font-size: 12px;
           font-weight: 500;
         }
-        
+
         .section-title {
           font-size: 18px;
           font-weight: 600;
@@ -838,12 +838,12 @@ function imprimir() {
           border-bottom: 2px solid #e3f2fd;
           padding-bottom: 5px;
         }
-        
+
         .no-data {
           color: #999;
           font-style: italic;
         }
-        
+
         .footer {
           margin-top: 30px;
           padding-top: 20px;
@@ -852,7 +852,7 @@ function imprimir() {
           color: #666;
           font-size: 12px;
         }
-        
+
         @media print {
           body { margin: 0; }
           .header { break-inside: avoid; }
@@ -869,7 +869,7 @@ function imprimir() {
           <p>${marcador.direccion}</p>
         </div>
       </div>
-      
+
       <div class="info-section">
         <div class="info-row">
           <span class="info-label">📞 Teléfono:</span>
@@ -880,7 +880,7 @@ function imprimir() {
           <span class="info-value">${marcador.dni}</span>
         </div>
       </div>
-      
+
       ${marcador.integrantes && marcador.integrantes.length > 0 ? `
         <div class="section-title">👥 Integrantes</div>
         <div class="integrantes-list">
@@ -895,7 +895,7 @@ function imprimir() {
         <div class="section-title">👥 Integrantes</div>
         <div class="no-data">No hay integrantes registrados</div>
       `}
-      
+
       <div class="section-title">📋 Programas</div>
       ${marcador.programas && marcador.programas.length > 0 ? `
         <div class="programas-container">
@@ -906,14 +906,14 @@ function imprimir() {
       ` : `
         <div class="no-data">No hay programas asignados</div>
       `}
-      
+
       ${marcador.notas ? `
         <div class="section-title">📝 Notas</div>
         <div class="info-section">
           ${marcador.notas.replace(/\n/g, '<br>')}
         </div>
       ` : ''}
-      
+
       <div class="footer">
         <p>Impreso el ${new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
