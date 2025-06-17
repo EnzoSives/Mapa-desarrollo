@@ -1,6 +1,16 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
+export interface Programa {
+  id: number;
+  tipo: string;
+  ayuda: string;
+  estado: string;
+  fechaInicio: string;
+  fechaUltimaModificacion: string;
+  fechaFin?: string | null;
+}
+
 export interface Marcador {
   id: number;
   nombreApellido: string;
@@ -13,15 +23,15 @@ export interface Marcador {
   longitud: number;
   icono: string;
   integrantes?: string[];
-  programas?: string[];
+  programas?: Programa[];
 }
 
 export const useGisStore = defineStore('gis', {
   state: () => ({
     marcadores: [] as Marcador[],
     marcadorSeleccionado: null as Marcador | null,
-    coordenadasSeleccionadas: null as [number, number] | null, // <-- Permite null o una tupla de dos números
-    panelActivo: 'mapa' as string, // <-- Añadido para evitar el error
+    marcadorSeleccionadoProgramasCompletos: [] as Programa[] // ⬅️ nueva propiedad
+
   }),
 
   actions: {
@@ -29,7 +39,6 @@ export const useGisStore = defineStore('gis', {
       try {
         const response = await axios.get('http://179.43.127.133:3006/marcador');
         this.marcadores = response.data;
-        this.guardarLocalStorage();
       } catch (error) {
         console.error('Error al cargar marcadores desde la API:', error);
       }
@@ -42,12 +51,8 @@ export const useGisStore = defineStore('gis', {
           marcador
         );
         const nuevoMarcador: Marcador = response.data;
-
         this.marcadores.push(nuevoMarcador);
         this.marcadorSeleccionado = nuevoMarcador;
-        this.guardarLocalStorage();
-
-        return nuevoMarcador; // <-- Esto es clave
       } catch (error) {
         console.error('Error al agregar marcador:', error);
       }
@@ -55,18 +60,15 @@ export const useGisStore = defineStore('gis', {
 
     async editarMarcador(marcadorEditado: Marcador) {
       try {
-        await axios.put(
-          `http://179.43.127.133:3006/marcador/${marcadorEditado.id}`,
-          marcadorEditado
-        );
-        const index = this.marcadores.findIndex(
-          (m) => m.id === marcadorEditado.id
-        );
+        const response = await axios.put(`http://179.43.127.133:3006/marcador/${marcadorEditado.id}`, marcadorEditado);
+        const marcadorActualizado: Marcador = response.data;
+
+        const index = this.marcadores.findIndex(m => m.id === marcadorActualizado.id);
         if (index !== -1) {
-          this.marcadores[index] = marcadorEditado;
-          this.guardarLocalStorage();
-          this.marcadorSeleccionado = null;
+          this.marcadores[index] = marcadorActualizado;
         }
+
+        this.marcadorSeleccionado = null;
       } catch (error) {
         console.error('Error al editar marcador:', error);
       }
@@ -75,8 +77,7 @@ export const useGisStore = defineStore('gis', {
     async eliminarMarcador(id: number) {
       try {
         await axios.delete(`http://179.43.127.133:3006/marcador/${id}`);
-        this.marcadores = this.marcadores.filter((m) => m.id !== id);
-        this.guardarLocalStorage();
+        this.marcadores = this.marcadores.filter(m => m.id !== id);
         if (this.marcadorSeleccionado?.id === id) {
           this.marcadorSeleccionado = null;
         }
@@ -85,24 +86,33 @@ export const useGisStore = defineStore('gis', {
       }
     },
 
-    seleccionarMarcador(id: number) {
-      this.marcadorSeleccionado =
-        this.marcadores.find((m) => m.id === id) || null;
+    async seleccionarMarcador(id: number) {
+      try {
+        const response = await axios.get(`http://179.43.127.133:3006/marcador/${id}`);
+        const marcadorCompleto: Marcador = response.data;
+
+        if (marcadorCompleto.programas) {
+          this.marcadorSeleccionadoProgramasCompletos = marcadorCompleto.programas; // guarda todos
+
+          marcadorCompleto.programas = marcadorCompleto.programas.filter(
+            (p: Programa) => p.estado === 'activo'
+          );
+
+          marcadorCompleto.programas.sort(
+            (a: Programa, b: Programa) =>
+              new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime()
+          );
+        }
+
+        this.marcadorSeleccionado = marcadorCompleto;
+      } catch (error) {
+        console.error('Error al obtener el marcador completo:', error);
+      }
     },
+
 
     cerrarInfo() {
       this.marcadorSeleccionado = null;
-    },
-
-    guardarLocalStorage() {
-      localStorage.setItem('marcadores', JSON.stringify(this.marcadores));
-    },
-
-    cargarDesdeLocalStorage() {
-      const data = localStorage.getItem('marcadores');
-      if (data) {
-        this.marcadores = JSON.parse(data);
-      }
-    },
-  },
+    }
+  }
 });

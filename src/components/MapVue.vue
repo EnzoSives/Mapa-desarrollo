@@ -13,102 +13,160 @@
     <!-- Panel Info del marcador (izquierda arriba) -->
     <div id="area-imprimir">
       <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel q-mx-auto"
-        style="min-width: 350px; max-width: 500px; border-radius: 12px;">
-        <q-card-section class="row items-center q-pb-none justify-end"
-          style="position: absolute; top: 0; right: 0; z-index: 2;">
-          <q-btn icon="close" round @click="gisStore.cerrarInfo" />
-        </q-card-section>
+        style="min-width: 350px; max-width: 500px; border-radius: 12px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;">
 
 
-        <!-- Encabezado simple -->
-        <q-card-section class="q-pa-md">
-          <div class="row items-center no-wrap">
-            <q-avatar v-if="gisStore.marcadorSeleccionado.icono" size="44px" class="q-mr-md">
-              <img :src="gisStore.marcadorSeleccionado.icono" alt="Ícono" />
-            </q-avatar>
-            <div class="col">
-              <div class="text-h6 text-weight-medium">
-                {{ gisStore.marcadorSeleccionado.nombreApellido }}
-              </div>
-              <div class="text-caption text-grey">
-                {{ gisStore.marcadorSeleccionado.direccion }}
-              </div>
-            </div>
-          </div>
 
-        </q-card-section>
+        <!-- Contenido con scroll -->
+        <div style="flex: 1; overflow-y: auto;">
+          <!-- Encabezado simple -->
+          <q-card-section class="q-pa-md relative-position">
+            <!-- Botón cerrar en esquina superior derecha -->
+            <q-btn icon="close" flat round dense class="absolute-top-right q-ma-sm" style="z-index: 2;"
+              @click="gisStore.cerrarInfo" />
 
-        <q-separator />
-
-        <!-- Información compacta -->
-        <q-card-section class="q-pa-md">
-
-          <!-- Contacto en una línea -->
-          <div class="row q-col-gutter-md q-mb-md">
-            <div class="col-6">
-              <div class="text-caption text-grey">Teléfono</div>
-              <div class="text-body2">{{ gisStore.marcadorSeleccionado.telefono || 'N/A' }}</div>
-            </div>
-            <div class="col-6">
-              <div class="text-caption text-grey">DNI</div>
-              <div class="text-body2">{{ gisStore.marcadorSeleccionado.dni }}</div>
-            </div>
-          </div>
-
-          <!-- Integrantes compactos -->
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Integrantes</div>
-            <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
-              <div v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index"
-                class="row items-center q-py-xs">
-                <q-avatar size="28px" class="q-mr-sm" color="grey-5" text-color="white">
-                  {{ integrante.nombre.charAt(0) }}
-                </q-avatar>
-                <div class="col">
-                  <div class="text-body2">{{ integrante.nombre }} {{ integrante.apellido }}</div>
-                  <div class="text-caption text-grey">{{ integrante.edad }} años • {{ integrante.dni }}</div>
+            <div class="row items-center no-wrap">
+              <q-avatar v-if="gisStore.marcadorSeleccionado.icono" size="44px" class="q-mr-md">
+                <img :src="gisStore.marcadorSeleccionado.icono" alt="Ícono" />
+              </q-avatar>
+              <div class="col">
+                <div class="text-h6 text-weight-medium">
+                  {{ gisStore.marcadorSeleccionado.nombreApellido }}
+                </div>
+                <div class="text-caption text-grey">
+                  {{ gisStore.marcadorSeleccionado.direccion }}
                 </div>
               </div>
             </div>
-            <div v-else class="text-caption text-grey">Sin integrantes</div>
-          </div>
+          </q-card-section>
 
-          <!-- Programas simples -->
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Programas</div>
-            <div v-if="gisStore.marcadorSeleccionado.programas?.length">
-              <div v-for="(programa, index) in gisStore.marcadorSeleccionado.programas" :key="index"
-                class="text-body2 q-mb-xs">
-                • {{ programa.tipo }}: {{ programa.ayuda }}
+          <q-separator />
+
+          <!-- Información compacta -->
+          <q-card-section class="q-pa-md">
+
+            <!-- Contacto en una línea -->
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-6">
+                <div class="text-caption text-grey">Teléfono</div>
+                <div class="text-body2">{{ gisStore.marcadorSeleccionado.telefono || 'N/A' }}</div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption text-grey">DNI</div>
+                <div class="text-body2">{{ gisStore.marcadorSeleccionado.dni }}</div>
               </div>
             </div>
-            <div v-else class="text-caption text-grey">Ninguno</div>
-          </div>
 
-          <!-- Notas simples -->
-          <div v-if="gisStore.marcadorSeleccionado.notas">
-            <div class="text-subtitle2 q-mb-sm">Notas</div>
-            <div class="text-body2">{{ gisStore.marcadorSeleccionado.notas }}</div>
+            <!-- Integrantes compactos -->
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm">Integrantes</div>
+              <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
+                <div v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index"
+                  class="row items-center q-py-xs">
+                  <q-avatar size="28px" class="q-mr-sm" color="grey-5" text-color="white">
+                    {{ integrante.nombre.charAt(0) }}
+                  </q-avatar>
+                  <div class="col">
+                    <div class="text-body2">{{ integrante.nombre }} {{ integrante.apellido }}</div>
+                    <div class="text-caption text-grey">{{ integrante.edad }} años • {{ integrante.dni }}</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-caption text-grey">Sin integrantes</div>
+            </div>
+
+            <!-- Programas activos + botón historial -->
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm">
+                Programas Activos
+                <q-chip v-if="programasActivos.length" :label="programasActivos.length" color="primary"
+                  text-color="white" size="sm" class="q-ml-sm" />
+              </div>
+
+              <div v-if="programasActivos.length">
+                <div v-for="(programa, index) in programasActivos" :key="index" class="text-body2 q-mb-xs">
+                  • {{ programa.tipo }}: {{ programa.ayuda }}
+                  <q-badge v-if="programa.fechaInicio" color="green" class="q-ml-sm" text-color="white">
+                    {{ new Date(programa.fechaInicio).toLocaleDateString() }}
+                  </q-badge>
+                </div>
+              </div>
+              <div v-else class="text-caption text-grey">Ninguno</div>
+
+              <div class="q-mt-sm">
+                <q-btn label="Historial de Programas" color="primary" flat @click="mostrarModalHistorial = true"
+                  :badge="programasInactivos.length || undefined" />
+              </div>
+            </div>
+
+            <!-- Notas simples -->
+            <div v-if="gisStore.marcadorSeleccionado.notas">
+              <div class="text-subtitle2 q-mb-sm">Notas</div>
+              <div class="text-body2">{{ gisStore.marcadorSeleccionado.notas }}</div>
+            </div>
+          </q-card-section>
+        </div>
+
+        <!-- Acciones fijas en la parte inferior -->
+        <div style="flex-shrink: 0;">
+          <q-separator />
+          <q-card-actions class="q-pa-sm justify-end">
+            <q-btn flat round icon="print" @click="generarPDF" size="md">
+              <q-tooltip>Imprimir</q-tooltip>
+            </q-btn>
+
+            <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="orange-8"
+              size="md" />
+
+            <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
+              size="md" />
+
+            <!-- <q-btns label="Cerrar" @click="gisStore.cerrarInfo" color="primary" size="md" /> -->
+          </q-card-actions>
+        </div>
+      </q-card>
+    </div>
+
+    <q-dialog v-model="mostrarModalHistorial">
+      <q-card style="min-width: 350px; max-width: 550px;">
+        <q-card-section>
+          <div class="text-h6">
+            Historial de Programas
+            <q-chip v-if="programasInactivos.length" :label="programasInactivos.length" color="grey" text-color="white"
+              size="sm" class="q-ml-sm" />
           </div>
         </q-card-section>
 
-        <!-- Acciones minimalistas -->
         <q-separator />
-        <q-card-actions class="q-pa-sm justify-end">
-          <q-btn flat round icon="print" @click="generarPDF" size="md">
-            <q-tooltip>Imprimir</q-tooltip>
-          </q-btn>
 
-          <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="orange-8"
-            size="md" />
+        <q-card-section>
+          <div v-if="programasInactivos.length">
+            <div v-for="(programa, index) in programasInactivos" :key="index" class="q-mb-sm">
+              <div class="row items-center q-gutter-sm">
+                <q-badge :color="colorPorEstado(programa.estado)" class="q-mr-sm">
+                  {{ programa.estado.toUpperCase() }}
+                </q-badge>
+                <div class="col text-body2">
+                  <div>• {{ programa.tipo }}: {{ programa.ayuda }}</div>
+                  <div class="text-caption text-grey">
+                    Inicio: {{ programa.fechaInicio ? new Date(programa.fechaInicio).toLocaleDateString() : 'N/A' }}<br>
+                    Fin: {{ programa.fechaFin ? new Date(programa.fechaFin).toLocaleDateString() : 'N/A' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-caption text-grey">No hay programas inactivos.</div>
+        </q-card-section>
 
-          <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
-            size="md" />
+        <q-separator />
 
-          <!-- <q-btns label="Cerrar" @click="gisStore.cerrarInfo" color="primary" size="md" /> -->
+        <q-card-actions align="right">
+          <q-btn flat label="Cerrar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
-    </div>
+    </q-dialog>
+
 
     <!-- Panel de Referencias (derecha arriba) -->
     <q-card v-if="mostrarReferencias" class="referencias-panel">
@@ -158,7 +216,7 @@
     </q-btn>
 
     <!-- Modal -->
-    <q-drawer v-model="modalVisible" side="right" :width="450" overlay bordered behavior="desktop"
+    <q-drawer v-model="modalVisible" side="right" :width="750" overlay bordered behavior="desktop"
       v-if="!permisos.soloLectura">
       <q-card class="q-pa-md q-gutter-md">
         <div class="text-h6 q-mb-md text-center">
@@ -207,10 +265,14 @@
 
                   <!-- Selector de Ayuda (dependiente del tipo) -->
                   <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
-                    outlined class="col" :disable="!programa.tipo"
-                    :rules="[val => !!val || 'Debe seleccionar una ayuda']" />
+                    outlined class="col" :disable="!programa.tipo || programa.tipo === 'SUBSIDIOS'"
+                    :rules="[val => programa.tipo === 'SUBSIDIOS' || !!val || 'Debe seleccionar una ayuda']" />
 
-                  <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarPrograma(index)" />
+                  <q-btn icon="remove_circle" color="negative" flat dense @click="eliminarPrograma(index)">
+                    <q-tooltip anchor="top middle" self="bottom middle" :offset="[0, 10]">
+                      Finalizar programa
+                    </q-tooltip>
+                  </q-btn>
                 </div>
                 <q-btn icon="add_circle" label="Agregar programa" color="primary" flat @click="agregarPrograma" />
 
@@ -287,8 +349,9 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" />
-          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="validarYGuardar" color="positive" />
+          <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" :disable="guardando" />
+          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="validarYGuardar" color="positive"
+            :loading="guardando" :disable="guardando" />
         </q-card-actions>
       </q-card>
     </q-drawer>
@@ -302,7 +365,7 @@ import 'ol/ol.css';
 import { Map, View } from 'ol';
 import { Tile as TileLayer } from 'ol/layer';
 import { OSM } from 'ol/source';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -324,6 +387,7 @@ const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 const searchTerm = ref('');
+const guardando = ref(false); // ✅ NUEVO: Variable para el loading
 
 // Ref para el formulario
 const formulario = ref();
@@ -334,6 +398,26 @@ const tooltipContent = ref('');
 const tooltipPosition = ref({ x: 0, y: 0 });
 
 const rol = ref(localStorage.getItem('rol') || 'Visor');
+
+const mostrarModalHistorial = ref(false)
+
+const programasActivos = computed(() =>
+  gisStore.marcadorSeleccionado?.programas?.filter(p => p.estado === 'activo') || []
+)
+const programasInactivos = computed(() =>
+  gisStore.marcadorSeleccionadoProgramasCompletos?.filter(p => p.estado !== 'activo') || []
+);
+
+function colorPorEstado(estado: any) {
+  switch (estado) {
+    case 'finalizado':
+      return 'red';
+    case 'cancelado':
+      return 'grey';
+    default:
+      return 'primary';
+  }
+}
 
 const permisos = computed(() => {
   return {
@@ -378,7 +462,7 @@ const iconosDisponibles = [
 const tiposPrograma = [
   'PROGRAMAS ALIMENTARIOS',
   'CONTRAPRESTACIÓN',
-  'SUBSIDIOS'
+  'SUBSIDIOS' // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
 ];
 
 const opcionesAyuda = {
@@ -394,7 +478,7 @@ const opcionesAyuda = {
     'Luz',
     'Banco Materiales'
   ],
-  'SUBSIDIOS': []
+  'SUBSIDIOS': [] // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
 };
 
 let map: Map;
@@ -418,12 +502,22 @@ onMounted(() => {
   gisStore.cargarMarcadoresDesdeAPI();
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
+  // Definir los límites del área permitida
+  const extent = transformExtent(
+    [-57.1939, -37.0417, -57.0739, -36.9617], // [minLon, minLat, maxLon, maxLat]
+    'EPSG:4326',
+    'EPSG:3857'
+  );
   map = new Map({
     target: mapContainer.value as HTMLElement,
     layers: [new TileLayer({ source: new OSM() }), vectorLayer],
     view: new View({
       center: fromLonLat([-57.1339, -37.0017]),
       zoom: 15,
+      minZoom: 14,        // Zoom mínimo permitido
+      maxZoom: 18,        // Zoom máximo permitido
+      extent: extent,     // Límites del área visible
+      constrainOnlyCenter: false  // Restringe toda la vista, no solo el centro
     }),
     controls: [],
   });
@@ -518,8 +612,9 @@ onMounted(() => {
 
 // ====== MÉTODOS DE VALIDACIÓN ======
 
-// Método principal para validar y guardar
+// ✅ MÉTODO ACTUALIZADO: Validar y guardar con loading
 async function validarYGuardar() {
+  guardando.value = true; // ✅ NUEVO: Activar loading
   try {
     // Validar el formulario principal
     const esValido = await formulario.value?.validate();
@@ -554,7 +649,6 @@ async function validarYGuardar() {
 
     // Si todo está válido, proceder a guardar
     await guardarMarcador();
-    cerrarModal();
 
   } catch (error) {
     console.error('Error en validación:', error);
@@ -563,6 +657,8 @@ async function validarYGuardar() {
       message: 'Error al validar el formulario',
       position: 'top'
     });
+  } finally {
+    guardando.value = false; // ✅ NUEVO: Desactivar loading
   }
 }
 
@@ -599,6 +695,7 @@ async function guardarMarcador() {
   if (!marcador.icono) {
     marcador.icono = iconosDisponibles[0].value;
   }
+
   if (marcadorTemporal) {
     desactivarEdicionTemporal();
     vectorSource.removeFeature(marcadorTemporal);
@@ -608,21 +705,34 @@ async function guardarMarcador() {
   try {
     if (editando.value) {
       await gisStore.editarMarcador(marcador);
-      recargarMarcadores();
+      // Para edición, recargamos todos los marcadores
+      await gisStore.cargarMarcadoresDesdeAPI();
       $q.notify({
         type: 'positive',
         message: 'Marcador actualizado correctamente',
         position: 'top'
       });
     } else {
-      const nuevo = await gisStore.agregarMarcador(marcador);
-      if (nuevo?.id) {
-        agregarMarcadorAlMapa(nuevo);
+      // Para creación, esperamos la respuesta del servidor
+      const nuevoMarcadorCreado = await gisStore.agregarMarcador(marcador);
+
+      if (nuevoMarcadorCreado?.id) {
+        // Agregamos el marcador al mapa inmediatamente
+        agregarMarcadorAlMapa(nuevoMarcadorCreado);
+
+        // También actualizamos la lista local del store si es necesario
+        // (esto depende de cómo esté implementado tu store)
+        if (!gisStore.marcadores.find(m => m.id === nuevoMarcadorCreado.id)) {
+          gisStore.marcadores.push(nuevoMarcadorCreado);
+        }
+
         $q.notify({
           type: 'positive',
           message: 'Marcador creado correctamente',
           position: 'top'
         });
+      } else {
+        throw new Error('No se recibió el marcador creado del servidor');
       }
     }
 
@@ -672,11 +782,15 @@ function getOpcionesAyuda(tipo: string) {
   return opcionesAyuda[tipo as keyof typeof opcionesAyuda] || [];
 }
 
-// Función para resetear la ayuda cuando cambia el tipo
+// ✅ FUNCIÓN ACTUALIZADA: Resetear ayuda cuando cambia el tipo
 function resetearAyuda(index: number) {
-  nuevoMarcador.value.programas[index].ayuda = '';
+  // Si cambias a SUBSIDIOS, limpia la ayuda
+  if (nuevoMarcador.value.programas[index].tipo === 'SUBSIDIOS') {
+    nuevoMarcador.value.programas[index].ayuda = '';
+  } else {
+    nuevoMarcador.value.programas[index].ayuda = '';
+  }
 }
-
 
 function activarEdicionTemporal() {
   desactivarEdicionTemporal();
@@ -705,249 +819,6 @@ function desactivarEdicionTemporal() {
   if (modifyInteraction) {
     map.removeInteraction(modifyInteraction);
     modifyInteraction = null;
-  }
-}
-
-function imprimir() {
-  if (!gisStore.marcadorSeleccionado) return;
-
-  const marcador = gisStore.marcadorSeleccionado;
-
-  // Crear el HTML para imprimir con estilos
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Información del Marcador - ${marcador.nombreApellido}</title>
-      <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          margin: 20px;
-          color: #333;
-          line-height: 1.6;
-        }
-
-        .header {
-          background: linear-gradient(135deg, #1976d2, #42a5f5);
-          color: white;
-          padding: 20px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-        }
-
-        .header img {
-          width: 48px;
-          height: 48px;
-          margin-right: 15px;
-          border-radius: 50%;
-          background: white;
-          padding: 4px;
-        }
-
-        .header-content h1 {
-          margin: 0;
-          font-size: 24px;
-          font-weight: 600;
-        }
-
-        .header-content p {
-          margin: 5px 0 0 0;
-          opacity: 0.9;
-          font-size: 14px;
-        }
-
-        .info-section {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 15px;
-          border-left: 4px solid #1976d2;
-        }
-
-        .info-row {
-          display: flex;
-          margin-bottom: 10px;
-          align-items: center;
-        }
-
-        .info-row:last-child {
-          margin-bottom: 0;
-        }
-
-        .info-label {
-          font-weight: 600;
-          min-width: 100px;
-          color: #1976d2;
-        }
-
-        .info-value {
-          flex: 1;
-        }
-
-        .integrantes-list {
-          background: white;
-          border: 1px solid #e0e0e0;
-          border-radius: 6px;
-          margin-top: 10px;
-        }
-
-        .integrante-item {
-          padding: 12px;
-          border-bottom: 1px solid #f0f0f0;
-        }
-
-        .integrante-item:last-child {
-          border-bottom: none;
-        }
-
-        .integrante-name {
-          font-weight: 600;
-          color: #333;
-          margin-bottom: 4px;
-        }
-
-        .integrante-details {
-          color: #666;
-          font-size: 14px;
-        }
-
-        .programas-container {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 10px;
-        }
-
-        .programa-chip {
-          background: #1976d2;
-          color: white;
-          padding: 6px 12px;
-          border-radius: 16px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .section-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1976d2;
-          margin: 20px 0 10px 0;
-          border-bottom: 2px solid #e3f2fd;
-          padding-bottom: 5px;
-        }
-
-        .no-data {
-          color: #999;
-          font-style: italic;
-        }
-
-        .footer {
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e0e0e0;
-          text-align: center;
-          color: #666;
-          font-size: 12px;
-        }
-
-        @media print {
-          body { margin: 0; }
-          .header { break-inside: avoid; }
-          .info-section { break-inside: avoid; }
-          .integrantes-list { break-inside: avoid; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        ${marcador.icono ? `<img src="${marcador.icono}" alt="Ícono" onerror="this.style.display='none'">` : ''}
-        <div class="header-content">
-          <h1>${marcador.nombreApellido}</h1>
-          <p>${marcador.direccion}</p>
-        </div>
-      </div>
-
-      <div class="info-section">
-        <div class="info-row">
-          <span class="info-label">📞 Teléfono:</span>
-          <span class="info-value">${marcador.telefono || 'N/A'}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">🆔 DNI:</span>
-          <span class="info-value">${marcador.dni}</span>
-        </div>
-      </div>
-
-      ${marcador.integrantes && marcador.integrantes.length > 0 ? `
-        <div class="section-title">👥 Integrantes</div>
-        <div class="integrantes-list">
-          ${marcador.integrantes.map(integrante => `
-            <div class="integrante-item">
-              <div class="integrante-name">${integrante.nombre} ${integrante.apellido}</div>
-              <div class="integrante-details">Edad: ${integrante.edad} | DNI: ${integrante.dni}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : `
-        <div class="section-title">👥 Integrantes</div>
-        <div class="no-data">No hay integrantes registrados</div>
-      `}
-
-      <div class="section-title">📋 Programas</div>
-      ${marcador.programas && marcador.programas.length > 0 ? `
-        <div class="programas-container">
-          ${marcador.programas.map(programa => `
-            <span class="programa-chip">${programa.tipo}: ${programa.ayuda}</span>
-          `).join('')}
-        </div>
-      ` : `
-        <div class="no-data">No hay programas asignados</div>
-      `}
-
-      ${marcador.notas ? `
-        <div class="section-title">📝 Notas</div>
-        <div class="info-section">
-          ${marcador.notas.replace(/\n/g, '<br>')}
-        </div>
-      ` : ''}
-
-      <div class="footer">
-        <p>Impreso el ${new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })}</p>
-      </div>
-    </body>
-    </html>
-  `;
-
-  // Crear ventana de impresión
-  const ventanaImpresion = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
-
-  if (ventanaImpresion) {
-    ventanaImpresion.document.write(htmlContent);
-    ventanaImpresion.document.close();
-
-    // Esperar a que se cargue el contenido antes de imprimir
-    ventanaImpresion.onload = function () {
-      ventanaImpresion.focus();
-      ventanaImpresion.print();
-
-      // Opcional: cerrar la ventana después de imprimir
-      ventanaImpresion.onafterprint = function () {
-        ventanaImpresion.close();
-      };
-    };
-  } else {
-    // Fallback si no se puede abrir la ventana
-    alert('No se pudo abrir la ventana de impresión. Verifique que no esté bloqueada por el navegador.');
   }
 }
 
@@ -1185,68 +1056,6 @@ async function generarPDF() {
   }
 }
 
-// Función alternativa para generar PDF más simple (si la anterior falla)
-async function generarPDFSimple() {
-  if (!gisStore.marcadorSeleccionado) {
-    alert('No hay ningún marcador seleccionado');
-    return;
-  }
-
-  try {
-    const marcador = gisStore.marcadorSeleccionado;
-    const doc = new jsPDF();
-
-    let yPos = 20;
-
-    // Título
-    doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
-    doc.text('INFORMACIÓN DEL MARCADOR', 20, yPos);
-    yPos += 20;
-
-    // Información básica
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-
-    const info = [
-      `Nombre: ${marcador.nombreApellido}`,
-      `Dirección: ${marcador.direccion}`,
-      `Teléfono: ${marcador.telefono || 'N/A'}`,
-      `DNI: ${marcador.dni}`,
-      '',
-      'INTEGRANTES:',
-      ...(marcador.integrantes?.map(int =>
-        `• ${int.nombre} ${int.apellido} - Edad: ${int.edad} - DNI: ${int.dni}`
-      ) || ['No hay integrantes']),
-      '',
-      'PROGRAMAS:',
-      ...(marcador.programas?.map(prog =>
-        `• ${prog.tipo}: ${prog.ayuda}`
-      ) || ['No hay programas']),
-      '',
-      'NOTAS:',
-      marcador.notas || 'Sin notas'
-    ];
-
-    info.forEach(line => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.text(line, 20, yPos);
-      yPos += 7;
-    });
-
-    // Guardar
-    const fileName = `marcador_${marcador.nombreApellido.replace(/\s+/g, '_')}.pdf`;
-    doc.save(fileName);
-
-  } catch (error) {
-    console.error('Error al generar PDF simple:', error);
-    alert('Error al generar el PDF');
-  }
-}
-
 function abrirModal(coords: [number, number]) {
   const [lon, lat] = coords;
 
@@ -1291,7 +1100,6 @@ function abrirModal(coords: [number, number]) {
   editando.value = false;
 }
 
-
 function agregarMarcadorAlMapa(marcador: Marcador) {
   const feature = new Feature({
     geometry: new Point(fromLonLat([marcador.longitud, marcador.latitud])),
@@ -1318,7 +1126,10 @@ function recargarMarcadores() {
 
 function editarMarcadorSeleccionado() {
   if (!gisStore.marcadorSeleccionado) return;
-  nuevoMarcador.value = { ...gisStore.marcadorSeleccionado };
+
+  // Hacemos una copia profunda para mantener todos los campos
+  nuevoMarcador.value = JSON.parse(JSON.stringify(gisStore.marcadorSeleccionado));
+
   editando.value = true;
   modalVisible.value = true;
 }
@@ -1326,16 +1137,40 @@ function editarMarcadorSeleccionado() {
 function eliminarMarcadorSeleccionado() {
   if (!gisStore.marcadorSeleccionado) return;
 
-  const id = gisStore.marcadorSeleccionado.id;
-  gisStore.eliminarMarcador(id);
-
-  vectorSource.getFeatures().forEach((feature) => {
-    if (feature.get('id') === id) {
-      vectorSource.removeFeature(feature);
+  // Usar el diálogo de confirmación de Quasar
+  $q.dialog({
+    title: 'Confirmar eliminación',
+    message: '¿Está seguro que desea eliminar este marcador?',
+    cancel: true,
+    persistent: true,
+    ok: {
+      color: 'negative',
+      label: 'Eliminar'
+    },
+    cancel: {
+      color: 'primary',
+      label: 'Cancelar'
     }
-  });
+  }).onOk(() => {
+    // Si confirma, procedemos con la eliminación
+    const id = gisStore.marcadorSeleccionado.id;
+    gisStore.eliminarMarcador(id);
 
-  gisStore.cerrarInfo();
+    vectorSource.getFeatures().forEach((feature) => {
+      if (feature.get('id') === id) {
+        vectorSource.removeFeature(feature);
+      }
+    });
+
+    gisStore.cerrarInfo();
+
+    // Mostrar notificación de éxito
+    $q.notify({
+      type: 'positive',
+      message: 'Marcador eliminado correctamente',
+      position: 'top'
+    });
+  });
 }
 
 function verInfoMarcador(marcador: Marcador) {
@@ -1348,7 +1183,6 @@ function verInfoMarcador(marcador: Marcador) {
     zoom: 17,
   });
 }
-
 
 </script>
 <style scoped>
