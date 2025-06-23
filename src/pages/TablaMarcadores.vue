@@ -55,89 +55,237 @@
     <!-- Modal de información - COMPLETAMENTE REACTIVO -->
     <q-dialog v-model="mostrarModal" persistent>
       <q-card v-if="marcadorActualEnTiempoReal" class="info-panel q-mx-auto"
-        style="min-width: 350px; max-width: 500px; border-radius: 12px;">
-        <q-card-section class="row items-center q-pb-none justify-end"
-          style="position: absolute; top: 0; right: 0; z-index: 2;">
-          <q-btn icon="close" flat round @click="cerrarModal" />
-        </q-card-section>
+        style="min-width: 500px; max-width: 500px; border-radius: 12px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;">
 
-        <q-card-section class="q-pa-md">
-          <div class="row items-center no-wrap">
-            <q-avatar v-if="marcadorActualEnTiempoReal.icono" size="44px" class="q-mr-md">
-              <img :src="marcadorActualEnTiempoReal.icono" alt="Ícono" />
-            </q-avatar>
-            <div class="col">
-              <div class="text-h6 text-weight-medium">
-                {{ marcadorActualEnTiempoReal.nombreApellido }}
-              </div>
-              <div class="text-caption text-grey">
-                {{ marcadorActualEnTiempoReal.direccion }}
-              </div>
-            </div>
-          </div>
-        </q-card-section>
+        <!-- Contenido con scroll -->
+        <div style="flex: 1; overflow-y: auto; scrollbar-width: none; scrollbar-color: #888 #f0f0f0;">
+          <!-- Encabezado con botón cerrar -->
+          <q-card-section class="q-pa-md relative-position">
+            <q-btn icon="close" flat round dense class="absolute-top-right q-ma-sm" style="z-index: 2;"
+              @click="cerrarModal" />
 
-        <q-separator />
-
-        <q-card-section class="q-pa-md">
-          <div class="row q-col-gutter-md q-mb-md">
-            <div class="col-6">
-              <div class="text-caption text-grey">Teléfono</div>
-              <div class="text-body2">{{ marcadorActualEnTiempoReal.telefono || 'N/A' }}</div>
-            </div>
-            <div class="col-6">
-              <div class="text-caption text-grey">DNI</div>
-              <div class="text-body2">{{ marcadorActualEnTiempoReal.dni }}</div>
-            </div>
-          </div>
-
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">Integrantes</div>
-            <div v-if="marcadorActualEnTiempoReal.integrantes?.length">
-              <div v-for="(integrante, index) in marcadorActualEnTiempoReal.integrantes" :key="index"
-                class="row items-center q-py-xs">
-                <q-avatar size="28px" class="q-mr-sm" color="grey-5" text-color="white">
-                  {{ integrante.nombre.charAt(0) }}
-                </q-avatar>
-                <div class="col">
-                  <div class="text-body2">{{ integrante.nombre }} {{ integrante.apellido }}</div>
-                  <div class="text-caption text-grey">{{ integrante.edad }} años • {{ integrante.dni }}</div>
+            <div class="row items-center no-wrap">
+              <q-avatar v-if="marcadorActualEnTiempoReal.icono" size="44px" class="q-mr-md">
+                <img :src="marcadorActualEnTiempoReal.icono" alt="Ícono" />
+              </q-avatar>
+              <div class="col">
+                <div class="text-h6 text-weight-medium">
+                  {{ marcadorActualEnTiempoReal.nombreApellido }}
+                </div>
+                <div class="text-caption text-grey">
+                  {{ marcadorActualEnTiempoReal.direccion }}
+                </div>
+                <div class="text-caption text-grey">
+                  Creado: {{ new Date(marcadorActualEnTiempoReal.fechaCreacion).toLocaleDateString() }}
                 </div>
               </div>
             </div>
-            <div v-else class="text-caption text-grey">Sin integrantes</div>
-          </div>
+          </q-card-section>
 
-          <!-- Programas activos - DIRECTAMENTE DEL STORE CON KEY PARA FORZAR REACTIVIDAD -->
-          <div class="q-mb-md" :key="`programas-${dniMarcadorSeleccionado}-${lastUpdateTimestamp}`">
-            <div class="text-subtitle2 q-mb-sm">
-              Programas Activos
-              <q-chip v-if="programasActivosDirectos.length" :label="programasActivosDirectos.length" color="primary"
-                text-color="white" size="sm" class="q-ml-sm" />
-            </div>
-            <div v-if="programasActivosDirectos.length">
-              <div v-for="(programa, index) in programasActivosDirectos"
-                :key="`activo-${programa.tipo}-${programa.ayuda}-${index}-${lastUpdateTimestamp}`"
-                class="text-body2 q-mb-xs">
-                • {{ programa.tipo }}: {{ programa.ayuda }}
-                <q-badge v-if="programa.fechaInicio" color="green" class="q-ml-sm" text-color="white">
-                  {{ new Date(programa.fechaInicio).toLocaleDateString() }}
-                </q-badge>
+          <q-separator />
+
+          <!-- Información compacta -->
+          <q-card-section class="q-pa-md">
+
+            <!-- Contacto en una línea -->
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-6">
+                <div class="text-caption text-grey">Teléfono</div>
+                <div class="text-body2">{{ marcadorActualEnTiempoReal.telefono || 'N/A' }}</div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption text-grey">DNI</div>
+                <div class="text-body2">{{ marcadorActualEnTiempoReal.dni }}</div>
               </div>
             </div>
-            <div v-else class="text-caption text-grey">Ninguno</div>
-          </div>
 
-          <div class="q-mb-md">
-            <q-btn label="Historial de Programas" color="primary" flat @click="abrirHistorialProgramas"
-              :badge="programasInactivosDirectos.length || undefined" />
-          </div>
+            <!-- Integrantes compactos -->
+            <div class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="people" class="q-mr-xs" />
+                Integrantes
+                <q-chip v-if="marcadorActualEnTiempoReal.integrantes?.length"
+                  :label="marcadorActualEnTiempoReal.integrantes.length" color="blue" text-color="white" size="sm"
+                  class="q-ml-sm" />
+              </div>
+              <div v-if="marcadorActualEnTiempoReal.integrantes?.length">
+                <div v-for="(integrante, index) in marcadorActualEnTiempoReal.integrantes" :key="index"
+                  class="row items-center q-py-xs q-mb-xs bg-grey-1 rounded-borders q-pa-sm">
+                  <q-avatar size="28px" class="q-mr-sm" color="blue-5" text-color="white">
+                    {{ integrante.nombre.charAt(0) }}
+                  </q-avatar>
+                  <div class="col">
+                    <div class="text-body2 text-weight-medium">{{ integrante.nombre }} {{ integrante.apellido }}</div>
+                    <div class="text-caption text-grey">
+                      {{ integrante.edad }} años • {{ integrante.vinculo }} • DNI: {{ integrante.dni }}
+                    </div>
+                    <!-- Salud del integrante -->
+                    <div v-if="integrante.salud?.length" class="q-mt-xs">
+                      <div v-for="(saludItem, sIndex) in integrante.salud" :key="sIndex" class="text-caption">
+                        <q-badge v-if="saludItem.cud" color="purple" text-color="white" class="q-mr-xs">CUD</q-badge>
+                        <q-badge v-if="saludItem.obra_social" color="green" text-color="white" class="q-mr-xs">Obra
+                          Social</q-badge>
+                        <span v-if="saludItem.problema_salud" class="text-red">{{ saludItem.problema_salud }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-caption text-grey">Sin integrantes</div>
+            </div>
 
-          <div v-if="marcadorActualEnTiempoReal.notas">
-            <div class="text-subtitle2 q-mb-sm">Notas</div>
-            <div class="text-body2">{{ marcadorActualEnTiempoReal.notas }}</div>
-          </div>
-        </q-card-section>
+            <!-- Programas activos + botón historial -->
+            <div class="q-mb-md" :key="`programas-${dniMarcadorSeleccionado}-${lastUpdateTimestamp}`">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="assignment" class="q-mr-xs" />
+                Programas Activos
+                <q-chip v-if="programasActivosDirectos.length" :label="programasActivosDirectos.length" color="primary"
+                  text-color="white" size="sm" class="q-ml-sm" />
+              </div>
+
+              <div v-if="programasActivosDirectos.length">
+                <div v-for="(programa, index) in programasActivosDirectos" :key="index"
+                  class="text-body2 q-mb-xs q-pa-sm bg-green-1 rounded-borders">
+                  <div class="text-weight-medium">{{ programa.tipo }}</div>
+                  <div class="text-caption">{{ programa.ayuda }}</div>
+                  <q-badge v-if="programa.fechaInicio" color="green" class="q-mt-xs" text-color="white">
+                    Desde: {{ new Date(programa.fechaInicio).toLocaleDateString() }}
+                  </q-badge>
+                </div>
+              </div>
+              <div v-else class="text-caption text-grey">Ninguno</div>
+
+              <div class="q-mt-sm">
+                <q-btn label="Historial de Programas" color="primary" flat @click="abrirHistorialProgramas"
+                  :badge="programasInactivosDirectos.length || undefined" />
+              </div>
+            </div>
+
+            <!-- Estudios -->
+            <div v-if="marcadorActualEnTiempoReal.estudios?.length" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="school" class="q-mr-xs" />
+                Educación
+              </div>
+              <div v-for="(estudio, index) in marcadorActualEnTiempoReal.estudios" :key="index"
+                class="text-body2 q-mb-xs q-pa-sm bg-blue-1 rounded-borders">
+                {{ estudio.nivel }}
+              </div>
+            </div>
+
+            <!-- Ocupaciones -->
+            <div v-if="marcadorActualEnTiempoReal.ocupaciones?.length" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="work" class="q-mr-xs" />
+                Ocupaciones
+              </div>
+              <div v-for="(ocupacion, index) in marcadorActualEnTiempoReal.ocupaciones" :key="index"
+                class="q-mb-xs q-pa-sm bg-orange-1 rounded-borders">
+                <div class="text-body2 text-weight-medium">{{ ocupacion.nombre }}</div>
+                <div class="text-caption text-grey">
+                  {{ ocupacion.tipo_1 }} • {{ ocupacion.tipo_2 }}
+                </div>
+                <div v-if="ocupacion.ingresos" class="text-caption text-green text-weight-medium">
+                  Ingresos: ${{ ocupacion.ingresos.toLocaleString() }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Vivienda -->
+            <div v-if="marcadorActualEnTiempoReal.viviendas?.length" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="home" class="q-mr-xs" />
+                Vivienda
+              </div>
+              <div v-for="(vivienda, index) in marcadorActualEnTiempoReal.viviendas" :key="index"
+                class="q-mb-xs q-pa-sm bg-teal-1 rounded-borders">
+                <div class="text-body2">
+                  <strong>{{ vivienda.tipo }}</strong> • {{ vivienda.dominio }}
+                </div>
+                <div class="text-caption text-grey">
+                  {{ vivienda.ambientes }} ambientes • Baño {{ vivienda.baño }}
+                  <span v-if="vivienda.baño_opcion"> ({{ vivienda.baño_opcion }})</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Servicios -->
+            <div v-if="marcadorActualEnTiempoReal.servicios?.length" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="electrical_services" class="q-mr-xs" />
+                Servicios
+                <q-chip :label="marcadorActualEnTiempoReal.servicios.length" color="indigo" text-color="white" size="sm"
+                  class="q-ml-sm" />
+              </div>
+              <div class="row q-col-gutter-sm">
+                <div v-for="(servicio, index) in marcadorActualEnTiempoReal.servicios" :key="index" class="col-6">
+                  <q-chip :color="servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'" text-color="white"
+                    size="sm" class="full-width">
+                    <q-icon :name="servicio.opcion_servicio === 'Conectado' ? 'check_circle' : 'cancel'"
+                      class="q-mr-xs" />
+                    {{ servicio.nombre }}
+                  </q-chip>
+                </div>
+              </div>
+            </div>
+
+            <!-- Salud general -->
+            <div v-if="marcadorActualEnTiempoReal.salud?.length" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="medical_services" class="q-mr-xs" />
+                Salud General
+              </div>
+              <div v-for="(saludItem, index) in marcadorActualEnTiempoReal.salud" :key="index"
+                class="q-mb-xs q-pa-sm bg-red-1 rounded-borders">
+                <div class="row items-center">
+                  <div class="col">
+                    <div v-if="saludItem.problema_salud" class="text-body2">{{ saludItem.problema_salud }}</div>
+                    <div class="q-mt-xs">
+                      <q-badge v-if="saludItem.cud" color="purple" text-color="white" class="q-mr-xs">CUD</q-badge>
+                      <q-badge v-if="saludItem.obra_social" color="green" text-color="white">Obra Social</q-badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notas simples -->
+            <div v-if="marcadorActualEnTiempoReal.notas" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="note" class="q-mr-xs" />
+                Notas
+              </div>
+              <div class="text-body2 q-pa-sm bg-grey-2 rounded-borders">{{ marcadorActualEnTiempoReal.notas }}</div>
+            </div>
+
+            <!-- Coordenadas (opcional, para debugging) -->
+            <!-- <div v-if="marcadorActualEnTiempoReal.latitud && marcadorActualEnTiempoReal.longitud" class="q-mb-md">
+              <div class="text-subtitle2 q-mb-sm flex items-center">
+                <q-icon name="place" class="q-mr-xs" />
+                Coordenadas
+              </div>
+              <div class="text-caption text-grey">
+                Lat: {{ marcadorActualEnTiempoReal.latitud.toFixed(6) }} •
+                Lng: {{ marcadorActualEnTiempoReal.longitud.toFixed(6) }}
+              </div>
+            </div> -->
+          </q-card-section>
+        </div>
+
+        <!-- Acciones fijas en la parte inferior (opcional) -->
+        <div style="flex-shrink: 0;" v-if="mostrarAcciones">
+          <q-separator />
+          <q-card-actions class="q-pa-sm justify-end">
+            <q-btn flat round icon="print" @click="generarPDF" size="md">
+              <q-tooltip>Imprimir</q-tooltip>
+            </q-btn>
+
+            <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcador" color="orange-8" size="md" />
+
+            <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcador" color="red"
+              size="md" />
+          </q-card-actions>
+        </div>
       </q-card>
     </q-dialog>
 

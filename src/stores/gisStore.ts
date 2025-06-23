@@ -13,7 +13,8 @@ export interface Programa {
 
 export interface Marcador {
   id: number;
-  nombreApellido: string;
+  nombre: string;
+  apellido: string; // ⬅️ nuevo campo
   direccion: string;
   telefono: string;
   dni: string;
@@ -60,7 +61,16 @@ export const useGisStore = defineStore('gis', {
 
     async editarMarcador(marcadorEditado: Marcador) {
       try {
-        const response = await axios.put(`http://179.43.127.133:3006/marcador/${marcadorEditado.id}`, marcadorEditado);
+        console.log('Marcador que se enviará al backend:', marcadorEditado);
+
+        const response = await axios.put(
+          `http://179.43.127.133:3006/marcador/${marcadorEditado.id}`,
+          {
+            ...marcadorEditado,
+            programas: marcadorEditado.programas, // 👈 asegurate de que esto esté presente
+          }
+        );
+
         const marcadorActualizado: Marcador = response.data;
 
         const index = this.marcadores.findIndex(m => m.id === marcadorActualizado.id);
