@@ -904,7 +904,7 @@ onMounted(() => {
   const vectorLayer = new VectorLayer({ source: vectorSource });
   // Definir los límites del área permitida
   const extent = transformExtent(
-    [-57.1939, -37.0417, -57.0739, -36.9617], // [minLon, minLat, maxLon, maxLat]
+    [-57.2139, -37.0617, -57.0539, -36.9417], // [minLon, minLat, maxLon, maxLat] - extendido
     'EPSG:4326',
     'EPSG:3857'
   );

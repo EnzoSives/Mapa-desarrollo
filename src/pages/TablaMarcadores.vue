@@ -70,7 +70,8 @@
               </q-avatar>
               <div class="col">
                 <div class="text-h6 text-weight-medium">
-                  {{ marcadorActualEnTiempoReal.nombreApellido }}
+                  {{ marcadorActualEnTiempoReal.nombre }}
+                  {{ marcadorActualEnTiempoReal.apellido }}
                 </div>
                 <div class="text-caption text-grey">
                   {{ marcadorActualEnTiempoReal.direccion }}
@@ -373,7 +374,8 @@ interface Programa {
 }
 
 interface Marcador {
-  nombreApellido: string;
+  nombre: string;
+  apellido: string;
   direccion: string;
   telefono: string;
   dni: string;
@@ -404,7 +406,8 @@ const marcadorActualEnTiempoReal = computed(() => {
 
   const marcadorLimpio = limpiarObjeto(marcadorEncontrado);
   return {
-    nombreApellido: marcadorLimpio.nombreApellido || '',
+    nombre: marcadorLimpio.nombre || '',
+    apellido: marcadorLimpio.apellido || '',
     direccion: marcadorLimpio.direccion || '',
     telefono: marcadorLimpio.telefono || '',
     dni: marcadorLimpio.dni || '',
@@ -557,7 +560,8 @@ const marcadoresFiltrados = computed(() => {
     const busqueda = filtro.value.toLowerCase().trim();
     marcadores = marcadores.filter((marcador) => {
       const campos = [
-        marcador.nombreApellido,
+        marcador.nombre,
+        marcador.apellido,
         marcador.direccion,
         marcador.telefono,
         marcador.dni,
@@ -592,7 +596,8 @@ const marcadoresLimpios = computed(() => {
   return gisStore.marcadores.map((marcador) => {
     const marcadorLimpio = limpiarObjeto(marcador);
     return {
-      nombreApellido: marcadorLimpio.nombreApellido || '',
+      nombre: marcadorLimpio.nombre || '',
+      apellido: marcadorLimpio.apellido || '',
       direccion: marcadorLimpio.direccion || '',
       telefono: marcadorLimpio.telefono || '',
       dni: marcadorLimpio.dni || '',
@@ -610,9 +615,16 @@ const marcadoresLimpios = computed(() => {
 
 const columnsQuasar = [
   {
-    name: 'nombreApellido',
+    name: 'nombre',
     label: 'Nombre',
-    field: 'nombreApellido',
+    field: 'nombre',
+    align: 'left' as const,
+    sortable: true
+  },
+  {
+    name: 'apellido',
+    label: 'Apellido',
+    field: 'apellido',
     align: 'left' as const,
     sortable: true
   },
@@ -663,9 +675,10 @@ function generarPDF() {
   doc.text(`Total de registros: ${marcadoresFiltrados.value.length}`, 14, yPosition);
   doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, yPosition + 6);
 
-  const headers = ['Nombre', 'Dirección', 'Teléfono', 'DNI', 'Programas Activos', 'Notas']; // Actualizado header
+  const headers = ['Nombre', 'Apellido', 'Dirección', 'Teléfono', 'DNI', 'Programas Activos', 'Notas']; // Actualizado header
   const data = marcadoresFiltrados.value.map(marcador => [
-    marcador.nombreApellido || '',
+    marcador.nombre || '',
+    marcador.apellido || '',
     marcador.direccion || '',
     marcador.telefono || '',
     marcador.dni || '',
