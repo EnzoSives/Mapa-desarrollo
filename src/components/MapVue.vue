@@ -65,9 +65,6 @@
                   {{ gisStore.marcadorSeleccionado.apellido }}
                 </div>
                 <div class="text-caption text-grey">
-                  {{ gisStore.marcadorSeleccionado.direccion }}
-                </div>
-                <div class="text-caption text-grey">
                   Creado:
                   {{
                     new Date(
@@ -81,290 +78,292 @@
 
           <q-separator />
 
-          <!-- Información compacta -->
+          <!-- 1. INFORMACIÓN BÁSICA -->
           <q-card-section class="q-pa-md">
-            <!-- Contacto en una línea -->
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="person" class="q-mr-xs" />
+              Información Básica
+            </div>
+
+            <!-- Nombre y Apellido en la misma fila -->
             <div class="row q-col-gutter-md q-mb-md">
               <div class="col-6">
-                <div class="text-caption text-grey">Teléfono</div>
+                <div class="text-caption text-grey">Nombre</div>
                 <div class="text-body2">
-                  {{ gisStore.marcadorSeleccionado.telefono || 'N/A' }}
+                  {{ gisStore.marcadorSeleccionado.nombre || 'N/A' }}
                 </div>
               </div>
               <div class="col-6">
-                <div class="text-caption text-grey">DNI</div>
+                <div class="text-caption text-grey">Apellido</div>
                 <div class="text-body2">
-                  {{ gisStore.marcadorSeleccionado.dni }}
+                  {{ gisStore.marcadorSeleccionado.apellido || 'N/A' }}
                 </div>
               </div>
             </div>
 
-            <!-- Integrantes compactos -->
+            <!-- DNI campo completo -->
             <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="people" class="q-mr-xs" />
-                Integrantes
-                <q-chip
-                  v-if="gisStore.marcadorSeleccionado.integrantes?.length"
-                  :label="gisStore.marcadorSeleccionado.integrantes.length"
-                  color="blue"
-                  text-color="white"
-                  size="sm"
-                  class="q-ml-sm"
-                />
+              <div class="text-caption text-grey">DNI</div>
+              <div class="text-body2">
+                {{ gisStore.marcadorSeleccionado.dni || 'N/A' }}
               </div>
-              <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
-                <div
-                  v-for="(integrante, index) in gisStore.marcadorSeleccionado
-                    .integrantes"
-                  :key="index"
-                  class="row items-center q-py-xs q-mb-xs rounded-borders q-pa-sm"
-                  :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'"
-                >
-                  <q-avatar
-                    size="28px"
-                    class="q-mr-sm"
-                    color="blue-5"
-                    text-color="white"
-                  >
-                    {{ integrante.nombre.charAt(0) }}
-                  </q-avatar>
-                  <div class="col">
-                    <div class="text-body2 text-weight-medium">
-                      {{ integrante.nombre }} {{ integrante.apellido }}
-                    </div>
-                    <div class="text-caption text-grey">
-                      {{ integrante.edad }} años • {{ integrante.vinculo }} •
-                      DNI: {{ integrante.dni }}
-                    </div>
-                    <!-- Salud del integrante -->
-                    <div v-if="integrante.salud?.length" class="q-mt-xs">
-                      <div
-                        v-for="(saludItem, sIndex) in integrante.salud"
-                        :key="sIndex"
-                        class="text-caption"
-                      >
-                        <q-badge
-                          v-if="saludItem.cud"
-                          color="purple"
-                          text-color="white"
-                          class="q-mr-xs"
-                          >CUD</q-badge
-                        >
-                        <q-badge
-                          v-if="saludItem.obra_social"
-                          color="green"
-                          text-color="white"
-                          class="q-mr-xs"
-                          >Obra Social</q-badge
-                        >
-                        <span
-                          v-if="saludItem.problema_salud"
-                          class="text-red"
-                          >{{ saludItem.problema_salud }}</span
-                        >
-                      </div>
-                    </div>
+            </div>
+
+            <!-- Domicilio campo completo -->
+            <div class="q-mb-md">
+              <div class="text-caption text-grey">Domicilio</div>
+              <div class="text-body2">
+                {{ gisStore.marcadorSeleccionado.direccion || 'N/A' }}
+              </div>
+            </div>
+
+            <!-- Teléfono campo completo -->
+            <div class="q-mb-md">
+              <div class="text-caption text-grey">Teléfono</div>
+              <div class="text-body2">
+                {{ gisStore.marcadorSeleccionado.telefono || 'N/A' }}
+              </div>
+            </div>
+
+            <!-- Barrio y Tiempo de residencia en la misma fila -->
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-6">
+                <div class="text-caption text-grey">Barrio</div>
+                <div class="text-body2">
+                  {{ gisStore.marcadorSeleccionado.barrio || 'N/A' }}
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-caption text-grey">Tiempo de Residencia</div>
+                <div class="text-body2">
+                  {{ gisStore.marcadorSeleccionado.tiempo_residencia || 'N/A' }}
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <!-- 2. NIVEL DE ESTUDIOS -->
+          <q-card-section
+            v-if="gisStore.marcadorSeleccionado.estudios?.length"
+            class="q-pa-md"
+          >
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="school" class="q-mr-xs" />
+              Nivel de Estudios
+              <q-chip
+                :label="gisStore.marcadorSeleccionado.estudios.length"
+                color="blue"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div
+              v-for="(estudio, index) in gisStore.marcadorSeleccionado.estudios"
+              :key="index"
+              class="text-body2 q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-blue-9' : 'bg-blue-1'"
+            >
+              {{ estudio.nivel }}
+            </div>
+          </q-card-section>
+
+          <q-separator v-if="gisStore.marcadorSeleccionado.estudios?.length" />
+
+          <!-- 3. INFORMACIÓN DE SALUD -->
+          <q-card-section
+            v-if="gisStore.marcadorSeleccionado.salud?.length"
+            class="q-pa-md"
+          >
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="medical_services" class="q-mr-xs" />
+              Información de Salud
+              <q-chip
+                :label="gisStore.marcadorSeleccionado.salud.length"
+                color="red"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div
+              v-for="(saludItem, index) in gisStore.marcadorSeleccionado.salud"
+              :key="index"
+              class="q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'"
+            >
+              <div class="row items-center">
+                <div class="col">
+                  <div v-if="saludItem.problema_salud" class="text-body2">
+                    {{ saludItem.problema_salud }}
+                  </div>
+                  <div class="q-mt-xs">
+                    <q-badge
+                      v-if="saludItem.cud"
+                      color="purple"
+                      text-color="white"
+                      class="q-mr-xs"
+                      >CUD</q-badge
+                    >
+                    <q-badge
+                      v-if="saludItem.obra_social"
+                      color="green"
+                      text-color="white"
+                      >Obra Social</q-badge
+                    >
                   </div>
                 </div>
               </div>
-              <div v-else class="text-caption text-grey">Sin integrantes</div>
             </div>
+          </q-card-section>
 
-            <!-- Programas activos + botón historial -->
-            <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="assignment" class="q-mr-xs" />
-                Programas Activos
-                <q-chip
-                  v-if="programasActivos.length"
-                  :label="programasActivos.length"
-                  color="primary"
+          <q-separator v-if="gisStore.marcadorSeleccionado.salud?.length" />
+
+          <!-- 4. VIVIENDA -->
+          <q-card-section
+            v-if="gisStore.marcadorSeleccionado.viviendas?.length"
+            class="q-pa-md"
+          >
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="home" class="q-mr-xs" />
+              Vivienda
+              <q-chip
+                :label="gisStore.marcadorSeleccionado.viviendas.length"
+                color="teal"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div
+              v-for="(vivienda, index) in gisStore.marcadorSeleccionado
+                .viviendas"
+              :key="index"
+              class="q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-teal-9' : 'bg-teal-1'"
+            >
+              <div class="text-body2">
+                <strong>{{ vivienda.tipo }}</strong> • {{ vivienda.dominio }}
+              </div>
+              <div class="text-caption text-grey">
+                <span v-if="vivienda.ambientes"
+                  >{{ vivienda.ambientes }} ambientes</span
+                >
+                <span v-if="vivienda.ambientes && vivienda.baño"> • </span>
+                <span v-if="vivienda.baño">Baño {{ vivienda.baño }}</span>
+                <span v-if="vivienda.baño_opcion">
+                  ({{ vivienda.baño_opcion }})
+                </span>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator v-if="gisStore.marcadorSeleccionado.viviendas?.length" />
+
+          <!-- 5. OCUPACIÓN -->
+          <q-card-section
+            v-if="gisStore.marcadorSeleccionado.ocupaciones?.length"
+            class="q-pa-md"
+          >
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="work" class="q-mr-xs" />
+              Ocupación
+              <q-chip
+                :label="gisStore.marcadorSeleccionado.ocupaciones.length"
+                color="orange"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div
+              v-for="(ocupacion, index) in gisStore.marcadorSeleccionado
+                .ocupaciones"
+              :key="index"
+              class="q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'"
+            >
+              <!-- Mostrar nombre si existe, sino el tipo principal -->
+              <div class="text-body2 text-weight-medium">
+                {{ ocupacion.nombre || ocupacion.tipo_principal }}
+              </div>
+              <div class="text-caption text-grey">
+                <span v-if="ocupacion.tipo_1">{{ ocupacion.tipo_1 }}</span>
+                <span v-if="ocupacion.tipo_1 && ocupacion.tipo_2"> • </span>
+                <span v-if="ocupacion.tipo_2">{{ ocupacion.tipo_2 }}</span>
+              </div>
+              <div
+                v-if="ocupacion.ingresos"
+                class="text-caption text-green text-weight-medium"
+              >
+                Ingresos: ${{ ocupacion.ingresos.toLocaleString() }}
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator
+            v-if="gisStore.marcadorSeleccionado.ocupaciones?.length"
+          />
+
+          <!-- 6. INTEGRANTES -->
+          <q-card-section class="q-pa-md">
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="people" class="q-mr-xs" />
+              Integrantes
+              <q-chip
+                v-if="gisStore.marcadorSeleccionado.integrantes?.length"
+                :label="gisStore.marcadorSeleccionado.integrantes.length"
+                color="blue"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
+              <div
+                v-for="(integrante, index) in gisStore.marcadorSeleccionado
+                  .integrantes"
+                :key="index"
+                class="row items-center q-py-xs q-mb-xs rounded-borders q-pa-sm"
+                :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'"
+              >
+                <q-avatar
+                  size="28px"
+                  class="q-mr-sm"
+                  color="blue-5"
                   text-color="white"
-                  size="sm"
-                  class="q-ml-sm"
-                />
-              </div>
-
-              <div v-if="programasActivos.length">
-                <div
-                  v-for="(programa, index) in programasActivos"
-                  :key="index"
-                  class="text-body2 q-mb-xs q-pa-sm rounded-borders"
-                  :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'"
                 >
-                  <div class="text-weight-medium">{{ programa.tipo }}</div>
-                  <div class="text-caption">{{ programa.ayuda }}</div>
-                  <q-badge
-                    v-if="programa.fechaInicio"
-                    color="green"
-                    class="q-mt-xs"
-                    text-color="white"
-                  >
-                    Desde:
-                    {{ new Date(programa.fechaInicio).toLocaleDateString() }}
-                  </q-badge>
-                </div>
-              </div>
-              <div v-else class="text-caption text-grey">Ninguno</div>
-
-              <div class="q-mt-sm">
-                <q-btn
-                  label="Historial de Programas"
-                  color="primary"
-                  flat
-                  @click="mostrarModalHistorial = true"
-                  :badge="programasInactivos.length || undefined"
-                />
-              </div>
-            </div>
-
-            <!-- Estudios -->
-            <div
-              v-if="gisStore.marcadorSeleccionado.estudios?.length"
-              class="q-mb-md"
-            >
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="school" class="q-mr-xs" />
-                Educación
-              </div>
-              <div
-                v-for="(estudio, index) in gisStore.marcadorSeleccionado
-                  .estudios"
-                :key="index"
-                class="text-body2 q-mb-xs q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-blue-9' : 'bg-blue-1'"
-              >
-                {{ estudio.nivel }}
-              </div>
-            </div>
-
-            <!-- Ocupaciones -->
-            <div
-              v-if="gisStore.marcadorSeleccionado.ocupaciones?.length"
-              class="q-mb-md"
-            >
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="work" class="q-mr-xs" />
-                Ocupaciones
-              </div>
-              <div
-                v-for="(ocupacion, index) in gisStore.marcadorSeleccionado
-                  .ocupaciones"
-                :key="index"
-                class="q-mb-xs q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'"
-              >
-                <div class="text-body2 text-weight-medium">
-                  {{ ocupacion.nombre }}
-                </div>
-                <div class="text-caption text-grey">
-                  {{ ocupacion.tipo_1 }} • {{ ocupacion.tipo_2 }}
-                </div>
-                <div
-                  v-if="ocupacion.ingresos"
-                  class="text-caption text-green text-weight-medium"
-                >
-                  Ingresos: ${{ ocupacion.ingresos.toLocaleString() }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Vivienda -->
-            <div
-              v-if="gisStore.marcadorSeleccionado.viviendas?.length"
-              class="q-mb-md"
-            >
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="home" class="q-mr-xs" />
-                Vivienda
-              </div>
-              <div
-                v-for="(vivienda, index) in gisStore.marcadorSeleccionado
-                  .viviendas"
-                :key="index"
-                class="q-mb-xs q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-teal-9' : 'bg-teal-1'"
-              >
-                <div class="text-body2">
-                  <strong>{{ vivienda.tipo }}</strong> • {{ vivienda.dominio }}
-                </div>
-                <div class="text-caption text-grey">
-                  {{ vivienda.ambientes }} ambientes • Baño {{ vivienda.baño }}
-                  <span v-if="vivienda.baño_opcion">
-                    ({{ vivienda.baño_opcion }})</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <!-- Servicios -->
-            <div
-              v-if="gisStore.marcadorSeleccionado.servicios?.length"
-              class="q-mb-md"
-            >
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="electrical_services" class="q-mr-xs" />
-                Servicios
-                <q-chip
-                  :label="gisStore.marcadorSeleccionado.servicios.length"
-                  color="indigo"
-                  text-color="white"
-                  size="sm"
-                  class="q-ml-sm"
-                />
-              </div>
-              <div class="row q-col-gutter-sm">
-                <div
-                  v-for="(servicio, index) in gisStore.marcadorSeleccionado
-                    .servicios"
-                  :key="index"
-                  class="col-6"
-                >
-                  <q-chip
-                    :color="
-                      servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
-                    "
-                    text-color="white"
-                    size="sm"
-                    class="full-width"
-                  >
-                    <q-icon
-                      :name="
-                        servicio.opcion_servicio === 'Conectado'
-                          ? 'check_circle'
-                          : 'cancel'
-                      "
-                      class="q-mr-xs"
-                    />
-                    {{ servicio.nombre }}
-                  </q-chip>
-                </div>
-              </div>
-            </div>
-
-            <!-- Salud general -->
-            <div
-              v-if="gisStore.marcadorSeleccionado.salud?.length"
-              class="q-mb-md"
-            >
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="medical_services" class="q-mr-xs" />
-                Salud General
-              </div>
-              <div
-                v-for="(saludItem, index) in gisStore.marcadorSeleccionado
-                  .salud"
-                :key="index"
-                class="q-mb-xs q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'"
-              >
-                <div class="row items-center">
-                  <div class="col">
-                    <div v-if="saludItem.problema_salud" class="text-body2">
-                      {{ saludItem.problema_salud }}
-                    </div>
-                    <div class="q-mt-xs">
+                  {{ integrante.nombre.charAt(0) }}
+                </q-avatar>
+                <div class="col">
+                  <div class="text-body2 text-weight-medium">
+                    {{ integrante.nombre }} {{ integrante.apellido }}
+                  </div>
+                  <div class="text-caption text-grey">
+                    {{ integrante.edad }} años • {{ integrante.vinculo }} • DNI:
+                    {{ integrante.dni }}
+                  </div>
+                  <!-- Salud del integrante -->
+                  <div v-if="integrante.salud?.length" class="q-mt-xs">
+                    <div
+                      v-for="(saludItem, sIndex) in integrante.salud"
+                      :key="sIndex"
+                      class="text-caption"
+                    >
                       <q-badge
                         v-if="saludItem.cud"
                         color="purple"
@@ -376,17 +375,136 @@
                         v-if="saludItem.obra_social"
                         color="green"
                         text-color="white"
+                        class="q-mr-xs"
                         >Obra Social</q-badge
                       >
+                      <span v-if="saludItem.problema_salud" class="text-red">{{
+                        saludItem.problema_salud
+                      }}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div v-else class="text-caption text-grey">Sin integrantes</div>
+          </q-card-section>
 
-            <!-- Notas simples -->
-            <div v-if="gisStore.marcadorSeleccionado.notas" class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm flex items-center">
+          <q-separator />
+
+          <!-- 7. SERVICIOS -->
+          <q-card-section
+            v-if="gisStore.marcadorSeleccionado.servicios?.length"
+            class="q-pa-md"
+          >
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="electrical_services" class="q-mr-xs" />
+              Servicios
+              <q-chip
+                :label="gisStore.marcadorSeleccionado.servicios.length"
+                color="indigo"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+            <div class="row q-col-gutter-sm">
+              <div
+                v-for="(servicio, index) in gisStore.marcadorSeleccionado
+                  .servicios"
+                :key="index"
+                class="col-6"
+              >
+                <q-chip
+                  :color="
+                    servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
+                  "
+                  text-color="white"
+                  size="sm"
+                  class="full-width"
+                >
+                  <q-icon
+                    :name="
+                      servicio.opcion_servicio === 'Conectado'
+                        ? 'check_circle'
+                        : 'cancel'
+                    "
+                    class="q-mr-xs"
+                  />
+                  {{ servicio.nombre }}
+                </q-chip>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator v-if="gisStore.marcadorSeleccionado.servicios?.length" />
+
+          <!-- 8. PROGRAMAS -->
+          <q-card-section class="q-pa-md">
+            <div
+              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+            >
+              <q-icon name="assignment" class="q-mr-xs" />
+              Programas Activos
+              <q-chip
+                v-if="programasActivos.length"
+                :label="programasActivos.length"
+                color="primary"
+                text-color="white"
+                size="sm"
+                class="q-ml-sm"
+              />
+            </div>
+
+            <div v-if="programasActivos.length">
+              <div
+                v-for="(programa, index) in programasActivos"
+                :key="index"
+                class="text-body2 q-mb-xs q-pa-sm rounded-borders"
+                :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'"
+              >
+                <div class="text-weight-medium">{{ programa.tipo }}</div>
+                <div class="text-caption">{{ programa.ayuda }}</div>
+                <!-- Mostrar notas del programa si existen -->
+                <div
+                  v-if="programa.notas"
+                  class="text-caption text-grey q-mt-xs"
+                >
+                  <q-icon name="note" size="xs" class="q-mr-xs" />
+                  {{ programa.notas }}
+                </div>
+                <q-badge
+                  v-if="programa.fechaInicio"
+                  color="green"
+                  class="q-mt-xs"
+                  text-color="white"
+                >
+                  Desde:
+                  {{ new Date(programa.fechaInicio).toLocaleDateString() }}
+                </q-badge>
+              </div>
+            </div>
+            <div v-else class="text-caption text-grey">Ninguno</div>
+
+            <div class="q-mt-sm">
+              <q-btn
+                label="Historial de Programas"
+                color="primary"
+                flat
+                @click="mostrarModalHistorial = true"
+                :badge="programasInactivos.length || undefined"
+              />
+            </div>
+          </q-card-section>
+
+          <!-- Notas (al final si existen) -->
+          <div v-if="gisStore.marcadorSeleccionado.notas">
+            <q-separator />
+            <q-card-section class="q-pa-md">
+              <div
+                class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
+              >
                 <q-icon name="note" class="q-mr-xs" />
                 Notas
               </div>
@@ -396,20 +514,8 @@
               >
                 {{ gisStore.marcadorSeleccionado.notas }}
               </div>
-            </div>
-
-            <!-- Coordenadas (opcional, para debugging)
-        <div v-if="gisStore.marcadorSeleccionado.latitud && gisStore.marcadorSeleccionado.longitud" class="q-mb-md">
-          <div class="text-subtitle2 q-mb-sm flex items-center">
-            <q-icon name="place" class="q-mr-xs" />
-            Coordenadas
+            </q-card-section>
           </div>
-          <div class="text-caption text-grey">
-            Lat: {{ gisStore.marcadorSeleccionado.latitud.toFixed(6) }} •
-            Lng: {{ gisStore.marcadorSeleccionado.longitud.toFixed(6) }}
-          </div>
-        </div> -->
-          </q-card-section>
         </div>
 
         <!-- Acciones fijas en la parte inferior -->
@@ -1604,7 +1710,7 @@ const nuevoMarcador = ref({
     nivel: string;
   }>,
   ocupaciones: [] as Array<{
-    nombre: string;
+    tipo_principal: string;
     tipo_1: string;
     tipo_2: string;
     ingresos: number | null;
@@ -2017,7 +2123,7 @@ function agregarOcupacion() {
     nuevoMarcador.value.ocupaciones = [];
   }
   nuevoMarcador.value.ocupaciones.push({
-    nombre: '',
+    tipo_principal: '',
     tipo_1: '',
     tipo_2: '',
     ingresos: null,
