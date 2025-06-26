@@ -5,6 +5,7 @@ export interface Programa {
   id: number;
   tipo: string;
   ayuda: string;
+  notas?: string; // ⬅️ nuevo campo opcional
   estado: string;
   fechaInicio: string;
   fechaUltimaModificacion: string;
@@ -18,7 +19,8 @@ export interface Marcador {
   direccion: string;
   telefono: string;
   dni: string;
-  notas?: string;
+  barrio: string;
+  tiempo_residencia: string;
   ayudas?: string[];
   latitud: number;
   longitud: number;
@@ -31,8 +33,7 @@ export const useGisStore = defineStore('gis', {
   state: () => ({
     marcadores: [] as Marcador[],
     marcadorSeleccionado: null as Marcador | null,
-    marcadorSeleccionadoProgramasCompletos: [] as Programa[] // ⬅️ nueva propiedad
-
+    marcadorSeleccionadoProgramasCompletos: [] as Programa[], // ⬅️ nueva propiedad
   }),
 
   actions: {
@@ -73,7 +74,9 @@ export const useGisStore = defineStore('gis', {
 
         const marcadorActualizado: Marcador = response.data;
 
-        const index = this.marcadores.findIndex(m => m.id === marcadorActualizado.id);
+        const index = this.marcadores.findIndex(
+          (m) => m.id === marcadorActualizado.id
+        );
         if (index !== -1) {
           this.marcadores[index] = marcadorActualizado;
         }
@@ -87,7 +90,7 @@ export const useGisStore = defineStore('gis', {
     async eliminarMarcador(id: number) {
       try {
         await axios.delete(`http://179.43.127.133:3006/marcador/${id}`);
-        this.marcadores = this.marcadores.filter(m => m.id !== id);
+        this.marcadores = this.marcadores.filter((m) => m.id !== id);
         if (this.marcadorSeleccionado?.id === id) {
           this.marcadorSeleccionado = null;
         }
@@ -98,11 +101,14 @@ export const useGisStore = defineStore('gis', {
 
     async seleccionarMarcador(id: number) {
       try {
-        const response = await axios.get(`http://179.43.127.133:3006/marcador/${id}`);
+        const response = await axios.get(
+          `http://179.43.127.133:3006/marcador/${id}`
+        );
         const marcadorCompleto: Marcador = response.data;
 
         if (marcadorCompleto.programas) {
-          this.marcadorSeleccionadoProgramasCompletos = marcadorCompleto.programas; // guarda todos
+          this.marcadorSeleccionadoProgramasCompletos =
+            marcadorCompleto.programas; // guarda todos
 
           marcadorCompleto.programas = marcadorCompleto.programas.filter(
             (p: Programa) => p.estado === 'activo'
@@ -110,7 +116,8 @@ export const useGisStore = defineStore('gis', {
 
           marcadorCompleto.programas.sort(
             (a: Programa, b: Programa) =>
-              new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime()
+              new Date(a.fechaInicio).getTime() -
+              new Date(b.fechaInicio).getTime()
           );
         }
 
@@ -120,9 +127,8 @@ export const useGisStore = defineStore('gis', {
       }
     },
 
-
     cerrarInfo() {
       this.marcadorSeleccionado = null;
-    }
-  }
+    },
+  },
 });
