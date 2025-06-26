@@ -69,7 +69,8 @@
               </div>
               <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
                 <div v-for="(integrante, index) in gisStore.marcadorSeleccionado.integrantes" :key="index"
-                  class="row items-center q-py-xs q-mb-xs bg-grey-1 rounded-borders q-pa-sm">
+                  class="row items-center q-py-xs q-mb-xs rounded-borders q-pa-sm"
+                  :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'">
                   <q-avatar size="28px" class="q-mr-sm" color="blue-5" text-color="white">
                     {{ integrante.nombre.charAt(0) }}
                   </q-avatar>
@@ -104,7 +105,8 @@
 
               <div v-if="programasActivos.length">
                 <div v-for="(programa, index) in programasActivos" :key="index"
-                  class="text-body2 q-mb-xs q-pa-sm bg-green-1 rounded-borders">
+                  class="text-body2 q-mb-xs q-pa-sm rounded-borders"
+                  :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
                   <div class="text-weight-medium">{{ programa.tipo }}</div>
                   <div class="text-caption">{{ programa.ayuda }}</div>
                   <q-badge v-if="programa.fechaInicio" color="green" class="q-mt-xs" text-color="white">
@@ -127,7 +129,8 @@
                 Educación
               </div>
               <div v-for="(estudio, index) in gisStore.marcadorSeleccionado.estudios" :key="index"
-                class="text-body2 q-mb-xs q-pa-sm bg-blue-1 rounded-borders">
+                class="text-body2 q-mb-xs q-pa-sm rounded-borders"
+                :class="$q.dark.isActive ? 'bg-blue-9' : 'bg-blue-1'">
                 {{ estudio.nivel }}
               </div>
             </div>
@@ -139,7 +142,7 @@
                 Ocupaciones
               </div>
               <div v-for="(ocupacion, index) in gisStore.marcadorSeleccionado.ocupaciones" :key="index"
-                class="q-mb-xs q-pa-sm bg-orange-1 rounded-borders">
+                class="q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'">
                 <div class="text-body2 text-weight-medium">{{ ocupacion.nombre }}</div>
                 <div class="text-caption text-grey">
                   {{ ocupacion.tipo_1 }} • {{ ocupacion.tipo_2 }}
@@ -157,7 +160,7 @@
                 Vivienda
               </div>
               <div v-for="(vivienda, index) in gisStore.marcadorSeleccionado.viviendas" :key="index"
-                class="q-mb-xs q-pa-sm bg-teal-1 rounded-borders">
+                class="q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-teal-9' : 'bg-teal-1'">
                 <div class="text-body2">
                   <strong>{{ vivienda.tipo }}</strong> • {{ vivienda.dominio }}
                 </div>
@@ -195,7 +198,7 @@
                 Salud General
               </div>
               <div v-for="(saludItem, index) in gisStore.marcadorSeleccionado.salud" :key="index"
-                class="q-mb-xs q-pa-sm bg-red-1 rounded-borders">
+                class="q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'">
                 <div class="row items-center">
                   <div class="col">
                     <div v-if="saludItem.problema_salud" class="text-body2">{{ saludItem.problema_salud }}</div>
@@ -214,20 +217,22 @@
                 <q-icon name="note" class="q-mr-xs" />
                 Notas
               </div>
-              <div class="text-body2 q-pa-sm bg-grey-2 rounded-borders">{{ gisStore.marcadorSeleccionado.notas }}</div>
+              <div class="text-body2 q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-2'">
+                {{ gisStore.marcadorSeleccionado.notas }}
+              </div>
             </div>
 
             <!-- Coordenadas (opcional, para debugging)
-            <div v-if="gisStore.marcadorSeleccionado.latitud && gisStore.marcadorSeleccionado.longitud" class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm flex items-center">
-                <q-icon name="place" class="q-mr-xs" />
-                Coordenadas
-              </div>
-              <div class="text-caption text-grey">
-                Lat: {{ gisStore.marcadorSeleccionado.latitud.toFixed(6) }} •
-                Lng: {{ gisStore.marcadorSeleccionado.longitud.toFixed(6) }}
-              </div>
-            </div> -->
+        <div v-if="gisStore.marcadorSeleccionado.latitud && gisStore.marcadorSeleccionado.longitud" class="q-mb-md">
+          <div class="text-subtitle2 q-mb-sm flex items-center">
+            <q-icon name="place" class="q-mr-xs" />
+            Coordenadas
+          </div>
+          <div class="text-caption text-grey">
+            Lat: {{ gisStore.marcadorSeleccionado.latitud.toFixed(6) }} •
+            Lng: {{ gisStore.marcadorSeleccionado.longitud.toFixed(6) }}
+          </div>
+        </div> -->
           </q-card-section>
         </div>
 
@@ -782,12 +787,11 @@ const opcionesAyuda = {
 
 // Agregar estas opciones después de las existentes
 const opcionesVinculo = [
-  'Titular', 'Cónyuge', 'Hijo/a', 'Padre/Madre',
-  'Hermano/a', 'Abuelo/a', 'Nieto/a', 'Otro'
+  'Pareja', 'Hijo/a', 'Padre/Madre', 'Otro'
 ];
 
 const opcionesEstudios = [
-  'Sin estudios', 'Primario incompleto', 'Primario completo',
+  'Analfabeto', 'Primario incompleto', 'Primario completo',
   'Secundario incompleto', 'Secundario completo',
   'Terciario incompleto', 'Terciario completo',
   'Universitario incompleto', 'Universitario completo'
