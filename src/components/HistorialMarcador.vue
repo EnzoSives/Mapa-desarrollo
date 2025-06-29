@@ -233,7 +233,7 @@
                                                 :key="integrante.id">
                                                 <q-item-section>
                                                     <q-item-label>{{ integrante.nombre }} {{ integrante.apellido
-                                                        }}</q-item-label>
+                                                    }}</q-item-label>
                                                     <q-item-label caption>
                                                         DNI: {{ integrante.dni }} |
                                                         Edad: {{ integrante.edad }} |
@@ -464,7 +464,7 @@ export default {
             error.value = null
 
             try {
-                const response = await axios.get(`http://localhost:3006/marcador/${props.idMarcador}/historial`)
+                const response = await axios.get(`http://179.43.127.133:3006/marcador/${props.idMarcador}/historial`)
                 historial.value = response.data || []
 
                 // Extraer tipos de operación únicos para el filtro
