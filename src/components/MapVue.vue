@@ -3,23 +3,16 @@
     <div ref="mapContainer" class="mapa"></div>
 
     <!-- Tooltip para mostrar el nombre del marcador -->
-    <div
-      v-if="tooltipVisible"
-      class="tooltip-marcador"
-      :style="{
-        left: tooltipPosition.x + 'px',
-        top: tooltipPosition.y + 'px',
-      }"
-    >
+    <div v-if="tooltipVisible" class="tooltip-marcador" :style="{
+      left: tooltipPosition.x + 'px',
+      top: tooltipPosition.y + 'px',
+    }">
       {{ tooltipContent }}
     </div>
 
     <!-- Panel Info del marcador (izquierda arriba) -->
     <div id="area-imprimir">
-      <q-card
-        v-if="gisStore.marcadorSeleccionado"
-        class="info-panel q-mx-auto"
-        style="
+      <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel q-mx-auto" style="
           min-width: 400px;
           max-width: 500px;
           border-radius: 12px;
@@ -27,36 +20,22 @@
           overflow-y: auto;
           display: flex;
           flex-direction: column;
-        "
-      >
+        ">
         <!-- Contenido con scroll -->
-        <div
-          style="
+        <div style="
             flex: 1;
             overflow-y: auto;
             scrollbar-width: none;
             scrollbar-color: #888 #f0f0f0;
-          "
-        >
+          ">
           <!-- Encabezado simple -->
           <q-card-section class="q-pa-md relative-position">
             <!-- Botón cerrar en esquina superior derecha -->
-            <q-btn
-              icon="close"
-              flat
-              round
-              dense
-              class="absolute-top-right q-ma-sm"
-              style="z-index: 2"
-              @click="gisStore.cerrarInfo"
-            />
+            <q-btn icon="close" flat round dense class="absolute-top-right q-ma-sm" style="z-index: 2"
+              @click="gisStore.cerrarInfo" />
 
             <div class="row items-center no-wrap">
-              <q-avatar
-                v-if="gisStore.marcadorSeleccionado.icono"
-                size="44px"
-                class="q-mr-md"
-              >
+              <q-avatar v-if="gisStore.marcadorSeleccionado.icono" size="44px" class="q-mr-md">
                 <img :src="gisStore.marcadorSeleccionado.icono" alt="Ícono" />
               </q-avatar>
               <div class="col">
@@ -80,9 +59,7 @@
 
           <!-- 1. INFORMACIÓN BÁSICA -->
           <q-card-section class="q-pa-md">
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="person" class="q-mr-xs" />
               Información Básica
             </div>
@@ -147,29 +124,15 @@
           <q-separator />
 
           <!-- 2. NIVEL DE ESTUDIOS -->
-          <q-card-section
-            v-if="gisStore.marcadorSeleccionado.estudios?.length"
-            class="q-pa-md"
-          >
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+          <q-card-section v-if="gisStore.marcadorSeleccionado.estudios?.length" class="q-pa-md">
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="school" class="q-mr-xs" />
               Nivel de Estudios
-              <q-chip
-                :label="gisStore.marcadorSeleccionado.estudios.length"
-                color="blue"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip :label="gisStore.marcadorSeleccionado.estudios.length" color="blue" text-color="white" size="sm"
+                class="q-ml-sm" />
             </div>
-            <div
-              v-for="(estudio, index) in gisStore.marcadorSeleccionado.estudios"
-              :key="index"
-              class="text-body2 q-mb-xs q-pa-sm rounded-borders"
-              :class="$q.dark.isActive ? 'bg-blue-9' : 'bg-blue-1'"
-            >
+            <div v-for="(estudio, index) in gisStore.marcadorSeleccionado.estudios" :key="index"
+              class="text-body2 q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-blue-9' : 'bg-blue-1'">
               {{ estudio.nivel }}
             </div>
           </q-card-section>
@@ -177,48 +140,23 @@
           <q-separator v-if="gisStore.marcadorSeleccionado.estudios?.length" />
 
           <!-- 3. INFORMACIÓN DE SALUD -->
-          <q-card-section
-            v-if="gisStore.marcadorSeleccionado.salud?.length"
-            class="q-pa-md"
-          >
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+          <q-card-section v-if="gisStore.marcadorSeleccionado.salud?.length" class="q-pa-md">
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="medical_services" class="q-mr-xs" />
               Información de Salud
-              <q-chip
-                :label="gisStore.marcadorSeleccionado.salud.length"
-                color="red"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip :label="gisStore.marcadorSeleccionado.salud.length" color="red" text-color="white" size="sm"
+                class="q-ml-sm" />
             </div>
-            <div
-              v-for="(saludItem, index) in gisStore.marcadorSeleccionado.salud"
-              :key="index"
-              class="q-mb-xs q-pa-sm rounded-borders"
-              :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'"
-            >
+            <div v-for="(saludItem, index) in gisStore.marcadorSeleccionado.salud" :key="index"
+              class="q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'">
               <div class="row items-center">
                 <div class="col">
                   <div v-if="saludItem.problema_salud" class="text-body2">
                     {{ saludItem.problema_salud }}
                   </div>
                   <div class="q-mt-xs">
-                    <q-badge
-                      v-if="saludItem.cud"
-                      color="purple"
-                      text-color="white"
-                      class="q-mr-xs"
-                      >CUD</q-badge
-                    >
-                    <q-badge
-                      v-if="saludItem.obra_social"
-                      color="green"
-                      text-color="white"
-                      >Obra Social</q-badge
-                    >
+                    <q-badge v-if="saludItem.cud" color="purple" text-color="white" class="q-mr-xs">CUD</q-badge>
+                    <q-badge v-if="saludItem.obra_social" color="green" text-color="white">Obra Social</q-badge>
                   </div>
                 </div>
               </div>
@@ -228,37 +166,21 @@
           <q-separator v-if="gisStore.marcadorSeleccionado.salud?.length" />
 
           <!-- 4. VIVIENDA -->
-          <q-card-section
-            v-if="gisStore.marcadorSeleccionado.viviendas?.length"
-            class="q-pa-md"
-          >
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+          <q-card-section v-if="gisStore.marcadorSeleccionado.viviendas?.length" class="q-pa-md">
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="home" class="q-mr-xs" />
               Vivienda
-              <q-chip
-                :label="gisStore.marcadorSeleccionado.viviendas.length"
-                color="teal"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip :label="gisStore.marcadorSeleccionado.viviendas.length" color="teal" text-color="white" size="sm"
+                class="q-ml-sm" />
             </div>
-            <div
-              v-for="(vivienda, index) in gisStore.marcadorSeleccionado
-                .viviendas"
-              :key="index"
-              class="q-mb-xs q-pa-sm rounded-borders"
-              :class="$q.dark.isActive ? 'bg-teal-9' : 'bg-teal-1'"
-            >
+            <div v-for="(vivienda, index) in gisStore.marcadorSeleccionado
+              .viviendas" :key="index" class="q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-teal-9' : 'bg-teal-1'">
               <div class="text-body2">
                 <strong>{{ vivienda.tipo }}</strong> • {{ vivienda.dominio }}
               </div>
               <div class="text-caption text-grey">
-                <span v-if="vivienda.ambientes"
-                  >{{ vivienda.ambientes }} ambientes</span
-                >
+                <span v-if="vivienda.ambientes">{{ vivienda.ambientes }} ambientes</span>
                 <span v-if="vivienda.ambientes && vivienda.baño"> • </span>
                 <span v-if="vivienda.baño">Baño {{ vivienda.baño }}</span>
                 <span v-if="vivienda.baño_opcion">
@@ -271,30 +193,16 @@
           <q-separator v-if="gisStore.marcadorSeleccionado.viviendas?.length" />
 
           <!-- 5. OCUPACIÓN -->
-          <q-card-section
-            v-if="gisStore.marcadorSeleccionado.ocupaciones?.length"
-            class="q-pa-md"
-          >
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+          <q-card-section v-if="gisStore.marcadorSeleccionado.ocupaciones?.length" class="q-pa-md">
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="work" class="q-mr-xs" />
               Ocupación
-              <q-chip
-                :label="gisStore.marcadorSeleccionado.ocupaciones.length"
-                color="orange"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip :label="gisStore.marcadorSeleccionado.ocupaciones.length" color="orange" text-color="white"
+                size="sm" class="q-ml-sm" />
             </div>
-            <div
-              v-for="(ocupacion, index) in gisStore.marcadorSeleccionado
-                .ocupaciones"
-              :key="index"
-              class="q-mb-xs q-pa-sm rounded-borders"
-              :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'"
-            >
+            <div v-for="(ocupacion, index) in gisStore.marcadorSeleccionado
+              .ocupaciones" :key="index" class="q-mb-xs q-pa-sm rounded-borders"
+              :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'">
               <!-- Mostrar nombre si existe, sino el tipo principal -->
               <div class="text-body2 text-weight-medium">
                 {{ ocupacion.nombre || ocupacion.tipo_principal }}
@@ -304,49 +212,28 @@
                 <span v-if="ocupacion.tipo_1 && ocupacion.tipo_2"> • </span>
                 <span v-if="ocupacion.tipo_2">{{ ocupacion.tipo_2 }}</span>
               </div>
-              <div
-                v-if="ocupacion.ingresos"
-                class="text-caption text-green text-weight-medium"
-              >
+              <div v-if="ocupacion.ingresos" class="text-caption text-green text-weight-medium">
                 Ingresos: ${{ ocupacion.ingresos.toLocaleString() }}
               </div>
             </div>
           </q-card-section>
 
-          <q-separator
-            v-if="gisStore.marcadorSeleccionado.ocupaciones?.length"
-          />
+          <q-separator v-if="gisStore.marcadorSeleccionado.ocupaciones?.length" />
 
           <!-- 6. INTEGRANTES -->
           <q-card-section class="q-pa-md">
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="people" class="q-mr-xs" />
               Integrantes
-              <q-chip
-                v-if="gisStore.marcadorSeleccionado.integrantes?.length"
-                :label="gisStore.marcadorSeleccionado.integrantes.length"
-                color="blue"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip v-if="gisStore.marcadorSeleccionado.integrantes?.length"
+                :label="gisStore.marcadorSeleccionado.integrantes.length" color="blue" text-color="white" size="sm"
+                class="q-ml-sm" />
             </div>
             <div v-if="gisStore.marcadorSeleccionado.integrantes?.length">
-              <div
-                v-for="(integrante, index) in gisStore.marcadorSeleccionado
-                  .integrantes"
-                :key="index"
-                class="row items-center q-py-xs q-mb-xs rounded-borders q-pa-sm"
-                :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'"
-              >
-                <q-avatar
-                  size="28px"
-                  class="q-mr-sm"
-                  color="blue-5"
-                  text-color="white"
-                >
+              <div v-for="(integrante, index) in gisStore.marcadorSeleccionado
+                .integrantes" :key="index" class="row items-center q-py-xs q-mb-xs rounded-borders q-pa-sm"
+                :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'">
+                <q-avatar size="28px" class="q-mr-sm" color="blue-5" text-color="white">
                   {{ integrante.nombre.charAt(0) }}
                 </q-avatar>
                 <div class="col">
@@ -359,25 +246,10 @@
                   </div>
                   <!-- Salud del integrante -->
                   <div v-if="integrante.salud?.length" class="q-mt-xs">
-                    <div
-                      v-for="(saludItem, sIndex) in integrante.salud"
-                      :key="sIndex"
-                      class="text-caption"
-                    >
-                      <q-badge
-                        v-if="saludItem.cud"
-                        color="purple"
-                        text-color="white"
-                        class="q-mr-xs"
-                        >CUD</q-badge
-                      >
-                      <q-badge
-                        v-if="saludItem.obra_social"
-                        color="green"
-                        text-color="white"
-                        class="q-mr-xs"
-                        >Obra Social</q-badge
-                      >
+                    <div v-for="(saludItem, sIndex) in integrante.salud" :key="sIndex" class="text-caption">
+                      <q-badge v-if="saludItem.cud" color="purple" text-color="white" class="q-mr-xs">CUD</q-badge>
+                      <q-badge v-if="saludItem.obra_social" color="green" text-color="white" class="q-mr-xs">Obra
+                        Social</q-badge>
                       <span v-if="saludItem.problema_salud" class="text-red">{{
                         saludItem.problema_salud
                       }}</span>
@@ -392,46 +264,22 @@
           <q-separator />
 
           <!-- 7. SERVICIOS -->
-          <q-card-section
-            v-if="gisStore.marcadorSeleccionado.servicios?.length"
-            class="q-pa-md"
-          >
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+          <q-card-section v-if="gisStore.marcadorSeleccionado.servicios?.length" class="q-pa-md">
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="electrical_services" class="q-mr-xs" />
               Servicios
-              <q-chip
-                :label="gisStore.marcadorSeleccionado.servicios.length"
-                color="indigo"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip :label="gisStore.marcadorSeleccionado.servicios.length" color="indigo" text-color="white"
+                size="sm" class="q-ml-sm" />
             </div>
             <div class="row q-col-gutter-sm">
-              <div
-                v-for="(servicio, index) in gisStore.marcadorSeleccionado
-                  .servicios"
-                :key="index"
-                class="col-6"
-              >
-                <q-chip
-                  :color="
-                    servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
-                  "
-                  text-color="white"
-                  size="sm"
-                  class="full-width"
-                >
-                  <q-icon
-                    :name="
-                      servicio.opcion_servicio === 'Conectado'
-                        ? 'check_circle'
-                        : 'cancel'
-                    "
-                    class="q-mr-xs"
-                  />
+              <div v-for="(servicio, index) in gisStore.marcadorSeleccionado
+                .servicios" :key="index" class="col-6">
+                <q-chip :color="servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
+                  " text-color="white" size="sm" class="full-width">
+                  <q-icon :name="servicio.opcion_servicio === 'Conectado'
+                    ? 'check_circle'
+                    : 'cancel'
+                    " class="q-mr-xs" />
                   {{ servicio.nombre }}
                 </q-chip>
               </div>
@@ -442,44 +290,25 @@
 
           <!-- 8. PROGRAMAS -->
           <q-card-section class="q-pa-md">
-            <div
-              class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-            >
+            <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="assignment" class="q-mr-xs" />
               Programas Activos
-              <q-chip
-                v-if="programasActivos.length"
-                :label="programasActivos.length"
-                color="primary"
-                text-color="white"
-                size="sm"
-                class="q-ml-sm"
-              />
+              <q-chip v-if="programasActivos.length" :label="programasActivos.length" color="primary" text-color="white"
+                size="sm" class="q-ml-sm" />
             </div>
 
             <div v-if="programasActivos.length">
-              <div
-                v-for="(programa, index) in programasActivos"
-                :key="index"
+              <div v-for="(programa, index) in programasActivos" :key="index"
                 class="text-body2 q-mb-xs q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'"
-              >
+                :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
                 <div class="text-weight-medium">{{ programa.tipo }}</div>
                 <div class="text-caption">{{ programa.ayuda }}</div>
                 <!-- Mostrar notas del programa si existen -->
-                <div
-                  v-if="programa.notas"
-                  class="text-caption text-grey q-mt-xs"
-                >
+                <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
                   <q-icon name="note" size="xs" class="q-mr-xs" />
                   {{ programa.notas }}
                 </div>
-                <q-badge
-                  v-if="programa.fechaInicio"
-                  color="green"
-                  class="q-mt-xs"
-                  text-color="white"
-                >
+                <q-badge v-if="programa.fechaInicio" color="green" class="q-mt-xs" text-color="white">
                   Desde:
                   {{ new Date(programa.fechaInicio).toLocaleDateString() }}
                 </q-badge>
@@ -488,13 +317,8 @@
             <div v-else class="text-caption text-grey">Ninguno</div>
 
             <div class="q-mt-sm">
-              <q-btn
-                label="Historial de Programas"
-                color="primary"
-                flat
-                @click="mostrarModalHistorial = true"
-                :badge="programasInactivos.length || undefined"
-              />
+              <q-btn label="Historial de Programas" color="primary" flat @click="mostrarModalHistorial = true"
+                :badge="programasInactivos.length || undefined" />
             </div>
           </q-card-section>
 
@@ -502,16 +326,11 @@
           <div v-if="gisStore.marcadorSeleccionado.notas">
             <q-separator />
             <q-card-section class="q-pa-md">
-              <div
-                class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
-              >
+              <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
                 <q-icon name="note" class="q-mr-xs" />
                 Notas
               </div>
-              <div
-                class="text-body2 q-pa-sm rounded-borders"
-                :class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-2'"
-              >
+              <div class="text-body2 q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-2'">
                 {{ gisStore.marcadorSeleccionado.notas }}
               </div>
             </q-card-section>
@@ -526,23 +345,14 @@
               <q-tooltip>Imprimir</q-tooltip>
             </q-btn>
 
-            <q-btn
-              flat
-              v-if="permisos.puedeEditar"
-              label="Editar"
-              @click="editarMarcadorSeleccionado"
-              color="orange-8"
-              size="md"
-            />
+            <HistorialMarcador :idMarcador="gisStore.marcadorSeleccionado.id"
+              :marcador="gisStore.marcadorSeleccionado" />
 
-            <q-btn
-              flat
-              v-if="permisos.puedeEliminar"
-              label="Eliminar"
-              @click="eliminarMarcadorSeleccionado"
-              color="red"
-              size="md"
-            />
+            <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="orange-8"
+              size="md" />
+
+            <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
+              size="md" />
           </q-card-actions>
         </div>
       </q-card>
@@ -553,14 +363,8 @@
         <q-card-section>
           <div class="text-h6">
             Historial de Programas
-            <q-chip
-              v-if="programasInactivos.length"
-              :label="programasInactivos.length"
-              color="grey"
-              text-color="white"
-              size="sm"
-              class="q-ml-sm"
-            />
+            <q-chip v-if="programasInactivos.length" :label="programasInactivos.length" color="grey" text-color="white"
+              size="sm" class="q-ml-sm" />
           </div>
         </q-card-section>
 
@@ -568,16 +372,9 @@
 
         <q-card-section>
           <div v-if="programasInactivos.length">
-            <div
-              v-for="(programa, index) in programasInactivos"
-              :key="index"
-              class="q-mb-sm"
-            >
+            <div v-for="(programa, index) in programasInactivos" :key="index" class="q-mb-sm">
               <div class="row items-center q-gutter-sm">
-                <q-badge
-                  :color="colorPorEstado(programa.estado)"
-                  class="q-mr-sm"
-                >
+                <q-badge :color="colorPorEstado(programa.estado)" class="q-mr-sm">
                   {{ programa.estado.toUpperCase() }}
                 </q-badge>
                 <div class="col text-body2">
@@ -618,19 +415,10 @@
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Referencias</div>
-          <q-btn
-            dense
-            flat
-            icon="chevron_right"
-            @click="mostrarReferencias = false"
-          />
+          <q-btn dense flat icon="chevron_right" @click="mostrarReferencias = false" />
         </div>
         <div class="row q-mt-sm">
-          <div
-            v-for="icono in iconosDisponibles"
-            :key="icono.value"
-            class="column items-center q-mr-md"
-          >
+          <div v-for="icono in iconosDisponibles" :key="icono.value" class="column items-center q-mr-md">
             <img :src="icono.value" width="24" height="24" />
             <div class="text-caption">{{ icono.label }}</div>
           </div>
@@ -638,46 +426,23 @@
       </q-card-section>
     </q-card>
 
-    <q-btn
-      v-if="!mostrarReferencias"
-      icon="pin_drop"
-      class="fixed-top-right q-mt-sm q-mr-sm"
-      style="top: 50px"
-      color="primary"
-      @click="mostrarReferencias = true"
-      ><q-tooltip> Ver referencias </q-tooltip>
+    <q-btn v-if="!mostrarReferencias" icon="pin_drop" class="fixed-top-right q-mt-sm q-mr-sm" style="top: 50px"
+      color="primary" @click="mostrarReferencias = true"><q-tooltip> Ver referencias </q-tooltip>
     </q-btn>
 
     <q-card v-if="mostrarDatosActuales" class="datos-actuales-panel">
       <q-card-section>
         <div class="row justify-between items-center">
           <div class="text-subtitle1">Datos cargados</div>
-          <q-btn
-            dense
-            flat
-            icon="chevron_right"
-            @click="mostrarDatosActuales = false"
-          />
+          <q-btn dense flat icon="chevron_right" @click="mostrarDatosActuales = false" />
         </div>
 
-        <q-input
-          dense
-          outlined
-          debounce="300"
-          v-model="searchTerm"
-          placeholder="Buscar por nombre o dirección"
-          class="q-mt-sm q-mb-sm"
-          clearable
-          prepend-inner-icon="search"
-        />
+        <q-input dense outlined debounce="300" v-model="searchTerm" placeholder="Buscar por nombre o dirección"
+          class="q-mt-sm q-mb-sm" clearable prepend-inner-icon="search" />
 
         <div class="scroll-contenido">
-          <div
-            v-for="(marcador, index) in marcadoresFiltrados"
-            :key="marcador.id"
-            class="q-mb-sm cursor-pointer"
-            @click="verInfoMarcador(marcador)"
-          >
+          <div v-for="(marcador, index) in marcadoresFiltrados" :key="marcador.id" class="q-mb-sm cursor-pointer"
+            @click="verInfoMarcador(marcador)">
             <div>
               <strong>{{ index + 1 }}.</strong> {{ marcador.nombre }}
               {{ marcador.apellido }}
@@ -689,25 +454,13 @@
       </q-card-section>
     </q-card>
 
-    <q-btn
-      v-if="!mostrarDatosActuales"
-      icon="view_list"
-      class="fixed-bottom-right q-mb-sm q-mr-sm"
-      color="primary"
-      @click="mostrarDatosActuales = true"
-      ><q-tooltip> Datos guardados </q-tooltip>
+    <q-btn v-if="!mostrarDatosActuales" icon="view_list" class="fixed-bottom-right q-mb-sm q-mr-sm" color="primary"
+      @click="mostrarDatosActuales = true"><q-tooltip> Datos guardados </q-tooltip>
     </q-btn>
 
     <!-- Modal -->
-    <q-drawer
-      v-model="modalVisible"
-      side="right"
-      :width="900"
-      overlay
-      bordered
-      behavior="desktop"
-      v-if="!permisos.soloLectura"
-    >
+    <q-drawer v-model="modalVisible" side="right" :width="900" overlay bordered behavior="desktop"
+      v-if="!permisos.soloLectura">
       <q-card class="q-pa-md q-gutter-md">
         <div class="text-h6 q-mb-md text-center">
           {{ editando ? 'Editar Informe' : 'Informe social' }}
@@ -722,124 +475,71 @@
               <!-- Nombre y Apellido -->
               <div class="row q-col-gutter-md">
                 <div class="col-6">
-                  <q-input
-                    v-model="nuevoMarcador.nombre"
-                    label="Nombre"
-                    dense
-                    outlined
-                    class="q-mb-md"
-                    :rules="[
-                      (val) => !!val || 'El nombre es obligatorio',
-                      (val) =>
-                        val.length >= 3 || 'Debe tener al menos 3 caracteres',
-                      (val) =>
-                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                        'Solo se permiten letras y espacios',
-                    ]"
-                  />
+                  <q-input v-model="nuevoMarcador.nombre" label="Nombre" dense outlined class="q-mb-md" :rules="[
+                    (val) => !!val || 'El nombre es obligatorio',
+                    (val) =>
+                      val.length >= 3 || 'Debe tener al menos 3 caracteres',
+                    (val) =>
+                      /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
+                      'Solo se permiten letras y espacios',
+                  ]" />
                 </div>
                 <div class="col-6">
-                  <q-input
-                    v-model="nuevoMarcador.apellido"
-                    label="Apellido"
-                    dense
-                    outlined
-                    class="q-mb-md"
-                    :rules="[
-                      (val) => !!val || 'El apellido es obligatorio',
-                      (val) =>
-                        val.length >= 3 || 'Debe tener al menos 3 caracteres',
-                      (val) =>
-                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                        'Solo se permiten letras y espacios',
-                    ]"
-                  />
+                  <q-input v-model="nuevoMarcador.apellido" label="Apellido" dense outlined class="q-mb-md" :rules="[
+                    (val) => !!val || 'El apellido es obligatorio',
+                    (val) =>
+                      val.length >= 3 || 'Debe tener al menos 3 caracteres',
+                    (val) =>
+                      /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
+                      'Solo se permiten letras y espacios',
+                  ]" />
                 </div>
               </div>
 
               <!-- DNI -->
-              <q-input
-                v-model="nuevoMarcador.dni"
-                label="DNI"
-                type="number"
-                dense
-                outlined
-                class="q-mb-md"
-                :min="0"
+              <q-input v-model="nuevoMarcador.dni" label="DNI" type="number" dense outlined class="q-mb-md" :min="0"
                 @update:model-value="
                   (val) => {
                     if (val !== null && Number(val) < 0) nuevoMarcador.dni = 0;
                   }
-                "
-                :rules="[
+                " :rules="[
                   (val) => !!val || 'El DNI es obligatorio',
                   (val) =>
                     /^\d{7,8}$/.test(val) || 'El DNI debe tener 7 u 8 dígitos',
-                ]"
-              />
+                ]" />
 
               <!-- Domicilio -->
-              <q-input
-                v-model="nuevoMarcador.direccion"
-                label="Domicilio"
-                dense
-                outlined
-                class="q-mb-md"
-                :rules="[
-                  (val) => !!val || 'El domicilio es obligatorio',
-                  (val) =>
-                    val.length >= 5 || 'Debe tener al menos 5 caracteres',
-                ]"
-              />
+              <q-input v-model="nuevoMarcador.direccion" label="Domicilio" dense outlined class="q-mb-md" :rules="[
+                (val) => !!val || 'El domicilio es obligatorio',
+                (val) =>
+                  val.length >= 5 || 'Debe tener al menos 5 caracteres',
+              ]" />
 
               <!-- Teléfono -->
-              <q-input
-                v-model="nuevoMarcador.telefono"
-                label="Teléfono"
-                type="number"
-                dense
-                outlined
-                class="q-mb-md"
-                :min="0"
-                @update:model-value="
+              <q-input v-model="nuevoMarcador.telefono" label="Teléfono" type="number" dense outlined class="q-mb-md"
+                :min="0" @update:model-value="
                   (val) => {
                     if (val !== null && Number(val) < 0)
                       nuevoMarcador.telefono = 0;
                   }
-                "
-                :rules="[
+                " :rules="[
                   (val) => !!val || 'El teléfono es obligatorio',
                   (val) =>
                     /^\d{8,12}$/.test(val) || 'Debe tener entre 8 y 12 dígitos',
-                ]"
-              />
+                ]" />
 
               <!-- Barrio y Tiempo de residencia -->
               <div class="row q-col-gutter-md">
                 <div class="col-6">
-                  <q-select
-                    v-model="nuevoMarcador.barrio"
-                    label="Barrio"
-                    :options="opcionesBarrios"
-                    dense
-                    outlined
-                    class="q-mb-md"
-                    :rules="[(val) => !!val || 'Debe seleccionar un barrio']"
-                  />
+                  <q-select v-model="nuevoMarcador.barrio" label="Barrio" :options="opcionesBarrios" dense outlined
+                    class="q-mb-md" :rules="[(val) => !!val || 'Debe seleccionar un barrio']" />
                 </div>
                 <div class="col-6">
-                  <q-select
-                    v-model="nuevoMarcador.tiempo_residencia"
-                    label="Tiempo de residencia"
-                    :options="opcionesResidencia"
-                    dense
-                    outlined
-                    class="q-mb-md"
-                    :rules="[
+                  <q-select v-model="nuevoMarcador.tiempo_residencia" label="Tiempo de residencia"
+                    :options="opcionesResidencia" dense outlined class="q-mb-md" :rules="[
                       (val) =>
                         !!val || 'Debe seleccionar el tiempo de residencia',
-                    ]"
-                  />
+                    ]" />
                 </div>
               </div>
             </q-card-section>
@@ -849,38 +549,14 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Nivel de Estudios</div>
 
-              <div
-                v-for="(estudio, index) in nuevoMarcador.estudios"
-                :key="index"
-                class="q-mb-sm q-pa-sm border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarEstudio(index)"
-                />
-                <q-select
-                  v-model="estudio.nivel"
-                  label="Nivel de estudios"
-                  :options="opcionesEstudios"
-                  dense
-                  outlined
-                  class="q-pr-lg"
-                  :rules="[(val) => !!val || 'Debe seleccionar un nivel']"
-                />
+              <div v-for="(estudio, index) in nuevoMarcador.estudios" :key="index"
+                class="q-mb-sm q-pa-sm border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarEstudio(index)" />
+                <q-select v-model="estudio.nivel" label="Nivel de estudios" :options="opcionesEstudios" dense outlined
+                  class="q-pr-lg" :rules="[(val) => !!val || 'Debe seleccionar un nivel']" />
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar estudio"
-                color="primary"
-                flat
-                @click="agregarEstudio"
-              />
+              <q-btn icon="add_circle" label="Agregar estudio" color="primary" flat @click="agregarEstudio" />
             </q-card-section>
 
             <!-- 3. Sección de Salud General -->
@@ -888,48 +564,23 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Información de Salud</div>
 
-              <div
-                v-for="(saludItem, index) in nuevoMarcador.salud"
-                :key="index"
-                class="q-mb-md q-pa-sm border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarSalud(index)"
-                />
+              <div v-for="(saludItem, index) in nuevoMarcador.salud" :key="index"
+                class="q-mb-md q-pa-sm border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarSalud(index)" />
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-2">
                     <q-checkbox v-model="saludItem.cud" label="CUD" />
                   </div>
                   <div class="col-12 col-md-2">
-                    <q-checkbox
-                      v-model="saludItem.obra_social"
-                      label="Obra Social"
-                    />
+                    <q-checkbox v-model="saludItem.obra_social" label="Obra Social" />
                   </div>
                   <div class="col-12 col-md-8">
-                    <q-input
-                      v-model="saludItem.problema_salud"
-                      label="Problema de salud"
-                      dense
-                      outlined
-                    />
+                    <q-input v-model="saludItem.problema_salud" label="Problema de salud" dense outlined />
                   </div>
                 </div>
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar info salud"
-                color="primary"
-                flat
-                @click="agregarSalud"
-              />
+              <q-btn icon="add_circle" label="Agregar info salud" color="primary" flat @click="agregarSalud" />
             </q-card-section>
 
             <!-- 4. Sección de Viviendas -->
@@ -937,69 +588,29 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Vivienda</div>
 
-              <div
-                v-for="(vivienda, index) in nuevoMarcador.viviendas"
-                :key="index"
-                class="q-mb-md q-pa-sm border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarVivienda(index)"
-                />
+              <div v-for="(vivienda, index) in nuevoMarcador.viviendas" :key="index"
+                class="q-mb-md q-pa-sm border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarVivienda(index)" />
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-3">
-                    <q-select
-                      v-model="vivienda.tipo"
-                      label="Tipo de vivienda"
-                      :options="opcionesTipoVivienda"
-                      dense
-                      outlined
-                      :rules="[(val) => !!val || 'Debe seleccionar un tipo']"
-                    />
+                    <q-select v-model="vivienda.tipo" label="Tipo de vivienda" :options="opcionesTipoVivienda" dense
+                      outlined :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
                   </div>
                   <div class="col-12 col-md-3">
-                    <q-select
-                      v-model="vivienda.dominio"
-                      label="Dominio"
-                      :options="opcionesDominioVivienda"
-                      dense
-                      outlined
-                      :rules="[(val) => !!val || 'Debe seleccionar el dominio']"
-                    />
+                    <q-select v-model="vivienda.dominio" label="Dominio" :options="opcionesDominioVivienda" dense
+                      outlined :rules="[(val) => !!val || 'Debe seleccionar el dominio']" />
                   </div>
                   <div class="col-12 col-md-3">
-                    <q-select
-                      v-model="vivienda.ambientes"
-                      label="Ambientes"
-                      :options="opcionesAmbientes"
-                      dense
-                      outlined
-                    />
+                    <q-select v-model="vivienda.ambientes" label="Ambientes" :options="opcionesAmbientes" dense
+                      outlined />
                   </div>
                   <div class="col-12 col-md-3">
-                    <q-select
-                      v-model="vivienda.baño"
-                      label="Baño"
-                      :options="opcionesBaño"
-                      dense
-                      outlined
-                    />
+                    <q-select v-model="vivienda.baño" label="Baño" :options="opcionesBaño" dense outlined />
                   </div>
                 </div>
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar vivienda"
-                color="primary"
-                flat
-                @click="agregarVivienda"
-              />
+              <q-btn icon="add_circle" label="Agregar vivienda" color="primary" flat @click="agregarVivienda" />
             </q-card-section>
 
             <!-- 5. Sección de Ocupaciones -->
@@ -1007,102 +618,55 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Ocupación</div>
 
-              <div
-                v-for="(ocupacion, index) in nuevoMarcador.ocupaciones"
-                :key="index"
-                class="q-mb-md q-pa-sm border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarOcupacion(index)"
-                />
+              <div v-for="(ocupacion, index) in nuevoMarcador.ocupaciones" :key="index"
+                class="q-mb-md q-pa-sm border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarOcupacion(index)" />
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-4">
-                    <q-select
-                      v-model="ocupacion.tipo_principal"
-                      label="Tipo de ocupación"
-                      :options="opcionesOcupacion"
-                      dense
-                      outlined
-                      @update:model-value="resetearTiposOcupacion(index)"
-                      :rules="[(val) => !!val || 'Debe seleccionar un tipo']"
-                    />
+                    <q-select v-model="ocupacion.tipo_principal" label="Tipo de ocupación" :options="opcionesOcupacion"
+                      dense outlined @update:model-value="resetearTiposOcupacion(index)"
+                      :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-select
-                      v-model="ocupacion.tipo_1"
-                      label="Tipo 1"
-                      :options="getTipoOcupacion1(ocupacion.tipo_principal)"
-                      dense
-                      outlined
-                      :disable="
-                        !ocupacion.tipo_principal ||
+                    <q-select v-model="ocupacion.tipo_1" label="Tipo 1"
+                      :options="getTipoOcupacion1(ocupacion.tipo_principal)" dense outlined :disable="!ocupacion.tipo_principal ||
                         ![
                           'Trabajo reproductivo',
                           'Trabajo productivo',
                         ].includes(ocupacion.tipo_principal)
-                      "
-                      :rules="[
-                        (val) =>
-                          !ocupacion.tipo_principal ||
-                          ![
-                            'Trabajo reproductivo',
-                            'Trabajo productivo',
-                          ].includes(ocupacion.tipo_principal) ||
-                          !!val ||
-                          'Debe seleccionar un tipo',
-                      ]"
-                    />
+                        " :rules="[
+                          (val) =>
+                            !ocupacion.tipo_principal ||
+                            ![
+                              'Trabajo reproductivo',
+                              'Trabajo productivo',
+                            ].includes(ocupacion.tipo_principal) ||
+                            !!val ||
+                            'Debe seleccionar un tipo',
+                        ]" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-select
-                      v-model="ocupacion.tipo_2"
-                      label="Tipo 2"
-                      :options="getTipoOcupacion2(ocupacion.tipo_principal)"
-                      dense
-                      outlined
-                      :disable="
-                        !ocupacion.tipo_principal ||
+                    <q-select v-model="ocupacion.tipo_2" label="Tipo 2"
+                      :options="getTipoOcupacion2(ocupacion.tipo_principal)" dense outlined :disable="!ocupacion.tipo_principal ||
                         ocupacion.tipo_principal !== 'Trabajo reproductivo'
-                      "
-                      :rules="[
-                        (val) =>
-                          ocupacion.tipo_principal !== 'Trabajo reproductivo' ||
-                          !!val ||
-                          'Debe seleccionar un tipo',
-                      ]"
-                    />
+                        " :rules="[
+                          (val) =>
+                            ocupacion.tipo_principal !== 'Trabajo reproductivo' ||
+                            !!val ||
+                            'Debe seleccionar un tipo',
+                        ]" />
                   </div>
                   <div class="col-12">
-                    <q-input
-                      v-model.number="ocupacion.ingresos"
-                      label="Ingresos"
-                      type="number"
-                      dense
-                      outlined
-                      :min="0"
-                      :disable="
-                        !ocupacion.tipo_principal ||
+                    <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined :min="0"
+                      :disable="!ocupacion.tipo_principal ||
                         (ocupacion.tipo_principal !== 'Trabajo reproductivo' &&
                           ocupacion.tipo_principal !== 'Trabajo productivo')
-                      "
-                    />
+                        " />
                   </div>
                 </div>
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar ocupación"
-                color="primary"
-                flat
-                @click="agregarOcupacion"
-              />
+              <q-btn icon="add_circle" label="Agregar ocupación" color="primary" flat @click="agregarOcupacion" />
             </q-card-section>
 
             <!-- 6. Sección de Integrantes -->
@@ -1110,152 +674,78 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Integrantes *</div>
 
-              <div
-                v-for="(integrante, index) in nuevoMarcador.integrantes"
-                :key="index"
-                class="q-pa-md q-mb-md border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarIntegrante(index)"
-                />
+              <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index"
+                class="q-pa-md q-mb-md border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarIntegrante(index)" />
                 <div class="row q-col-gutter-md q-mb-md q-pr-lg">
                   <div class="col-12 col-md-4">
-                    <q-input
-                      v-model="integrante.nombre"
-                      label="Nombre"
-                      dense
-                      outlined
-                      :rules="[
-                        (val) => !!val || 'El nombre es obligatorio',
-                        (val) =>
-                          val.length >= 2 || 'Debe tener al menos 2 caracteres',
-                        (val) =>
-                          /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                          'Solo se permiten letras y espacios',
-                      ]"
-                    />
+                    <q-input v-model="integrante.nombre" label="Nombre" dense outlined :rules="[
+                      (val) => !!val || 'El nombre es obligatorio',
+                      (val) =>
+                        val.length >= 2 || 'Debe tener al menos 2 caracteres',
+                      (val) =>
+                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
+                        'Solo se permiten letras y espacios',
+                    ]" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-input
-                      v-model="integrante.apellido"
-                      label="Apellido"
-                      dense
-                      outlined
-                      :rules="[
-                        (val) => !!val || 'El apellido es obligatorio',
-                        (val) =>
-                          val.length >= 2 || 'Debe tener al menos 2 caracteres',
-                        (val) =>
-                          /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                          'Solo se permiten letras y espacios',
-                      ]"
-                    />
+                    <q-input v-model="integrante.apellido" label="Apellido" dense outlined :rules="[
+                      (val) => !!val || 'El apellido es obligatorio',
+                      (val) =>
+                        val.length >= 2 || 'Debe tener al menos 2 caracteres',
+                      (val) =>
+                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
+                        'Solo se permiten letras y espacios',
+                    ]" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-select
-                      v-model="integrante.vinculo"
-                      label="Vínculo"
-                      :options="opcionesVinculo"
-                      dense
-                      outlined
-                      :rules="[(val) => !!val || 'Debe seleccionar un vínculo']"
-                    />
+                    <q-select v-model="integrante.vinculo" label="Vínculo" :options="opcionesVinculo" dense outlined
+                      :rules="[(val) => !!val || 'Debe seleccionar un vínculo']" />
                   </div>
                 </div>
 
                 <div class="row q-col-gutter-md q-mb-md q-pr-lg">
                   <div class="col-12 col-md-6">
-                    <q-input
-                      v-model.number="integrante.edad"
-                      label="Edad"
-                      type="number"
-                      dense
-                      outlined
-                      :rules="[
-                        (val) => !!val || 'La edad es obligatoria',
-                        (val) =>
-                          (val >= 0 && val <= 120) ||
-                          'La edad debe estar entre 0 y 120 años',
-                      ]"
-                    />
+                    <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined :rules="[
+                      (val) => !!val || 'La edad es obligatoria',
+                      (val) =>
+                        (val >= 0 && val <= 120) ||
+                        'La edad debe estar entre 0 y 120 años',
+                    ]" />
                   </div>
                   <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="integrante.dni"
-                      label="DNI"
-                      type="number"
-                      dense
-                      outlined
-                      :rules="[
-                        (val) => !!val || 'El DNI es obligatorio',
-                        (val) =>
-                          /^\d{7,8}$/.test(val) ||
-                          'El DNI debe tener 7 u 8 dígitos',
-                      ]"
-                    />
+                    <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined :rules="[
+                      (val) => !!val || 'El DNI es obligatorio',
+                      (val) =>
+                        /^\d{7,8}$/.test(val) ||
+                        'El DNI debe tener 7 u 8 dígitos',
+                    ]" />
                   </div>
                 </div>
 
                 <!-- Salud del integrante -->
                 <div class="text-subtitle2 q-mb-sm">Información de Salud</div>
-                <div
-                  v-for="(saludItem, saludIndex) in integrante.salud"
-                  :key="saludIndex"
-                  class="q-mb-md q-pa-sm bg-grey-1 rounded relative-position"
-                >
-                  <q-btn
-                    icon="close"
-                    color="negative"
-                    flat
-                    dense
-                    round
-                    size="sm"
-                    class="absolute-top-right q-ma-xs"
-                    @click="eliminarSaludIntegrante(index, saludIndex)"
-                  />
+                <div v-for="(saludItem, saludIndex) in integrante.salud" :key="saludIndex"
+                  class="q-mb-md q-pa-sm bg-grey-1 rounded relative-position">
+                  <q-btn icon="close" color="negative" flat dense round size="sm" class="absolute-top-right q-ma-xs"
+                    @click="eliminarSaludIntegrante(index, saludIndex)" />
                   <div class="row q-col-gutter-md items-center q-pr-lg">
                     <div class="col-12 col-md-3">
                       <q-checkbox v-model="saludItem.cud" label="CUD" />
                     </div>
                     <div class="col-12 col-md-3">
-                      <q-checkbox
-                        v-model="saludItem.obra_social"
-                        label="Obra Social"
-                      />
+                      <q-checkbox v-model="saludItem.obra_social" label="Obra Social" />
                     </div>
                     <div class="col-12 col-md-6">
-                      <q-input
-                        v-model="saludItem.problema_salud"
-                        label="Problema de salud"
-                        dense
-                        outlined
-                      />
+                      <q-input v-model="saludItem.problema_salud" label="Problema de salud" dense outlined />
                     </div>
                   </div>
                 </div>
-                <q-btn
-                  icon="add"
-                  label="Agregar info salud"
-                  color="primary"
-                  flat
-                  size="sm"
-                  @click="agregarSaludIntegrante(index)"
-                />
+                <q-btn icon="add" label="Agregar info salud" color="primary" flat size="sm"
+                  @click="agregarSaludIntegrante(index)" />
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar integrante"
-                color="primary"
-                flat
-                @click="agregarIntegrante"
-              />
+              <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
             </q-card-section>
 
             <!-- 7. Sección de Servicios -->
@@ -1263,56 +753,25 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Servicios</div>
 
-              <div
-                v-for="(servicio, index) in nuevoMarcador.servicios"
-                :key="index"
-                class="q-mb-sm q-pa-sm border rounded relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarServicio(index)"
-                />
+              <div v-for="(servicio, index) in nuevoMarcador.servicios" :key="index"
+                class="q-mb-sm q-pa-sm border rounded relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarServicio(index)" />
                 <div class="row q-gutter-sm q-pr-lg">
-                  <q-select
-                    v-model="servicio.nombre"
-                    label="Servicio"
-                    :options="opcionesServicios"
-                    dense
-                    outlined
-                    class="col-5"
-                    @update:model-value="resetearOpcionServicio(index)"
-                    :rules="[(val) => !!val || 'Debe seleccionar un servicio']"
-                  />
-                  <q-select
-                    v-model="servicio.opcion_servicio"
-                    label="Opción"
-                    :options="getOpcionesxServicios(servicio.nombre)"
-                    dense
-                    outlined
-                    class="col-5"
-                    :disable="!servicio.nombre"
-                    :rules="[
+                  <q-select v-model="servicio.nombre" label="Servicio" :options="opcionesServicios" dense outlined
+                    class="col-5" @update:model-value="resetearOpcionServicio(index)"
+                    :rules="[(val) => !!val || 'Debe seleccionar un servicio']" />
+                  <q-select v-model="servicio.opcion_servicio" label="Opción"
+                    :options="getOpcionesxServicios(servicio.nombre)" dense outlined class="col-5"
+                    :disable="!servicio.nombre" :rules="[
                       (val) =>
                         !servicio.nombre ||
                         !!val ||
                         'Debe seleccionar una opción',
-                    ]"
-                  />
+                    ]" />
                 </div>
               </div>
-              <q-btn
-                icon="add_circle"
-                label="Agregar servicio"
-                color="primary"
-                flat
-                @click="agregarServicio"
-              />
+              <q-btn icon="add_circle" label="Agregar servicio" color="primary" flat @click="agregarServicio" />
             </q-card-section>
 
             <!-- 8. Sección de Programas -->
@@ -1320,86 +779,42 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Programas *</div>
 
-              <div
-                v-for="(programa, index) in nuevoMarcador.programas"
-                :key="index"
-                class="q-mb-md q-pa-md rounded bordered relative-position"
-              >
-                <q-btn
-                  icon="close"
-                  color="negative"
-                  dense
-                  round
-                  size="sm"
-                  class="absolute-top-right q-ma-xs"
-                  style="padding: 6px"
-                  @click="eliminarPrograma(index)"
-                >
-                  <q-tooltip
-                    anchor="top middle"
-                    self="bottom middle"
-                    :offset="[0, 10]"
-                  >
+              <div v-for="(programa, index) in nuevoMarcador.programas" :key="index"
+                class="q-mb-md q-pa-md rounded bordered relative-position">
+                <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
+                  style="padding: 6px" @click="eliminarPrograma(index)">
+                  <q-tooltip anchor="top middle" self="bottom middle" :offset="[0, 10]">
                     Finalizar programa
                   </q-tooltip>
                 </q-btn>
 
                 <!-- Primera fila: Tipo + Ayuda -->
                 <div class="row q-col-gutter-md q-pr-lg">
-                  <q-select
-                    v-model="programa.tipo"
-                    label="Tipo"
-                    :options="tiposPrograma"
-                    dense
-                    outlined
-                    class="col"
+                  <q-select v-model="programa.tipo" label="Tipo" :options="tiposPrograma" dense outlined class="col"
                     @update:model-value="resetearAyuda(index)"
-                    :rules="[(val) => !!val || 'Debe seleccionar un tipo']"
-                  />
+                    :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
 
-                  <q-select
-                    v-model="programa.ayuda"
-                    label="Ayuda"
-                    :options="getOpcionesAyuda(programa.tipo)"
-                    dense
-                    outlined
-                    class="col"
-                    :disable="!programa.tipo || programa.tipo === 'SUBSIDIOS'"
-                    :rules="[
+                  <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
+                    outlined class="col" :disable="!programa.tipo || programa.tipo === 'SUBSIDIOS'" :rules="[
                       (val) =>
                         programa.tipo === 'SUBSIDIOS' ||
                         !!val ||
                         'Debe seleccionar una ayuda',
-                    ]"
-                  />
+                    ]" />
                 </div>
 
                 <!-- Segunda fila: Notas -->
                 <div class="row q-mt-sm q-pr-lg">
-                  <q-input
-                    v-model="programa.notas"
-                    label="Notas"
-                    type="textarea"
-                    dense
-                    outlined
-                    class="col"
-                    :rules="[
-                      (val) =>
-                        !val ||
-                        val.length <= 500 ||
-                        'Las notas no pueden exceder 500 caracteres',
-                    ]"
-                  />
+                  <q-input v-model="programa.notas" label="Notas" type="textarea" dense outlined class="col" :rules="[
+                    (val) =>
+                      !val ||
+                      val.length <= 500 ||
+                      'Las notas no pueden exceder 500 caracteres',
+                  ]" />
                 </div>
               </div>
 
-              <q-btn
-                icon="add_circle"
-                label="Agregar programa"
-                color="primary"
-                flat
-                @click="agregarPrograma"
-              />
+              <q-btn icon="add_circle" label="Agregar programa" color="primary" flat @click="agregarPrograma" />
             </q-card-section>
 
             <!-- Sección de Ícono -->
@@ -1407,28 +822,14 @@
             <q-card-section>
               <div class="text-h6 q-mb-md">Ícono del Marcador</div>
 
-              <q-select
-                v-model="nuevoMarcador.icono"
-                label="Ícono del marcador"
-                :options="iconosDisponibles"
-                option-value="value"
-                option-label="label"
-                emit-value
-                map-options
-                outlined
-                dense
-                class="q-mb-md"
-                :rules="[(val) => !!val || 'Debe seleccionar un ícono']"
-              >
+              <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
+                option-value="value" option-label="label" emit-value map-options outlined dense class="q-mb-md"
+                :rules="[(val) => !!val || 'Debe seleccionar un ícono']">
                 <!-- Slot para opciones con imágenes -->
                 <template v-slot:option="scope">
                   <q-item clickable v-bind="scope.itemProps">
                     <q-item-section avatar>
-                      <q-img
-                        :src="scope.opt.value"
-                        :alt="scope.opt.label"
-                        style="width: 32px; height: 32px"
-                      />
+                      <q-img :src="scope.opt.value" :alt="scope.opt.label" style="width: 32px; height: 32px" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -1439,11 +840,7 @@
                 <!-- Slot para mostrar la imagen seleccionada -->
                 <template v-slot:selected-item="scope">
                   <q-chip dense square class="q-ma-none">
-                    <q-img
-                      :src="scope.opt.value"
-                      style="width: 20px; height: 20px"
-                      class="q-mr-sm"
-                    />
+                    <q-img :src="scope.opt.value" style="width: 20px; height: 20px" class="q-mr-sm" />
                     {{ scope.opt.label }}
                   </q-chip>
                 </template>
@@ -1453,21 +850,9 @@
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
-          <q-btn
-            flat
-            label="Cancelar"
-            @click="cerrarModal"
-            color="negative"
-            :disable="guardando"
-          />
-          <q-btn
-            flat
-            :label="editando ? 'Guardar cambios' : 'Guardar'"
-            @click="validarYGuardar"
-            color="positive"
-            :loading="guardando"
-            :disable="guardando"
-          />
+          <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" :disable="guardando" />
+          <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="validarYGuardar" color="positive"
+            :loading="guardando" :disable="guardando" />
         </q-card-actions>
       </q-card>
     </q-drawer>
@@ -1491,6 +876,10 @@ import { Geometry } from 'ol/geom';
 import Modify from 'ol/interaction/Modify';
 import { jsPDF } from 'jspdf';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+import HistorialMarcador from 'src/components/HistorialMarcador.vue';
+
+const router = useRouter();
 
 let modifyInteraction: Modify | null = null;
 let marcadorTemporal: Feature<Point> | null = null;
@@ -2282,7 +1671,7 @@ function desactivarEdicionTemporal() {
   }
 }
 
-// Función para generar PDF del marcador seleccionado
+// Función mejorada para generar PDF con diseño de tarjetas/cuadros
 async function generarPDF() {
   if (!gisStore.marcadorSeleccionado) {
     alert('No hay ningún marcador seleccionado');
@@ -2290,507 +1679,662 @@ async function generarPDF() {
   }
 
   try {
-    // Importar jsPDF dinámicamente
+    // Verificar si jsPDF está disponible
+    if (typeof jsPDF === 'undefined') {
+      console.error('jsPDF no está disponible');
+      alert('Error: La librería jsPDF no está cargada. Verifique la conexión a internet.');
+      return;
+    }
+
     const marcador = gisStore.marcadorSeleccionado;
-    const doc = new jsPDF();
+    const doc = new jsPDF('p', 'mm', 'a4');
 
-    // Configuración inicial
-    let yPos = 20;
-    const pageWidth = doc.internal.pageSize.width;
-    const margin = 20;
-    const contentWidth = pageWidth - margin * 2;
+    // ===== CONFIGURACIÓN OPTIMIZADA =====
+    const CONFIG = {
+      margins: { top: 12, right: 12, bottom: 15, left: 12 },
+      pageWidth: doc.internal.pageSize.width,
+      pageHeight: doc.internal.pageSize.height,
+      colors: {
+        primary: [25, 118, 210],
+        success: [76, 175, 80],
+        error: [244, 67, 54],
+        warning: [255, 152, 0],
+        info: [33, 150, 243],
+        text: [33, 33, 33],
+        textSecondary: [117, 117, 117],
+        light: [248, 249, 250],
+        cardBg: [250, 250, 250],
+        cardBorder: [220, 220, 220]
+      },
+      fonts: {
+        title: { size: 14, style: 'bold' },
+        cardTitle: { size: 9, style: 'bold' },
+        cardLabel: { size: 7, style: 'bold' },
+        cardValue: { size: 7, style: 'normal' },
+        small: { size: 6, style: 'normal' },
+        tiny: { size: 5, style: 'normal' }
+      },
+      card: {
+        padding: 3,
+        margin: 2,
+        cornerRadius: 1,
+        headerHeight: 8,
+        minHeight: 15
+      }
+    };
 
-    // Función helper para añadir texto con wrap
-    function addTextWithWrap(text, x, y, maxWidth, fontSize = 12) {
-      doc.setFontSize(fontSize);
-      const lines = doc.splitTextToSize(text, maxWidth);
-      doc.text(lines, x, y);
-      return y + lines.length * (fontSize * 0.4);
+    let yPos = CONFIG.margins.top;
+    const contentWidth = CONFIG.pageWidth - CONFIG.margins.left - CONFIG.margins.right;
+
+    // ===== FUNCIONES HELPER MEJORADAS =====
+
+    // Función para limpiar caracteres especiales
+    function cleanText(text, preserveSpaces = true) {
+      if (!text || typeof text !== 'string') return '';
+
+      let cleaned = text
+        .replace(/%ª/g, '')
+        .replace(/%Ï/g, '')
+        .replace(/%[a-zA-Z]/g, '')
+        .replace(/[^\w\s\-.,;:()\[\]\/]/g, '')
+        .trim();
+
+      if (preserveSpaces) {
+        cleaned = cleaned.replace(/\s+/g, ' ');
+      }
+
+      return cleaned;
     }
 
-    // Función helper para dibujar rectángulo con color
-    function drawColoredRect(x, y, width, height, color) {
-      doc.setFillColor(color);
-      doc.rect(x, y, width, height, 'F');
+    function getSafeValue(value, defaultValue = 'N/A') {
+      if (value === null || value === undefined || value === '') {
+        return defaultValue;
+      }
+
+      const cleanedValue = cleanText(String(value));
+      return cleanedValue || defaultValue;
     }
 
-    // Función helper para verificar nueva página
-    function checkPageBreak(requiredSpace = 30) {
-      if (yPos > 280 - requiredSpace) {
+    function setColor(colorArray) {
+      doc.setTextColor(colorArray[0], colorArray[1], colorArray[2]);
+    }
+
+    function setFont(fontConfig) {
+      doc.setFontSize(fontConfig.size);
+      doc.setFont('helvetica', fontConfig.style);
+    }
+
+    function checkPageBreak(requiredSpace = 15) {
+      if (yPos > CONFIG.pageHeight - CONFIG.margins.bottom - requiredSpace) {
         doc.addPage();
-        yPos = 20;
+        yPos = CONFIG.margins.top + 5;
         return true;
       }
       return false;
     }
 
-    // Función helper para crear sección
-    function createSection(title) {
-      checkPageBreak(20);
-      drawColoredRect(margin, yPos - 3, contentWidth, 2, '#e3f2fd');
-      doc.setFontSize(16);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      doc.text(title, margin, yPos + 8);
-      yPos += 20;
+    // ===== FUNCIONES PARA TARJETAS =====
+
+    // Crear tarjeta básica
+    function createCard(x, y, width, height, title, color = CONFIG.colors.primary) {
+      // Fondo de la tarjeta
+      doc.setFillColor(CONFIG.colors.cardBg[0], CONFIG.colors.cardBg[1], CONFIG.colors.cardBg[2]);
+      doc.rect(x, y, width, height, 'F');
+
+      // Borde de la tarjeta
+      doc.setDrawColor(CONFIG.colors.cardBorder[0], CONFIG.colors.cardBorder[1], CONFIG.colors.cardBorder[2]);
+      doc.setLineWidth(0.3);
+      doc.rect(x, y, width, height, 'S');
+
+      // Header de la tarjeta
+      doc.setFillColor(color[0], color[1], color[2]);
+      doc.rect(x, y, width, CONFIG.card.headerHeight, 'F');
+
+      // Título de la tarjeta
+      setFont(CONFIG.fonts.cardTitle);
+      doc.setTextColor(255, 255, 255);
+      doc.text(cleanText(title).toUpperCase(), x + CONFIG.card.padding, y + 5);
+
+      return {
+        contentX: x + CONFIG.card.padding,
+        contentY: y + CONFIG.card.headerHeight + CONFIG.card.padding,
+        contentWidth: width - (CONFIG.card.padding * 2),
+        contentHeight: height - CONFIG.card.headerHeight - (CONFIG.card.padding * 2)
+      };
     }
 
-    // ENCABEZADO
-    drawColoredRect(margin, yPos - 5, contentWidth, 25, '#1976d2');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text('INFORMACIÓN DEL MARCADOR', margin + 5, yPos + 8);
+    // Agregar campo en tarjeta
+    function addCardField(label, value, x, y, maxWidth) {
+      const cleanLabel = getSafeValue(label);
+      const cleanValue = getSafeValue(value);
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    doc.text(
-      `Generado: ${new Date().toLocaleDateString('es-ES')}`,
-      pageWidth - 60,
-      yPos + 8
-    );
+      if (cleanValue === 'N/A') return y;
 
-    yPos += 35;
+      // Label
+      setFont(CONFIG.fonts.cardLabel);
+      setColor(CONFIG.colors.textSecondary);
+      doc.text(`${cleanLabel}:`, x, y);
 
-    // INFORMACIÓN PRINCIPAL
-    createSection('DATOS PERSONALES');
+      // Value
+      setFont(CONFIG.fonts.cardValue);
+      setColor(CONFIG.colors.text);
 
-    // Nombre y Apellido
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Nombre:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(marcador.nombre || '', margin + 25, yPos);
-    yPos += 10;
-
-    doc.setFont(undefined, 'bold');
-    doc.text('Apellido:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(marcador.apellido || '', margin + 25, yPos);
-    yPos += 10;
-
-    // Dirección
-    doc.setFont(undefined, 'bold');
-    doc.text('Dirección:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    yPos = addTextWithWrap(
-      marcador.direccion,
-      margin + 25,
-      yPos,
-      contentWidth - 25
-    );
-    yPos += 5;
-
-    // Teléfono
-    doc.setFont(undefined, 'bold');
-    doc.text('Teléfono:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(marcador.telefono || 'N/A', margin + 25, yPos);
-    yPos += 10;
-
-    // DNI
-    doc.setFont(undefined, 'bold');
-    doc.text('DNI:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(marcador.dni.toString(), margin + 25, yPos);
-    yPos += 10;
-
-    // Fecha de creación
-    doc.setFont(undefined, 'bold');
-    doc.text('Fecha de Creación:', margin, yPos);
-    doc.setFont(undefined, 'normal');
-    doc.text(
-      new Date(marcador.fechaCreacion).toLocaleDateString('es-ES'),
-      margin + 45,
-      yPos
-    );
-    yPos += 10;
-
-    // INTEGRANTES
-    createSection('INTEGRANTES');
-
-    if (marcador.integrantes && marcador.integrantes.length > 0) {
-      marcador.integrantes.forEach((integrante, index) => {
-        checkPageBreak(25);
-
-        // Fondo alternado para cada integrante
-        if (index % 2 === 0) {
-          drawColoredRect(margin, yPos - 3, contentWidth, 20, '#f8f9fa');
-        }
-
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(
-          `${index + 1}. ${integrante.nombre} ${integrante.apellido}`,
-          margin + 2,
-          yPos + 5
-        );
-
-        doc.setFont(undefined, 'normal');
-        doc.text(`Edad: ${integrante.edad || 'N/A'}`, margin + 2, yPos + 12);
-        doc.text(`DNI: ${integrante.dni}`, margin + 50, yPos + 12);
-        doc.text(
-          `Vínculo: ${integrante.vinculo || 'N/A'}`,
-          margin + 100,
-          yPos + 12
-        );
-
-        // Salud del integrante
-        if (integrante.salud && integrante.salud.length > 0) {
-          yPos += 5;
-          integrante.salud.forEach((saludItem) => {
-            doc.setFontSize(10);
-            doc.setTextColor(150, 0, 0);
-            let saludTexto = '  Salud: ';
-            if (saludItem.cud) saludTexto += 'CUD ';
-            if (saludItem.obra_social) saludTexto += 'Obra Social ';
-            if (saludItem.problema_salud)
-              saludTexto += `- ${saludItem.problema_salud}`;
-            doc.text(saludTexto, margin + 2, yPos + 12);
-            doc.setTextColor(0, 0, 0);
-          });
-        }
-
-        yPos += 25;
+      const valueLines = doc.splitTextToSize(cleanValue, maxWidth - 5);
+      valueLines.forEach((line, index) => {
+        doc.text(line, x, y + 3 + (index * 3));
       });
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay integrantes registrados', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
+
+      return y + 3 + (valueLines.length * 3) + 1;
     }
 
-    // ESTUDIOS
-    createSection('EDUCACIÓN');
+    // Agregar lista en tarjeta
+    function addCardList(items, x, y, maxWidth, columns = 1) {
+      const cleanItems = items
+        .filter(item => item && item.toString().trim())
+        .map(item => getSafeValue(item))
+        .filter(item => item !== 'N/A');
 
-    if (marcador.estudios && marcador.estudios.length > 0) {
-      marcador.estudios.forEach((estudio, index) => {
-        checkPageBreak(15);
-        drawColoredRect(margin, yPos - 3, contentWidth, 12, '#e8f4fd');
+      if (cleanItems.length === 0) return y;
 
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
-        doc.text(`• ${estudio.nivel}`, margin + 2, yPos + 5);
-        yPos += 15;
+      const columnWidth = maxWidth / columns;
+      let currentColumn = 0;
+      let currentY = y;
+      let maxY = y;
+
+      setFont(CONFIG.fonts.cardValue);
+      setColor(CONFIG.colors.text);
+
+      cleanItems.forEach((item, index) => {
+        const itemX = x + (currentColumn * columnWidth);
+
+        // Bullet
+        doc.text('•', itemX, currentY);
+
+        // Texto
+        const lines = doc.splitTextToSize(item, columnWidth - 8);
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, itemX + 4, currentY + (lineIndex * 3));
+        });
+
+        const itemHeight = lines.length * 3;
+        maxY = Math.max(maxY, currentY + itemHeight);
+
+        currentColumn++;
+        if (currentColumn >= columns) {
+          currentColumn = 0;
+          currentY = maxY + 2;
+        }
       });
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay información educativa registrada', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
+
+      return Math.max(maxY, currentY) + 2;
     }
 
-    // OCUPACIONES
-    createSection('OCUPACIONES');
+    // Calcular altura necesaria para contenido
+    function calculateContentHeight(fields) {
+      let height = CONFIG.card.headerHeight + (CONFIG.card.padding * 2);
 
+      fields.forEach(field => {
+        if (field.value && getSafeValue(field.value) !== 'N/A') {
+          height += 8; // Altura base por campo
+
+          // Calcular líneas adicionales si el texto es largo
+          const lines = doc.splitTextToSize(getSafeValue(field.value), 60);
+          if (lines.length > 1) {
+            height += (lines.length - 1) * 3;
+          }
+        }
+      });
+
+      return Math.max(height, CONFIG.card.minHeight);
+    }
+
+    // ===== GENERACIÓN DEL DOCUMENTO CON TARJETAS =====
+
+    // Título principal
+    doc.setFillColor(CONFIG.colors.primary[0], CONFIG.colors.primary[1], CONFIG.colors.primary[2]);
+    doc.rect(CONFIG.margins.left - 5, yPos - 3, contentWidth + 10, 20, 'F');
+
+    setFont(CONFIG.fonts.title);
+    doc.setTextColor(255, 255, 255);
+    const titleText = 'REPORTE DE INFORMACIÓN PERSONAL';
+    const titleWidth = doc.getTextWidth(titleText);
+    const titleX = (CONFIG.pageWidth - titleWidth) / 2;
+    doc.text(titleText, titleX, yPos + 8);
+
+    setFont(CONFIG.fonts.small);
+    const subtitleText = `Generado: ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES')}`;
+    const subtitleWidth = doc.getTextWidth(subtitleText);
+    const subtitleX = (CONFIG.pageWidth - subtitleWidth) / 2;
+    doc.text(subtitleText, subtitleX, yPos + 14);
+
+    yPos += 25;
+
+    // ===== TARJETAS DE INFORMACIÓN =====
+
+    // 1. INFORMACIÓN BÁSICA
+    {
+      const baseHeight = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+      const lineHeight = 5;
+      const basicHeight = baseHeight + (3 * lineHeight);
+      checkPageBreak(basicHeight);
+      const basicCard = createCard(CONFIG.margins.left, yPos, contentWidth, basicHeight, 'INFORMACION BASICA', CONFIG.colors.primary);
+
+      let cardY = basicCard.contentY;
+      cardY = addCardField('Nombre Completo', `${getSafeValue(marcador.nombre)} ${getSafeValue(marcador.apellido)}`, basicCard.contentX, cardY, basicCard.contentWidth);
+      cardY = addCardField('DNI', marcador.dni, basicCard.contentX, cardY, basicCard.contentWidth);
+      cardY = addCardField('Domicilio', marcador.direccion, basicCard.contentX, cardY, basicCard.contentWidth);
+
+      const col2X = basicCard.contentX + (basicCard.contentWidth / 2);
+      let cardY2 = basicCard.contentY;
+      cardY2 = addCardField('Teléfono', marcador.telefono, col2X, cardY2, basicCard.contentWidth / 2);
+      cardY2 = addCardField('Barrio', marcador.barrio, col2X, cardY2, basicCard.contentWidth / 2);
+      cardY2 = addCardField('Tiempo Residencia', marcador.tiempo_residencia, col2X, cardY2, basicCard.contentWidth / 2);
+
+      yPos += basicHeight + 3;
+    }
+
+    // 2. EDUCACION Y SALUD
+    {
+      const cardWidth = (contentWidth - 5) / 2;
+
+      // Educación
+      let estudiosItems = marcador.estudios?.map(e => getSafeValue(e.nivel)).filter(e => e !== 'N/A') || [];
+      let alturaEstudios = CONFIG.card.headerHeight + CONFIG.card.padding * 2 + estudiosItems.length * 4;
+      if (estudiosItems.length === 0) alturaEstudios += 4;
+
+      checkPageBreak(alturaEstudios);
+      const studyCard = createCard(CONFIG.margins.left, yPos, cardWidth, alturaEstudios, 'EDUCACION', CONFIG.colors.info);
+      if (estudiosItems.length > 0) {
+        addCardList(estudiosItems, studyCard.contentX, studyCard.contentY, studyCard.contentWidth, 1);
+      } else {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('Sin información', studyCard.contentX, studyCard.contentY);
+      }
+
+      // Salud
+      let alturaSalud = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+      if (marcador.salud?.length > 0) {
+        marcador.salud.forEach(s => {
+          if (getSafeValue(s.problema_salud) !== 'N/A') {
+            alturaSalud += 4;
+            if (s.cud || s.obra_social) alturaSalud += 3;
+          }
+        });
+        if (alturaSalud === CONFIG.card.headerHeight + CONFIG.card.padding * 2) alturaSalud += 4;
+      } else {
+        alturaSalud += 4;
+      }
+
+      const healthCard = createCard(CONFIG.margins.left + cardWidth + 5, yPos, cardWidth, alturaSalud, 'SALUD', CONFIG.colors.error);
+      if (marcador.salud?.length > 0) {
+        let healthY = healthCard.contentY;
+        let hasValidHealth = false;
+
+        marcador.salud.forEach((saludItem) => {
+          const problema = getSafeValue(saludItem.problema_salud);
+          if (problema !== 'N/A') {
+            hasValidHealth = true;
+            setFont(CONFIG.fonts.cardValue);
+            setColor(CONFIG.colors.text);
+            doc.text(`• ${problema}`, healthCard.contentX, healthY);
+            healthY += 4;
+
+            let cobertura = [];
+            if (saludItem.cud) cobertura.push('CUD');
+            if (saludItem.obra_social) cobertura.push('O.S.');
+
+            if (cobertura.length > 0) {
+              setFont(CONFIG.fonts.tiny);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(`  ${cobertura.join(', ')}`, healthCard.contentX, healthY);
+              healthY += 3;
+            }
+          }
+        });
+
+        if (!hasValidHealth) {
+          setFont(CONFIG.fonts.cardValue);
+          setColor(CONFIG.colors.textSecondary);
+          doc.text('Sin información', healthCard.contentX, healthCard.contentY);
+        }
+      } else {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('Sin información', healthCard.contentX, healthCard.contentY);
+      }
+
+      yPos += Math.max(alturaEstudios, alturaSalud) + 3;
+    }
+
+    {
+      let alturaVivienda = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+
+      if (marcador.viviendas?.length > 0) {
+        // Cada vivienda ocupa 2 filas de campos → 2 * altura por vivienda
+        alturaVivienda += marcador.viviendas.length * (2 * 6); // 6 es el alto estimado por campo
+      } else {
+        alturaVivienda += 5;
+      }
+
+      checkPageBreak(alturaVivienda);
+      const housingCard = createCard(CONFIG.margins.left, yPos, contentWidth, alturaVivienda, 'VIVIENDA', CONFIG.colors.warning);
+
+      if (marcador.viviendas?.length > 0) {
+        let housingY = housingCard.contentY;
+        const col1X = housingCard.contentX;
+        const col2X = housingCard.contentX + (housingCard.contentWidth / 2);
+        const colWidth = housingCard.contentWidth / 2;
+
+        marcador.viviendas.forEach((vivienda, index) => {
+          // Fila 1
+          housingY = addCardField('Tipo', getSafeValue(vivienda.tipo), col1X, housingY, colWidth);
+          housingY = addCardField('Dominio', getSafeValue(vivienda.dominio), col2X, housingY - 6, colWidth); // misma fila
+
+          // Fila 2
+          housingY = addCardField('Ambientes', getSafeValue(vivienda.ambientes), col1X, housingY, colWidth);
+
+          const bañoInfo = getSafeValue(vivienda.baño) +
+            (vivienda.baño_opcion ? ` (${getSafeValue(vivienda.baño_opcion)})` : '');
+          housingY = addCardField('Baño', bañoInfo, col2X, housingY - 6, colWidth); // misma fila
+
+          housingY += 2; // espacio entre viviendas
+        });
+      } else {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('Sin información de vivienda', housingCard.contentX, housingCard.contentY);
+      }
+
+      yPos += alturaVivienda + 3;
+    }
+
+    // 4. OCUPACION
+    // 4. TARJETA DE OCUPACIÓN (con altura dinámica)
     if (marcador.ocupaciones && marcador.ocupaciones.length > 0) {
+      // Calcular altura necesaria
+      const ocupacionesAltura = marcador.ocupaciones.reduce((acc, ocupacion) => {
+        let altura = 6; // ocupación + título
+        if (ocupacion.tipo_1 || ocupacion.tipo_2) altura += 5;
+        if (ocupacion.ingresos) altura += 5;
+        return acc + altura + 2; // +2 de espacio extra
+      }, CONFIG.card.headerHeight + CONFIG.card.padding * 2);
+
+      checkPageBreak(ocupacionesAltura);
+      const jobCard = createCard(CONFIG.margins.left, yPos, contentWidth, ocupacionesAltura, 'OCUPACIÓN', CONFIG.colors.success);
+
+      let jobY = jobCard.contentY;
+
       marcador.ocupaciones.forEach((ocupacion, index) => {
-        checkPageBreak(20);
-        drawColoredRect(margin, yPos - 3, contentWidth, 18, '#fff3e0');
+        const nombreOcupacion = getSafeValue(ocupacion.nombre || ocupacion.tipo_principal);
+        if (nombreOcupacion !== 'N/A') {
+          jobY = addCardField(`Ocupación ${index + 1}`, nombreOcupacion, jobCard.contentX, jobY, jobCard.contentWidth);
 
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${index + 1}. ${ocupacion.nombre}`, margin + 2, yPos + 5);
-
-        doc.setFont(undefined, 'normal');
-        doc.text(
-          `Tipo: ${ocupacion.tipo_1} - ${ocupacion.tipo_2}`,
-          margin + 2,
-          yPos + 12
-        );
-
-        if (ocupacion.ingresos) {
-          doc.setTextColor(0, 100, 0);
-          doc.text(
-            `Ingresos: $${ocupacion.ingresos.toLocaleString()}`,
-            margin + 2,
-            yPos + 18
-          );
-          doc.setTextColor(0, 0, 0);
-        }
-
-        yPos += 25;
-      });
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay ocupaciones registradas', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
-    }
-
-    // VIVIENDA
-    createSection('VIVIENDA');
-
-    if (marcador.viviendas && marcador.viviendas.length > 0) {
-      marcador.viviendas.forEach((vivienda, index) => {
-        checkPageBreak(20);
-        drawColoredRect(margin, yPos - 3, contentWidth, 18, '#e0f2f1');
-
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Tipo: ${vivienda.tipo}`, margin + 2, yPos + 5);
-
-        doc.setFont(undefined, 'normal');
-        doc.text(`Dominio: ${vivienda.dominio}`, margin + 2, yPos + 12);
-        doc.text(`Ambientes: ${vivienda.ambientes}`, margin + 60, yPos + 12);
-        doc.text(
-          `Baño: ${vivienda.baño} ${
-            vivienda.baño_opcion ? `(${vivienda.baño_opcion})` : ''
-          }`,
-          margin + 2,
-          yPos + 18
-        );
-
-        yPos += 25;
-      });
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay información de vivienda registrada', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
-    }
-
-    // SERVICIOS
-    createSection('SERVICIOS');
-
-    if (marcador.servicios && marcador.servicios.length > 0) {
-      // Agrupar servicios por estado
-      const serviciosConectados = marcador.servicios.filter(
-        (s) => s.opcion_servicio === 'Conectado'
-      );
-      const serviciosDesconectados = marcador.servicios.filter(
-        (s) => s.opcion_servicio !== 'Conectado'
-      );
-
-      if (serviciosConectados.length > 0) {
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(0, 150, 0);
-        doc.text('Servicios Conectados:', margin, yPos);
-        yPos += 8;
-
-        doc.setFont(undefined, 'normal');
-        serviciosConectados.forEach((servicio) => {
-          doc.text(`• ${servicio.nombre}`, margin + 5, yPos);
-          yPos += 8;
-        });
-        yPos += 5;
-      }
-
-      if (serviciosDesconectados.length > 0) {
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(150, 0, 0);
-        doc.text('Servicios No Conectados:', margin, yPos);
-        yPos += 8;
-
-        doc.setFont(undefined, 'normal');
-        serviciosDesconectados.forEach((servicio) => {
-          doc.text(`• ${servicio.nombre}`, margin + 5, yPos);
-          yPos += 8;
-        });
-      }
-      doc.setTextColor(0, 0, 0);
-      yPos += 10;
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay servicios registrados', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
-    }
-
-    // PROGRAMAS
-    createSection('PROGRAMAS');
-
-    if (marcador.programas && marcador.programas.length > 0) {
-      // Separar programas activos e inactivos
-      const programasActivos = marcador.programas.filter(
-        (p) => p.estado === 'activo'
-      );
-      const programasInactivos = marcador.programas.filter(
-        (p) => p.estado !== 'activo'
-      );
-
-      if (programasActivos.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(0, 100, 0);
-        doc.text('Programas Activos:', margin, yPos);
-        yPos += 12;
-
-        programasActivos.forEach((programa, index) => {
-          checkPageBreak(15);
-          drawColoredRect(margin, yPos - 3, contentWidth, 12, '#e8f5e8');
-
-          doc.setFontSize(12);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(`${index + 1}. ${programa.tipo}`, margin + 2, yPos + 5);
-
-          doc.setFont(undefined, 'normal');
-          doc.text(`Ayuda: ${programa.ayuda}`, margin + 5, yPos + 10);
-
-          if (programa.fechaInicio) {
-            doc.text(
-              `Desde: ${new Date(programa.fechaInicio).toLocaleDateString(
-                'es-ES'
-              )}`,
-              margin + 100,
-              yPos + 10
-            );
+          const tipo1 = getSafeValue(ocupacion.tipo_1);
+          const tipo2 = getSafeValue(ocupacion.tipo_2);
+          if (tipo1 !== 'N/A' || tipo2 !== 'N/A') {
+            jobY = addCardField('Tipo', `${tipo1} - ${tipo2}`, jobCard.contentX + 10, jobY, jobCard.contentWidth - 10);
           }
 
-          yPos += 18;
-        });
-      }
-
-      if (programasInactivos.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(150, 0, 0);
-        doc.text('Programas Finalizados:', margin, yPos);
-        yPos += 12;
-
-        programasInactivos.forEach((programa, index) => {
-          checkPageBreak(15);
-          drawColoredRect(margin, yPos - 3, contentWidth, 12, '#ffeaea');
-
-          doc.setFontSize(12);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(0, 0, 0);
-          doc.text(`${index + 1}. ${programa.tipo}`, margin + 2, yPos + 5);
-
-          doc.setFont(undefined, 'normal');
-          doc.text(`Ayuda: ${programa.ayuda}`, margin + 5, yPos + 10);
-
-          if (programa.fechaFin) {
-            doc.text(
-              `Finalizado: ${new Date(programa.fechaFin).toLocaleDateString(
-                'es-ES'
-              )}`,
-              margin + 100,
-              yPos + 10
-            );
+          if (ocupacion.ingresos && !isNaN(ocupacion.ingresos)) {
+            jobY = addCardField('Ingresos', `$${ocupacion.ingresos.toLocaleString('es-ES')}`, jobCard.contentX + 10, jobY, jobCard.contentWidth - 10);
           }
 
-          yPos += 18;
+          jobY += 2; // espacio entre ocupaciones
+        }
+      });
+
+      yPos += ocupacionesAltura + 3;
+    } else {
+      checkPageBreak(25);
+      const jobCard = createCard(CONFIG.margins.left, yPos, contentWidth, 22, 'OCUPACIÓN', CONFIG.colors.success);
+      setFont(CONFIG.fonts.cardValue);
+      setColor(CONFIG.colors.textSecondary);
+      doc.text('Sin ocupaciones registradas', jobCard.contentX, jobCard.contentY);
+      yPos += 25;
+    }
+
+
+    // 5. INTEGRANTES
+    {
+      let alturaIntegrantes = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+      if (marcador.integrantes?.length > 0) alturaIntegrantes += 10 + marcador.integrantes.length * 4;
+      else alturaIntegrantes += 4;
+
+      checkPageBreak(alturaIntegrantes);
+      const membersCard = createCard(CONFIG.margins.left, yPos, contentWidth, alturaIntegrantes, 'INTEGRANTES DEL HOGAR', CONFIG.colors.success);
+
+      if (marcador.integrantes?.length > 0) {
+        let membersY = membersCard.contentY;
+
+        const totalIntegrantes = marcador.integrantes.length;
+        const edadesValidas = marcador.integrantes.filter(i => i.edad && !isNaN(i.edad)).map(i => parseInt(i.edad));
+        const edadPromedio = edadesValidas.length > 0 ? Math.round(edadesValidas.reduce((sum, edad) => sum + edad, 0) / edadesValidas.length) : 'N/A';
+
+        membersY = addCardField('Total', `${totalIntegrantes} integrantes`, membersCard.contentX, membersY, membersCard.contentWidth / 2);
+        addCardField('Edad Promedio', edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A',
+          membersCard.contentX + (membersCard.contentWidth / 2), membersCard.contentY, membersCard.contentWidth / 2);
+
+        setFont(CONFIG.fonts.cardLabel);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('DETALLE:', membersCard.contentX, membersY + 2);
+        membersY += 6;
+
+        marcador.integrantes.forEach((i, index) => {
+          const nombre = getSafeValue(i.nombre);
+          const apellido = getSafeValue(i.apellido);
+          const edad = getSafeValue(i.edad);
+          const vinculo = getSafeValue(i.vinculo);
+
+          setFont(CONFIG.fonts.cardValue);
+          setColor(CONFIG.colors.text);
+          doc.text(`${index + 1}. ${nombre} ${apellido} (${edad} años) - ${vinculo}`, membersCard.contentX, membersY);
+          membersY += 4;
+        });
+      } else {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('No hay integrantes registrados', membersCard.contentX, membersCard.contentY);
+      }
+
+      yPos += alturaIntegrantes + 3;
+
+    }
+
+
+    {
+      const cardWidth = (contentWidth - 5) / 2;
+
+      // ==== Servicios ====
+      let conectados = marcador.servicios?.filter(s => s.opcion_servicio === 'Conectado') || [];
+      let noConectados = marcador.servicios?.filter(s => s.opcion_servicio !== 'Conectado') || [];
+      let serviciosAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+
+      if (conectados.length > 0) serviciosAltura += 4 + conectados.length * 3;
+      if (noConectados.length > 0) serviciosAltura += 4 + noConectados.length * 3;
+      if (conectados.length === 0 && noConectados.length === 0) serviciosAltura += 4;
+
+      checkPageBreak(serviciosAltura);
+      const servicesCard = createCard(CONFIG.margins.left, yPos, cardWidth, serviciosAltura, 'SERVICIOS', CONFIG.colors.info);
+
+      let servicesY = servicesCard.contentY;
+
+      if (conectados.length > 0) {
+        setFont(CONFIG.fonts.cardLabel);
+        setColor(CONFIG.colors.success);
+        // doc.text('✓ CONECTADOS:', servicesCard.contentX, servicesY);
+        servicesY += 4;
+
+        conectados.forEach(s => {
+          const nombre = getSafeValue(s.nombre);
+          if (nombre !== 'N/A') {
+            setFont(CONFIG.fonts.cardValue);
+            setColor(CONFIG.colors.text);
+            doc.text(`• ${nombre}`, servicesCard.contentX, servicesY);
+            servicesY += 3;
+          }
         });
       }
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay programas asignados', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
+
+      if (noConectados.length > 0) {
+        setFont(CONFIG.fonts.cardLabel);
+        setColor(CONFIG.colors.error);
+        // doc.text('✗ NO CONECTADOS:', servicesCard.contentX, servicesY);
+        servicesY += 4;
+
+        noConectados.forEach(s => {
+          const nombre = getSafeValue(s.nombre);
+          if (nombre !== 'N/A') {
+            setFont(CONFIG.fonts.cardValue);
+            setColor(CONFIG.colors.text);
+            doc.text(`• ${nombre}`, servicesCard.contentX, servicesY);
+            servicesY += 3;
+          }
+        });
+      }
+
+      if (conectados.length === 0 && noConectados.length === 0) {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('Sin servicios registrados', servicesCard.contentX, servicesY);
+      }
+
+      // ==== Programas ====
+      let activos = marcador.programas?.filter(p => p.estado === 'activo') || [];
+      let inactivos = marcador.programas?.filter(p => p.estado !== 'activo') || [];
+      let programasAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+
+      if (activos.length > 0) programasAltura += 4 + activos.length * 3;
+      if (inactivos.length > 0) programasAltura += 4 + inactivos.length * 3;
+      if (activos.length === 0 && inactivos.length === 0) programasAltura += 4;
+
+      const programsCard = createCard(CONFIG.margins.left + cardWidth + 5, yPos, cardWidth, programasAltura, 'PROGRAMAS', CONFIG.colors.warning);
+      let programsY = programsCard.contentY;
+
+      if (activos.length > 0) {
+        setFont(CONFIG.fonts.cardLabel);
+        setColor(CONFIG.colors.success);
+        doc.text('ACTIVOS:', programsCard.contentX, programsY);
+        programsY += 4;
+
+        activos.forEach(p => {
+          const tipo = getSafeValue(p.tipo);
+          const ayuda = getSafeValue(p.ayuda);
+          if (tipo !== 'N/A' || ayuda !== 'N/A') {
+            setFont(CONFIG.fonts.cardValue);
+            setColor(CONFIG.colors.text);
+            doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
+            programsY += 3;
+          }
+        });
+      }
+
+      if (inactivos.length > 0) {
+        setFont(CONFIG.fonts.cardLabel);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('FINALIZADOS:', programsCard.contentX, programsY);
+        programsY += 4;
+
+        inactivos.forEach(p => {
+          const tipo = getSafeValue(p.tipo);
+          const ayuda = getSafeValue(p.ayuda);
+          if (tipo !== 'N/A' || ayuda !== 'N/A') {
+            setFont(CONFIG.fonts.cardValue);
+            setColor(CONFIG.colors.textSecondary);
+            doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
+            programsY += 3;
+          }
+        });
+      }
+
+      if (activos.length === 0 && inactivos.length === 0) {
+        setFont(CONFIG.fonts.cardValue);
+        setColor(CONFIG.colors.textSecondary);
+        doc.text('Sin programas asignados', programsCard.contentX, programsCard.contentY);
+      }
+
+      yPos += Math.max(serviciosAltura, programasAltura) + 3;
     }
 
-    // SALUD GENERAL
-    createSection('SALUD GENERAL');
 
-    if (marcador.salud && marcador.salud.length > 0) {
-      marcador.salud.forEach((saludItem, index) => {
-        checkPageBreak(20);
-        drawColoredRect(margin, yPos - 3, contentWidth, 18, '#ffebee');
+    {
+      if (marcador.notas && marcador.notas.trim()) {
+        const notasLimpias = getSafeValue(marcador.notas.trim());
+        if (notasLimpias !== 'N/A') {
+          const notasLines = doc.splitTextToSize(notasLimpias, contentWidth);
+          const notasAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2 + (notasLines.length * 4);
 
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        if (saludItem.problema_salud) {
-          doc.text(
-            `Problema de Salud: ${saludItem.problema_salud}`,
-            margin + 2,
-            yPos + 5
-          );
+          checkPageBreak(notasAltura);
+          const notesCard = createCard(CONFIG.margins.left, yPos, contentWidth, notasAltura, 'NOTAS ADICIONALES', [121, 85, 72]);
+
+          setFont(CONFIG.fonts.cardValue);
+          setColor(CONFIG.colors.text);
+
+          notasLines.forEach((linea, index) => {
+            doc.text(linea, notesCard.contentX, notesCard.contentY + (index * 4));
+          });
+
+          yPos += notasAltura + 3;
         }
-
-        doc.setFont(undefined, 'normal');
-        let saludInfo = '';
-        if (saludItem.cud) saludInfo += 'CUD ';
-        if (saludItem.obra_social) saludInfo += 'Obra Social ';
-
-        if (saludInfo) {
-          doc.text(`Cobertura: ${saludInfo}`, margin + 2, yPos + 12);
-        }
-
-        yPos += 25;
-      });
-    } else {
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'italic');
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay información de salud registrada', margin, yPos);
-      doc.setTextColor(0, 0, 0);
-      yPos += 20;
+      }
     }
 
-    // NOTAS
-    if (marcador.notas) {
-      createSection('NOTAS');
 
-      // Fondo para las notas
-      const notasLines = doc.splitTextToSize(marcador.notas, contentWidth - 10);
-      const notasHeight = notasLines.length * 5 + 10;
-      drawColoredRect(margin, yPos - 5, contentWidth, notasHeight, '#f8f9fa');
-
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
-      yPos = addTextWithWrap(
-        marcador.notas,
-        margin + 5,
-        yPos,
-        contentWidth - 10
-      );
-    }
-
-    // FOOTER
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
+    // ===== FOOTER =====
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      doc.text(
-        `Página ${i} de ${pageCount}`,
-        pageWidth - 30,
-        doc.internal.pageSize.height - 10
-      );
-      doc.text(
-        `Sistema GIS - ${new Date().toLocaleDateString('es-ES')}`,
-        margin,
-        doc.internal.pageSize.height - 10
-      );
+
+      // Línea decorativa
+      doc.setDrawColor(CONFIG.colors.primary[0], CONFIG.colors.primary[1], CONFIG.colors.primary[2]);
+      doc.setLineWidth(0.5);
+      doc.line(CONFIG.margins.left, CONFIG.pageHeight - 12, CONFIG.pageWidth - CONFIG.margins.right, CONFIG.pageHeight - 12);
+
+      // Información del sistema
+      setFont(CONFIG.fonts.tiny);
+      setColor(CONFIG.colors.textSecondary);
+      doc.text(`Sistema GIS - ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES')}`,
+        CONFIG.margins.left, CONFIG.pageHeight - 6);
+      doc.text(`Página ${i} de ${totalPages}`,
+        CONFIG.pageWidth - CONFIG.margins.right - 15, CONFIG.pageHeight - 6);
     }
 
-    // Abrir en nueva ventana y disparar impresión
+    // ===== GENERAR PDF =====
+    const nombreLimpio = getSafeValue(marcador.nombre) || 'Usuario';
+    const apellidoLimpio = getSafeValue(marcador.apellido) || 'Desconocido';
+    const fileName = `Reporte_${nombreLimpio}_${apellidoLimpio}_${new Date().toISOString().split('T')[0]}.pdf`;
+
     const pdfBlob = doc.output('blob');
     const blobUrl = URL.createObjectURL(pdfBlob);
 
-    const printWindow = window.open(blobUrl);
+    // Abrir para imprimir
+    const printWindow = window.open(blobUrl, '_blank');
     if (printWindow) {
       printWindow.onload = function () {
         printWindow.focus();
-        printWindow.print();
+        setTimeout(() => {
+          printWindow.print();
+        }, 1000);
       };
     } else {
-      alert(
-        'No se pudo abrir la ventana de impresión. Verifica que no haya bloqueadores de pop-ups.'
-      );
+      // Fallback: descargar
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      alert('PDF generado y descargado. Verifique su carpeta de descargas.');
     }
+
+    // Limpiar URL después de 10 segundos
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+    }, 10000);
+
   } catch (error) {
-    console.error('Error al generar el PDF:', error);
-    alert(
-      'Error al generar el PDF. Verifique la conexión a internet y que jsPDF esté disponible.'
-    );
+    console.error('Error detallado al generar el PDF:', error);
+    alert(`Error al generar el PDF: ${error.message}. Verifique que jsPDF esté correctamente cargado.`);
   }
 }
 
@@ -2935,6 +2479,7 @@ function verInfoMarcador(marcador: Marcador) {
     zoom: 17,
   });
 }
+
 </script>
 <style scoped>
 .header-gradient {
@@ -3113,6 +2658,7 @@ function verInfoMarcador(marcador: Marcador) {
 }
 
 @media (max-width: 768px) {
+
   .info-panel,
   .referencias-panel,
   .datos-actuales-panel {
