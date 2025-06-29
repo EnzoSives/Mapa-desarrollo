@@ -936,7 +936,7 @@ const permisos = computed(() => {
       rol.value === 'superadmin' ||
       rol.value === 'admin' ||
       rol.value === 'user',
-    puedeEditar: rol.value === 'superadmin' || rol.value === 'admin',
+    puedeEditar: rol.value === 'superadmin' || rol.value === 'admin' || rol.value === 'user',
     puedeEliminar: rol.value === 'superadmin' || rol.value === 'admin',
     soloLectura: rol.value === 'visor',
   };
