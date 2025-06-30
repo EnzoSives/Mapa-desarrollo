@@ -12,15 +12,26 @@
         />
 
         <q-toolbar-title>Mapa Madariaga</q-toolbar-title>
-        <!-- <div>Quasar v{{ $q.version }}</div> -->
-        <q-btn
+
+        <!-- Menú de usuario -->
+        <q-btn-dropdown
           flat
           dense
-          icon="logout"
-          label="Cerrar Sesión"
+          :label="userName"
+          icon="account_circle"
           class="q-ml-md"
-          @click="logout"
-        />
+        >
+          <q-list>
+            <q-item clickable v-close-popup @click="logout">
+              <q-item-section avatar>
+                <q-icon name="logout" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Cerrar Sesión</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
       </q-toolbar>
     </q-header>
 
@@ -82,7 +93,6 @@
             {{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}
           </q-tooltip>
         </q-btn>
-
       </q-list>
     </q-drawer>
 
@@ -93,30 +103,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-// import EssentialLink from 'components/EssentialLink.vue';
+import { defineComponent, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-
-// const linksList = [
-//   {
-//     title: 'Marcadores',
-//     caption: 'quasar.dev',
-//     icon: 'LocationOn',
-//     link: '/tabla',
-//   },
-// ];
 
 export default defineComponent({
   name: 'MainLayout',
 
-  // components: {
-  //   EssentialLink,
-  // },
-
   setup() {
     const leftDrawerOpen = ref(false);
-
     const router = useRouter();
+
+    // Obtener el nombre del usuario desde localStorage
+    const userName = computed(() => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        try {
+          // Intentar parsear como JSON
+          const userData = JSON.parse(user);
+          return (
+            userData.name || userData.username || userData.email || 'Usuario'
+          );
+        } catch (error) {
+          // Si no es JSON válido, asumir que es un string simple
+          return user || 'Usuario';
+        }
+      }
+      return 'Usuario';
+    });
 
     const logout = () => {
       localStorage.removeItem('token');
@@ -126,8 +139,8 @@ export default defineComponent({
     };
 
     return {
+      userName,
       logout,
-      // essentialLinks: linksList
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
