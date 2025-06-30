@@ -38,7 +38,7 @@ export const useGisStore = defineStore('gis', {
   actions: {
     async cargarMarcadoresDesdeAPI() {
       try {
-        const response = await axios.get('http://179.43.127.133:3006/marcador');
+        const response = await axios.get('http://179.43.127.133/:3006/marcador');
         this.marcadores = response.data;
       } catch (error) {
         console.error('Error al cargar marcadores desde la API:', error);
@@ -48,7 +48,7 @@ export const useGisStore = defineStore('gis', {
     async agregarMarcador(marcador: Omit<Marcador, 'id'>) {
       try {
         const response = await axios.post(
-          'http://179.43.127.133:3006/marcador',
+          'http://179.43.127.133/:3006/marcador',
           marcador
         );
         const nuevoMarcador: Marcador = response.data;
@@ -64,7 +64,7 @@ export const useGisStore = defineStore('gis', {
         console.log('Marcador que se enviará al backend:', marcadorEditado);
 
         const response = await axios.put(
-          `http://179.43.127.133:3006/marcador/${marcadorEditado.id}`,
+          `http://179.43.127.133/:3006/marcador/${marcadorEditado.id}`,
           {
             ...marcadorEditado,
             programas: marcadorEditado.programas, // 👈 asegurate de que esto esté presente
@@ -86,7 +86,7 @@ export const useGisStore = defineStore('gis', {
 
     async eliminarMarcador(id: number) {
       try {
-        await axios.delete(`http://179.43.127.133:3006/marcador/${id}`);
+        await axios.delete(`http://179.43.127.133/:3006/marcador/${id}`);
         this.marcadores = this.marcadores.filter(m => m.id !== id);
         if (this.marcadorSeleccionado?.id === id) {
           this.marcadorSeleccionado = null;
@@ -98,7 +98,7 @@ export const useGisStore = defineStore('gis', {
 
     async seleccionarMarcador(id: number) {
       try {
-        const response = await axios.get(`http://179.43.127.133:3006/marcador/${id}`);
+        const response = await axios.get(`http://179.43.127.133/:3006/marcador/${id}`);
         const marcadorCompleto: Marcador = response.data;
 
         if (marcadorCompleto.programas) {
