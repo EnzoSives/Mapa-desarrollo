@@ -1275,24 +1275,24 @@ async function validarYGuardar() {
       return;
     }
 
-    // Validaciones adicionales
-    if (!validarProgramas()) {
-      $q.notify({
-        type: 'negative',
-        message: 'Debe agregar al menos un programa',
-        position: 'top',
-      });
-      return;
-    }
+    // // Validaciones adicionales
+    // if (!validarProgramas()) {
+    //   $q.notify({
+    //     type: 'negative',
+    //     message: 'Debe agregar al menos un programa',
+    //     position: 'top',
+    //   });
+    //   return;
+    // }
 
-    if (!validarIntegrantes()) {
-      $q.notify({
-        type: 'negative',
-        message: 'Debe agregar al menos un integrante',
-        position: 'top',
-      });
-      return;
-    }
+    // if (!validarIntegrantes()) {
+    //   $q.notify({
+    //     type: 'negative',
+    //     message: 'Debe agregar al menos un integrante',
+    //     position: 'top',
+    //   });
+    //   return;
+    // }
 
     // Si todo está válido, proceder a guardar
     await guardarMarcador();
