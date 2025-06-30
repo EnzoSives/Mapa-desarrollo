@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="no-scroll">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -11,91 +11,123 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Mapa Madariaga </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title>Mapa Madariaga</q-toolbar-title>
+        <!-- <div>Quasar v{{ $q.version }}</div> -->
+        <q-btn
+          flat
+          dense
+          icon="logout"
+          label="Cerrar Sesión"
+          class="q-ml-md"
+          @click="logout"
+        />
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="text-h6 text-bold"
+              >Mapa Madariaga</q-item-label
+            >
+          </q-item-section>
+        </q-item>
+        <q-item
+          clickable
+          @click="$router.push('/home')"
+          :active="$route.path === '/home'"
+          active-class="bg-primary text-white"
+          v-ripple
+        >
+          <q-tooltip anchor="center right" self="center left" :offset="[10, 0]">
+            Mapa Madariaga
+          </q-tooltip>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+          <q-item-section avatar>
+            <q-icon name="table_chart" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Inicio</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item
+          clickable
+          @click="$router.push('/tabla')"
+          :active="$route.path === '/tabla'"
+          active-class="bg-primary text-white"
+          v-ripple
+        >
+          <q-tooltip anchor="center right" self="center left" :offset="[10, 0]">
+            Ir a Marcadores
+          </q-tooltip>
+
+          <q-item-section avatar>
+            <q-icon name="table_chart" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Marcadores</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-btn
+          :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+          class="fixed-top-right q-mt-md q-mr-sm"
+          :color="$q.dark.isActive ? 'white' : 'dark'"
+          :text-color="$q.dark.isActive ? 'black' : 'white'"
+          @click="$q.dark.toggle()"
+        >
+          <q-tooltip>
+            {{ $q.dark.isActive ? 'Modo Claro' : 'Modo Oscuro' }}
+          </q-tooltip>
+        </q-btn>
+
       </q-list>
     </q-drawer>
 
-    <q-page-container class="full-height">
-      <router-view />
+    <q-page-container class="no-scroll full-height">
+      <router-view class="no-scroll full-height" />
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import EssentialLink from 'components/EssentialLink.vue';
+// import EssentialLink from 'components/EssentialLink.vue';
+import { useRouter } from 'vue-router';
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-];
+// const linksList = [
+//   {
+//     title: 'Marcadores',
+//     caption: 'quasar.dev',
+//     icon: 'LocationOn',
+//     link: '/tabla',
+//   },
+// ];
 
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-    EssentialLink,
-  },
+  // components: {
+  //   EssentialLink,
+  // },
 
   setup() {
     const leftDrawerOpen = ref(false);
 
+    const router = useRouter();
+
+    const logout = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('rol');
+      router.push('/');
+    };
+
     return {
-      essentialLinks: linksList,
+      logout,
+      // essentialLinks: linksList
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -104,3 +136,18 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+/* ✨ Estilo global para remover scrolls no deseados */
+html,
+body,
+#q-app {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.no-scroll {
+  overflow: hidden !important;
+}
+</style>
