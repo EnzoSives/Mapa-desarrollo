@@ -296,6 +296,31 @@ integrante, index
                       }}</span>
                     </div>
                   </div>
+                  <!-- Ocupaciones del integrante -->
+                  <div v-if="integrante.ocupaciones?.length" class="q-mt-xs">
+                    <div class="text-caption text-grey-7 q-mb-xs">
+                      <q-icon name="work" size="xs" class="q-mr-xs" />
+                      Ocupaciones:
+                    </div>
+                    <div v-for="(ocupacion, oIndex) in integrante.ocupaciones" :key="oIndex"
+                      class="text-caption q-mb-xs">
+                      <div class="row items-center q-gutter-xs">
+                        <q-badge color="orange" text-color="white" class="q-mr-xs">
+                          {{ ocupacion.tipo_principal }}
+                        </q-badge>
+                        <q-badge v-if="ocupacion.tipo_1" color="orange-3" text-color="dark" class="q-mr-xs">
+                          {{ ocupacion.tipo_1 }}
+                        </q-badge>
+                        <q-badge v-if="ocupacion.tipo_2" color="orange-2" text-color="dark" class="q-mr-xs">
+                          {{ ocupacion.tipo_2 }}
+                        </q-badge>
+                        <span v-if="ocupacion.ingresos" class="text-green text-weight-medium">
+                          Ingresos:
+                          ${{ ocupacion.ingresos.toLocaleString() }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -313,17 +338,14 @@ integrante, index
                 class="q-ml-sm" />
             </div>
             <div class="row q-col-gutter-sm">
-              <div v-for="(
-servicio, index
-                ) in marcadorActualEnTiempoReal.servicios" :key="index" class="col-6">
-                <q-chip :color="servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
-                  " text-color="white" size="sm" class="full-width">
-                  <q-icon :name="servicio.opcion_servicio === 'Conectado'
-                    ? 'check_circle'
-                    : 'cancel'
-                    " class="q-mr-xs" />
+              <div v-for="(servicio, index) in marcadorActualEnTiempoReal.servicios" :key="index" class="col-6">
+                <q-chip :color="'primary'" text-color="white" size="sm" class="full-width">
+                  <q-icon :name="'check_circle'" class="q-mr-xs" />
                   {{ servicio.nombre }}
                 </q-chip>
+                <span v-if="servicio.opcion_servicio" class="q-ml-xs text-caption text-bold">
+                  ({{ servicio.opcion_servicio }})
+                </span>
               </div>
             </div>
           </q-card-section>
@@ -370,7 +392,7 @@ servicio, index
             <q-card-section class="q-pa-md">
               <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
                 <q-icon name="note" class="q-mr-xs" />
-                Notas
+                Observaciones
               </div>
               <div class="text-body2 q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-2'">
                 {{ marcadorActualEnTiempoReal.notas }}
@@ -1249,24 +1271,53 @@ async function generarPDF() {
 
 
     // 5. INTEGRANTES
+    // 5. INTEGRANTES
     {
-      let alturaIntegrantes = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-      if (marcador.integrantes?.length > 0) alturaIntegrantes += 10 + marcador.integrantes.length * 4;
+      let alturaIntegrantes =
+        CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+      if (marcador.integrantes?.length > 0)
+        alturaIntegrantes += 10 + marcador.integrantes.length * 8; // Aumenta altura para ocupaciones
       else alturaIntegrantes += 4;
 
       checkPageBreak(alturaIntegrantes);
-      const membersCard = createCard(CONFIG.margins.left, yPos, contentWidth, alturaIntegrantes, 'INTEGRANTES DEL HOGAR', CONFIG.colors.success);
+      const membersCard = createCard(
+        CONFIG.margins.left,
+        yPos,
+        contentWidth,
+        alturaIntegrantes,
+        'INTEGRANTES DEL HOGAR',
+        CONFIG.colors.success
+      );
 
       if (marcador.integrantes?.length > 0) {
         let membersY = membersCard.contentY;
 
         const totalIntegrantes = marcador.integrantes.length;
-        const edadesValidas = marcador.integrantes.filter(i => i.edad && !isNaN(i.edad)).map(i => parseInt(i.edad));
-        const edadPromedio = edadesValidas.length > 0 ? Math.round(edadesValidas.reduce((sum, edad) => sum + edad, 0) / edadesValidas.length) : 'N/A';
+        const edadesValidas = marcador.integrantes
+          .filter((i) => i.edad && !isNaN(i.edad))
+          .map((i) => parseInt(i.edad));
+        const edadPromedio =
+          edadesValidas.length > 0
+            ? Math.round(
+              edadesValidas.reduce((sum, edad) => sum + edad, 0) /
+              edadesValidas.length
+            )
+            : 'N/A';
 
-        membersY = addCardField('Total', `${totalIntegrantes} integrantes`, membersCard.contentX, membersY, membersCard.contentWidth / 2);
-        addCardField('Edad Promedio', edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A',
-          membersCard.contentX + (membersCard.contentWidth / 2), membersCard.contentY, membersCard.contentWidth / 2);
+        membersY = addCardField(
+          'Total',
+          `${totalIntegrantes} integrantes`,
+          membersCard.contentX,
+          membersY,
+          membersCard.contentWidth / 2
+        );
+        addCardField(
+          'Edad Promedio',
+          edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A',
+          membersCard.contentX + membersCard.contentWidth / 2,
+          membersCard.contentY,
+          membersCard.contentWidth / 2
+        );
 
         setFont(CONFIG.fonts.cardLabel);
         setColor(CONFIG.colors.textSecondary);
@@ -1281,17 +1332,50 @@ async function generarPDF() {
 
           setFont(CONFIG.fonts.cardValue);
           setColor(CONFIG.colors.text);
-          doc.text(`${index + 1}. ${nombre} ${apellido} (${edad} años) - ${vinculo}`, membersCard.contentX, membersY);
+          doc.text(
+            `${index + 1}. ${nombre} ${apellido} (${edad} años) - ${vinculo}`,
+            membersCard.contentX,
+            membersY
+          );
           membersY += 4;
+
+          // Ocupaciones del integrante
+          if (i.ocupaciones && i.ocupaciones.length > 0) {
+            i.ocupaciones.forEach((ocup, oidx) => {
+              const tipoPrincipal = getSafeValue(ocup.tipo_principal);
+              const tipo1 = getSafeValue(ocup.tipo_1);
+              const tipo2 = getSafeValue(ocup.tipo_2);
+              const ingresos =
+                ocup.ingresos && !isNaN(ocup.ingresos)
+                  ? `$${ocup.ingresos.toLocaleString('es-ES')}`
+                  : '';
+
+              let ocupacionLinea = `   - Ocupación: ${tipoPrincipal}`;
+              if (tipo1 !== 'N/A' || tipo2 !== 'N/A') {
+                ocupacionLinea += ` (${[tipo1, tipo2].filter((t) => t && t !== 'N/A').join(' - ')})`;
+              }
+              if (ingresos) {
+                ocupacionLinea += ` | Ingresos: ${ingresos}`;
+              }
+
+              setFont(CONFIG.fonts.small);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(ocupacionLinea, membersCard.contentX + 4, membersY);
+              membersY += 3;
+            });
+          }
         });
       } else {
         setFont(CONFIG.fonts.cardValue);
         setColor(CONFIG.colors.textSecondary);
-        doc.text('No hay integrantes registrados', membersCard.contentX, membersCard.contentY);
+        doc.text(
+          'No hay integrantes registrados',
+          membersCard.contentX,
+          membersCard.contentY
+        );
       }
 
       yPos += alturaIntegrantes + 3;
-
     }
 
 
@@ -1418,7 +1502,7 @@ async function generarPDF() {
           const notasAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2 + (notasLines.length * 4);
 
           checkPageBreak(notasAltura);
-          const notesCard = createCard(CONFIG.margins.left, yPos, contentWidth, notasAltura, 'NOTAS ADICIONALES', [121, 85, 72]);
+          const notesCard = createCard(CONFIG.margins.left, yPos, contentWidth, notasAltura, 'OBSERVACIONES', [121, 85, 72]);
 
           setFont(CONFIG.fonts.cardValue);
           setColor(CONFIG.colors.text);
