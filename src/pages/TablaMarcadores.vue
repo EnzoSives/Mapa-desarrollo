@@ -367,6 +367,7 @@ integrante, index
                 :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
                 <div class="text-weight-medium">{{ programa.tipo }}</div>
                 <div class="text-caption">{{ programa.ayuda }}</div>
+                <div class="text-caption">{{ programa.detalle }}</div>
                 <!-- Mostrar notas del programa si existen -->
                 <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
                   <q-icon name="note" size="xs" class="q-mr-xs" />
@@ -1451,16 +1452,22 @@ async function generarPDF() {
       if (activos.length > 0) {
         setFont(CONFIG.fonts.cardLabel);
         setColor(CONFIG.colors.success);
-        doc.text('ACTIVOS:', programsCard.contentX, programsY);
+
         programsY += 4;
 
-        activos.forEach(p => {
+        activos.forEach((p) => {
           const tipo = getSafeValue(p.tipo);
           const ayuda = getSafeValue(p.ayuda);
-          if (tipo !== 'N/A' || ayuda !== 'N/A') {
+          const detalle = getSafeValue(p.detalle);
+          if (tipo !== 'N/A' || ayuda !== 'N/A' || detalle !== 'N/A') {
             setFont(CONFIG.fonts.cardValue);
             setColor(CONFIG.colors.text);
             doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
+            if (detalle && detalle !== 'N/A') {
+              setFont(CONFIG.fonts.tiny);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(`  Detalle: ${detalle}`, programsCard.contentX + 10, programsY + 3);
+            }
             programsY += 3;
           }
         });

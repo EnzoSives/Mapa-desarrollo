@@ -327,6 +327,7 @@
                 :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
                 <div class="text-weight-medium">{{ programa.tipo }}</div>
                 <div class="text-caption">{{ programa.ayuda }}</div>
+                <div class="text-caption">{{ programa.detalle }}</div>
                 <!-- Mostrar notas del programa si existen -->
                 <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
                   <q-icon name="note" size="xs" class="q-mr-xs" />
@@ -527,9 +528,8 @@
                     if (val !== null && Number(val) < 0) nuevoMarcador.dni = 0;
                   }
                 " :rules="[
-                  (val) => !!val || 'El DNI es obligatorio',
                   (val) =>
-                    /^\d{7,8}$/.test(val) || 'El DNI debe tener 7 u 8 dígitos',
+                    !val || /^\d{7,8}$/.test(val) || 'El DNI debe tener 7 u 8 dígitos',
                 ]" />
 
               <!-- Domicilio -->
@@ -661,18 +661,7 @@
                           'Estudiante',
                           'AUH/SUAF',
                         ].includes(ocupacion.tipo_principal)
-                        " :rules="[
-                          (val) =>
-                            !ocupacion.tipo_principal ||
-                            ![
-                              'Trabajo reproductivo',
-                              'Trabajo productivo',
-                              'Estudiante',
-                              'AUH/SUAF',
-                            ].includes(ocupacion.tipo_principal) ||
-                            !!val ||
-                            'Debe seleccionar un tipo',
-                        ]" />
+                        " />
                   </div>
                   <div class="col-12 col-md-4">
                     <q-select v-model="ocupacion.tipo_2" label="Tipo 2"
@@ -680,14 +669,7 @@
                         (ocupacion.tipo_principal !== 'Trabajo reproductivo' &&
                           ocupacion.tipo_principal !== 'Estudiante' &&
                           ocupacion.tipo_principal !== 'AUH/SUAF')
-                        " :rules="[
-                          (val) =>
-                            ocupacion.tipo_principal !== 'Trabajo reproductivo' ||
-                            ocupacion.tipo_principal !== 'Estudiante' ||
-                            ocupacion.tipo_principal !== 'AUH/SUAF' ||
-                            !!val ||
-                            'Debe seleccionar un tipo',
-                        ]" />
+                        " />
                   </div>
                   <div class="col-12">
                     <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined :min="0"
@@ -750,7 +732,6 @@
                   </div>
                   <div class="col-12 col-md-6">
                     <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined :rules="[
-                      (val) => !!val || 'El DNI es obligatorio',
                       (val) =>
                         /^\d{7,8}$/.test(val) ||
                         'El DNI debe tener 7 u 8 dígitos',
@@ -803,47 +784,20 @@
                             'Trabajo reproductivo',
                             'Trabajo productivo',
                             'Estudiante',
-                            'AUH/SUAF',
                           ].includes(ocupacion.tipo_principal)
-                          " :rules="[
-                            (val) =>
-                              !ocupacion.tipo_principal ||
-                              ![
-                                'Trabajo reproductivo',
-                                'Trabajo productivo',
-                                'Estudiante',
-                                'AUH/SUAF',
-                              ].includes(ocupacion.tipo_principal) ||
-                              !!val ||
-                              'Debe seleccionar un tipo',
-                          ]" />
+                          " />
                     </div>
                     <div class="col-12 col-md-4">
                       <q-select v-model="ocupacion.tipo_2" label="Tipo 2"
                         :options="getTipoOcupacion2(ocupacion.tipo_principal)" dense outlined :disable="!ocupacion.tipo_principal ||
                           (ocupacion.tipo_principal !==
                             'Trabajo reproductivo' &&
-                            ocupacion.tipo_principal !== 'Estudiante' &&
-                            ocupacion.tipo_principal !== 'AUH/SUAF')
-                          " :rules="[
-                            (val) =>
-                              ocupacion.tipo_principal !==
-                              'Trabajo reproductivo' ||
-                              ocupacion.tipo_principal !== 'Estudiante' ||
-                              ocupacion.tipo_principal !== 'AUH/SUAF' ||
-                              !!val ||
-                              'Debe seleccionar un tipo',
-                          ]" />
+                            ocupacion.tipo_principal !== 'Estudiante')
+                          " />
                     </div>
                     <div class="col-12">
                       <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined
-                        :min="0" :disable="!ocupacion.tipo_principal ||
-                          (ocupacion.tipo_principal !==
-                            'Trabajo reproductivo' &&
-                            ocupacion.tipo_principal !== 'Trabajo productivo' &&
-                            ocupacion.tipo_principal !== 'AUH/SUAF' &&
-                            ocupacion.tipo_principal !== 'Estudiante')
-                          " />
+                        :min="0" />
                     </div>
                   </div>
                 </div>
@@ -883,7 +837,6 @@
             <q-separator />
             <q-card-section>
               <div class="text-h6 q-mb-md">Programas </div>
-
               <div v-for="(programa, index) in nuevoMarcador.programas" :key="index"
                 class="q-mb-md q-pa-md rounded bordered relative-position">
                 <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
@@ -892,7 +845,6 @@
                     Finalizar programa
                   </q-tooltip>
                 </q-btn>
-
                 <!-- Primera fila: Tipo + Ayuda -->
                 <div class="row q-col-gutter-md q-pr-lg">
                   <q-select v-model="programa.tipo" label="Tipo" :options="tiposPrograma" dense outlined class="col"
@@ -900,16 +852,30 @@
                     :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
 
                   <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
-                    outlined class="col" :disable="!programa.tipo || programa.tipo === 'SUBSIDIOS' ||
-                      programa.tipo === 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN'" :rules="[
-                        (val) =>
-                          programa.tipo === 'SUBSIDIOS' ||
-                          programa.tipo === 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN' ||
-                          !!val ||
-                          'Debe seleccionar una ayuda',
-                      ]" />
-                </div>
+                    outlined class="col"
+                    :disable="!programa.tipo || (programa.tipo !== 'CONTRAPRESTACIÓN' && programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')"
+                    :rules="[
+                      (val) => {
+                        // Solo requiere ayuda para CONTRAPRESTACIÓN y AYUDA SOCIAL SIN CONTRAPRESTACIÓN
+                        if (programa.tipo === 'CONTRAPRESTACIÓN' || programa.tipo === 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN') {
+                          return !!val || 'Debe seleccionar una ayuda';
+                        }
+                        return true;
+                      }
+                    ]" />
 
+                  <q-select v-model="programa.detalle" label="Detalle" :options="detallesAyuda[programa.ayuda] || []"
+                    dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'"
+                    :rules="[
+                      (val) => {
+                        // Solo requiere detalle si la ayuda es 'Banco Materiales'
+                        if (programa.ayuda === 'Banco Materiales') {
+                          return !!val || 'Debe seleccionar un detalle';
+                        }
+                        return true;
+                      }
+                    ]" />
+                </div>
                 <!-- Segunda fila: Notas -->
                 <div class="row q-mt-sm q-pr-lg">
                   <q-input v-model="programa.notas" label="Notas" type="textarea" dense outlined class="col" :rules="[
@@ -1072,26 +1038,59 @@ const iconosDisponibles = [
   { label: 'Intervención Especifica', value: '/marker-icon-4.png' },
 ];
 
-// Opciones para los selectores de programas
+// Tipos de programa (primer selector)
 const tiposPrograma = [
-  'PROGRAMAS ALIMENTARIOS',
+  'SUBSIDIO ECONÓMICO',
+  'ALQUILER',
   'CONTRAPRESTACIÓN',
+  'SEPELIO',
+  'OTRAS AYUDAS',
+  'INF. SOCIALES',
   'AYUDA SOCIAL SIN CONTRAPRESTACIÓN',
-  'SUBSIDIOS', // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
 ];
 
+// Ayudas disponibles por tipo de programa (segundo selector)
 const opcionesAyuda = {
-  'PROGRAMAS ALIMENTARIOS': [
-    'AM - Ayuda Mensual',
-    'DBT - Diabéticos',
-    'ES - Esp. Solidario',
-    'AU - Ayuda Urgente',
-    'DE - Dietas Especiales',
+  'SUBSIDIO ECONÓMICO': [],
+  'ALQUILER': [],
+  'CONTRAPRESTACIÓN': [
+    'Banco Materiales',
+    'Gas',
+    'Luz',
+    'Desagote pozo',
+    'Colchón',
+    'Frazadas',
+    'Otros',
   ],
-  CONTRAPRESTACIÓN: ['Gas', 'Luz', 'Banco Materiales', 'Otros', 'Desagote pozo'],
-  'AYUDA SOCIAL SIN CONTRAPRESTACIÓN': [],
-  SUBSIDIOS: [], // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
+  'SEPELIO': [],
+  'OTRAS AYUDAS': [],
+  'INF. SOCIALES': [],
+  'AYUDA SOCIAL SIN CONTRAPRESTACIÓN': [
+    'Banco Materiales',
+    'Gas',
+    'Luz',
+    'Desagote pozo',
+    'Colchón',
+    'Frazadas',
+    'Otros',
+  ],
 };
+
+// Detalles por ayuda (tercer selector, opcional según la ayuda)
+const detallesAyuda = {
+  'Banco Materiales': [
+    'Membrana',
+    'Chapa',
+    'Tirante / Aislajás',
+    'Aberturas',
+    'Otros materiales',
+    'Módulo habitacional',
+    'Baño',
+    'Otros',
+  ],
+  // Si en el futuro quisieras agregar detalles para otras ayudas, podés hacerlo acá.
+};
+
 
 // Agregar estas opciones después de las existentes
 const opcionesVinculo = ['Pareja', 'Hijo/a', 'Padre/Madre', 'Otro'];
@@ -1214,6 +1213,7 @@ const nuevoMarcador = ref({
   programas: [] as Array<{
     tipo: string;
     ayuda: string;
+    detalle: string;
     notas: string;
   }>,
   integrantes: [] as Array<{
@@ -2643,16 +2643,22 @@ async function generarPDF() {
       if (activos.length > 0) {
         setFont(CONFIG.fonts.cardLabel);
         setColor(CONFIG.colors.success);
-        doc.text('ACTIVOS:', programsCard.contentX, programsY);
+
         programsY += 4;
 
         activos.forEach((p) => {
           const tipo = getSafeValue(p.tipo);
           const ayuda = getSafeValue(p.ayuda);
-          if (tipo !== 'N/A' || ayuda !== 'N/A') {
+          const detalle = getSafeValue(p.detalle);
+          if (tipo !== 'N/A' || ayuda !== 'N/A' || detalle !== 'N/A') {
             setFont(CONFIG.fonts.cardValue);
             setColor(CONFIG.colors.text);
             doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
+            if (detalle && detalle !== 'N/A') {
+              setFont(CONFIG.fonts.tiny);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(`  Detalle: ${detalle}`, programsCard.contentX + 10, programsY + 3);
+            }
             programsY += 3;
           }
         });

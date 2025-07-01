@@ -1,34 +1,20 @@
 <template>
   <div class="historial-marcador">
     <!-- Botón para abrir el modal -->
-    <q-btn
-      @click="abrirModal"
-      label="Ver Historial del Marcador"
-      color="primary"
-      icon="history"
-      class="q-ma-md"
-    />
+    <q-btn @click="abrirModal" label="Ver Historial del Marcador" color="primary" icon="history" class="q-ma-md" />
 
     <!-- Modal del historial -->
     <q-dialog v-model="modalAbierto" persistent maximized>
       <q-card>
         <!-- Header del modal -->
-        <q-card-section
-          class="row items-center q-pb-none bg-primary text-white"
-        >
+        <q-card-section class="row items-center q-pb-none bg-primary text-white">
           <div class="text-h6">
             <q-icon name="history" class="q-mr-sm" />
             Historial de Informes de {{ marcador.nombre }}
             {{ marcador.apellido }}
           </div>
           <q-space />
-          <q-btn
-            icon="close"
-            style="bottom: 10px; right: 16px"
-            flat
-            round
-            v-close-popup
-          />
+          <q-btn icon="close" style="bottom: 10px; right: 16px" flat round v-close-popup />
         </q-card-section>
 
         <!-- Contenido del modal -->
@@ -36,38 +22,19 @@
           <!-- Filtros -->
           <div class="row q-gutter-md q-mb-md">
             <div class="col-12 col-md-3">
-              <q-input
-                v-model="filtroFechaInicio"
-                type="date"
-                label="Fecha inicio"
-                outlined
-                dense
-                @update:model-value="filtrarPorFecha"
-              />
+              <q-input v-model="filtroFechaInicio" type="date" label="Fecha inicio" outlined dense
+                @update:model-value="filtrarPorFecha" />
             </div>
             <div class="col-12 col-md-3">
-              <q-input
-                v-model="filtroFechaFin"
-                type="date"
-                label="Fecha fin"
-                outlined
-                dense
-                @update:model-value="filtrarPorFecha"
-              />
+              <q-input v-model="filtroFechaFin" type="date" label="Fecha fin" outlined dense
+                @update:model-value="filtrarPorFecha" />
             </div>
             <div class="col-12 col-md-3">
               <!-- <q-select v-model="filtroTipoOperacion" :options="tiposOperacion" label="Tipo de operación"
                                 outlined dense clearable @update:model-value="filtrarPorFecha" /> -->
             </div>
             <div class="col-12 col-md-3">
-              <q-btn
-                @click="limpiarFiltros"
-                label="Limpiar filtros"
-                color="grey"
-                outline
-                dense
-                class="full-width"
-              />
+              <q-btn @click="limpiarFiltros" label="Limpiar filtros" color="grey" outline dense class="full-width" />
             </div>
           </div>
 
@@ -92,16 +59,8 @@
 
           <!-- Data table -->
           <div v-else>
-            <q-table
-              :rows="historialFiltrado"
-              :columns="columns"
-              row-key="id"
-              :pagination="pagination"
-              :loading="loading"
-              flat
-              bordered
-              class="historial-table"
-            >
+            <q-table :rows="historialFiltrado" :columns="columns" row-key="id" :pagination="pagination"
+              :loading="loading" flat bordered class="historial-table">
               <template v-slot:body-cell-fecha_modificacion="props">
                 <q-td :props="props">
                   <div>
@@ -117,12 +76,8 @@
 
               <template v-slot:body-cell-tipo_operacion="props">
                 <q-td :props="props">
-                  <q-chip
-                    :color="getColorTipoOperacion(props.value)"
-                    :icon="getIconoTipoOperacion(props.value)"
-                    text-color="white"
-                    dense
-                  >
+                  <q-chip :color="getColorTipoOperacion(props.value)" :icon="getIconoTipoOperacion(props.value)"
+                    text-color="white" dense>
                     {{ formatearTipoOperacion(props.value) }}
                   </q-chip>
                 </q-td>
@@ -131,26 +86,17 @@
               <template v-slot:body-cell-resumen_cambios="props">
                 <q-td :props="props">
                   <div class="cambios-summary">
-                    <div
-                      v-if="props.row.programas_snapshot?.length"
-                      class="q-mb-xs"
-                    >
+                    <div v-if="props.row.programas_snapshot?.length" class="q-mb-xs">
                       <q-chip size="sm" color="blue-2" text-color="blue-8">
                         {{ props.row.programas_snapshot.length }} programas
                       </q-chip>
                     </div>
-                    <div
-                      v-if="props.row.integrantes_snapshot?.length"
-                      class="q-mb-xs"
-                    >
+                    <div v-if="props.row.integrantes_snapshot?.length" class="q-mb-xs">
                       <q-chip size="sm" color="green-2" text-color="green-8">
                         {{ props.row.integrantes_snapshot.length }} integrantes
                       </q-chip>
                     </div>
-                    <div
-                      v-if="props.row.servicios_snapshot?.length"
-                      class="q-mb-xs"
-                    >
+                    <div v-if="props.row.servicios_snapshot?.length" class="q-mb-xs">
                       <q-chip size="sm" color="orange-2" text-color="orange-8">
                         {{ props.row.servicios_snapshot.length }} servicios
                       </q-chip>
@@ -161,14 +107,7 @@
 
               <template v-slot:body-cell-acciones="props">
                 <q-td :props="props">
-                  <q-btn
-                    flat
-                    round
-                    color="primary"
-                    icon="visibility"
-                    size="sm"
-                    @click="verDetalle(props.row)"
-                  >
+                  <q-btn flat round color="primary" icon="visibility" size="sm" @click="verDetalle(props.row)">
                     <q-tooltip>Ver detalle completo</q-tooltip>
                   </q-btn>
                   <!-- <q-btn flat round color="info" icon="compare" size="sm"
@@ -197,15 +136,12 @@
 
     <!-- Dialog para mostrar detalles completos -->
     <q-dialog v-model="dialogDetalle" persistent>
-      <q-card
-        style="
+      <q-card style="
           min-width: 90vw;
           max-width: 1200px;
           max-height: 90vh;
           overflow-y: auto;
-        "
-        class="q-pa-md"
-      >
+        " class="q-pa-md">
         <!-- Encabezado -->
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6 text-weight-bold text-primary">
@@ -286,12 +222,12 @@
                   </div>
                   <div v-if="registroSeleccionado.programas_snapshot?.length">
                     <q-list separator>
-                      <q-item
-                        v-for="programa in registroSeleccionado.programas_snapshot"
-                        :key="programa.id"
-                      >
+                      <q-item v-for="programa in registroSeleccionado.programas_snapshot" :key="programa.id">
                         <q-item-section>
                           <q-item-label>{{ programa.ayuda }}</q-item-label>
+                          <q-item-label>
+                            {{ programa.detalle || 'Sin detalle disponible' }}
+                          </q-item-label>
                           <q-item-label caption>
                             Tipo: {{ programa.tipo }} | Estado:
                             {{ programa.estado }} | Inicio:
@@ -302,23 +238,12 @@
                           </q-item-label>
                         </q-item-section>
                         <q-item-section side>
-                          <q-chip
-                            :color="
-                              programa.estado === 'activo'
-                                ? 'green-6'
-                                : 'grey-5'
-                            "
-                            text-color="white"
-                            dense
-                            class="q-pa-xs"
-                            square
-                          >
-                            <q-icon
-                              name="check_circle"
-                              size="16px"
-                              class="q-mr-xs"
-                              v-if="programa.estado === 'activo'"
-                            />
+                          <q-chip :color="programa.estado === 'activo'
+                              ? 'green-6'
+                              : 'grey-5'
+                            " text-color="white" dense class="q-pa-xs" square>
+                            <q-icon name="check_circle" size="16px" class="q-mr-xs"
+                              v-if="programa.estado === 'activo'" />
                             {{ programa.estado }}
                           </q-chip>
                         </q-item-section>
@@ -344,15 +269,10 @@
                   </div>
                   <div v-if="registroSeleccionado.integrantes_snapshot?.length">
                     <q-list separator>
-                      <q-item
-                        v-for="integrante in registroSeleccionado.integrantes_snapshot"
-                        :key="integrante.id"
-                      >
+                      <q-item v-for="integrante in registroSeleccionado.integrantes_snapshot" :key="integrante.id">
                         <q-item-section>
-                          <q-item-label
-                            >{{ integrante.nombre }}
-                            {{ integrante.apellido }}</q-item-label
-                          >
+                          <q-item-label>{{ integrante.nombre }}
+                            {{ integrante.apellido }}</q-item-label>
                           <q-item-label caption>
                             DNI: {{ integrante.dni }} | Edad:
                             {{ integrante.edad }} | Vínculo:
@@ -389,24 +309,15 @@
                   </div>
                   <div v-if="registroSeleccionado.servicios_snapshot?.length">
                     <q-list>
-                      <q-item
-                        v-for="servicio in registroSeleccionado.servicios_snapshot"
-                        :key="servicio.id"
-                      >
+                      <q-item v-for="servicio in registroSeleccionado.servicios_snapshot" :key="servicio.id">
                         <q-item-section>
                           <q-item-label>{{ servicio.nombre }}</q-item-label>
                         </q-item-section>
                         <q-item-section side>
-                          <q-chip
-                            :color="
-                              servicio.opcion_servicio === 'Conectado'
-                                ? 'green-6'
-                                : 'grey-5'
-                            "
-                            text-color="white"
-                            dense
-                            square
-                          >
+                          <q-chip :color="servicio.opcion_servicio === 'Conectado'
+                              ? 'green-6'
+                              : 'grey-5'
+                            " text-color="white" dense square>
                             {{ servicio.opcion_servicio }}
                           </q-chip>
                         </q-item-section>
@@ -421,21 +332,14 @@
             </div>
 
             <!-- Vivienda -->
-            <div
-              class="col-12 col-md-6 q-mb-md"
-              v-if="registroSeleccionado.viviendas_snapshot?.length"
-            >
+            <div class="col-12 col-md-6 q-mb-md" v-if="registroSeleccionado.viviendas_snapshot?.length">
               <q-card flat bordered>
                 <q-card-section>
                   <div class="text-h6 text-primary text-weight-bold q-mb-md">
                     <q-icon name="home" class="q-mr-sm text-blue-7" />
                     Vivienda
                   </div>
-                  <div
-                    v-for="vivienda in registroSeleccionado.viviendas_snapshot"
-                    :key="vivienda.id"
-                    class="info-grid"
-                  >
+                  <div v-for="vivienda in registroSeleccionado.viviendas_snapshot" :key="vivienda.id" class="info-grid">
                     <div><strong>Tipo:</strong> {{ vivienda.tipo }}</div>
                     <div><strong>Dominio:</strong> {{ vivienda.dominio }}</div>
                     <div>
@@ -452,21 +356,15 @@
             </div>
 
             <!-- Ocupaciones -->
-            <div
-              class="col-12 col-md-6 q-mb-md"
-              v-if="registroSeleccionado.ocupaciones_snapshot?.length"
-            >
+            <div class="col-12 col-md-6 q-mb-md" v-if="registroSeleccionado.ocupaciones_snapshot?.length">
               <q-card flat bordered>
                 <q-card-section>
                   <div class="text-h6 text-primary text-weight-bold q-mb-md">
                     <q-icon name="work" class="q-mr-sm text-blue-7" />
                     Ocupaciones
                   </div>
-                  <div
-                    v-for="ocupacion in registroSeleccionado.ocupaciones_snapshot"
-                    :key="ocupacion.id"
-                    class="info-grid"
-                  >
+                  <div v-for="ocupacion in registroSeleccionado.ocupaciones_snapshot" :key="ocupacion.id"
+                    class="info-grid">
                     <div>
                       <strong>Tipo principal:</strong>
                       {{ ocupacion.tipo_principal }}
@@ -788,7 +686,7 @@ export default {
     display: grid;
     gap: 8px;
 
-    > div {
+    >div {
       padding: 4px 0;
       border-bottom: 1px solid #f0f0f0;
 
