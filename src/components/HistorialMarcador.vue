@@ -629,7 +629,7 @@ export default {
 
       try {
         const response = await axios.get(
-          `http://localhost:3006/marcador/${props.idMarcador}/historial`
+          `http://179.43.127.133:3006/marcador/${props.idMarcador}/historial`
         );
         historial.value = response.data || [];
 
