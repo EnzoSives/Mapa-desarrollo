@@ -587,6 +587,50 @@
                       }}</span>
                     </div>
                   </div>
+                  <!-- Ocupaciones del integrante -->
+                  <div v-if="integrante.ocupaciones?.length" class="q-mt-xs">
+                    <div class="text-caption text-grey-7 q-mb-xs">
+                      <q-icon name="work" size="xs" class="q-mr-xs" />
+                      Ocupaciones:
+                    </div>
+                    <div
+                      v-for="(ocupacion, oIndex) in integrante.ocupaciones"
+                      :key="oIndex"
+                      class="text-caption q-mb-xs"
+                    >
+                      <div class="row items-center q-gutter-xs">
+                        <q-badge
+                          color="orange"
+                          text-color="white"
+                          class="q-mr-xs"
+                        >
+                          {{ ocupacion.tipo_principal }}
+                        </q-badge>
+                        <q-badge
+                          v-if="ocupacion.tipo_1"
+                          color="orange-3"
+                          text-color="dark"
+                          class="q-mr-xs"
+                        >
+                          {{ ocupacion.tipo_1 }}
+                        </q-badge>
+                        <q-badge
+                          v-if="ocupacion.tipo_2"
+                          color="orange-2"
+                          text-color="dark"
+                          class="q-mr-xs"
+                        >
+                          {{ ocupacion.tipo_2 }}
+                        </q-badge>
+                        <span
+                          v-if="ocupacion.ingresos"
+                          class="text-green text-weight-medium"
+                        >
+                          Ingresos: ${{ ocupacion.ingresos.toLocaleString() }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -622,23 +666,20 @@
                 class="col-6"
               >
                 <q-chip
-                  :color="
-                    servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
-                  "
+                  :color="'primary'"
                   text-color="white"
                   size="sm"
                   class="full-width"
                 >
-                  <q-icon
-                    :name="
-                      servicio.opcion_servicio === 'Conectado'
-                        ? 'check_circle'
-                        : 'cancel'
-                    "
-                    class="q-mr-xs"
-                  />
+                  <q-icon :name="'check_circle'" class="q-mr-xs" />
                   {{ servicio.nombre }}
                 </q-chip>
+                <span
+                  v-if="servicio.opcion_servicio"
+                  class="q-ml-xs text-caption text-bold"
+                >
+                  ({{ servicio.opcion_servicio }})
+                </span>
               </div>
             </div>
           </q-card-section>
@@ -674,6 +715,7 @@
               >
                 <div class="text-weight-medium">{{ programa.tipo }}</div>
                 <div class="text-caption">{{ programa.ayuda }}</div>
+                <div class="text-caption">{{ programa.detalle }}</div>
                 <!-- Mostrar notas del programa si existen -->
                 <div
                   v-if="programa.notas"
@@ -714,7 +756,7 @@
                 class="text-subtitle1 text-weight-medium q-mb-md flex items-center"
               >
                 <q-icon name="note" class="q-mr-xs" />
-                Notas
+                Observaciones
               </div>
               <div
                 class="text-body2 q-pa-sm rounded-borders"
@@ -1918,6 +1960,7 @@ async function generarPDF() {
     }
 
     // 5. INTEGRANTES
+    // 5. INTEGRANTES
     {
       let alturaIntegrantes =
         CONFIG.card.headerHeight + CONFIG.card.padding * 2;
@@ -1984,6 +2027,34 @@ async function generarPDF() {
             membersY
           );
           membersY += 4;
+
+          // Ocupaciones del integrante
+          if (i.ocupaciones && i.ocupaciones.length > 0) {
+            i.ocupaciones.forEach((ocup, oidx) => {
+              const tipoPrincipal = getSafeValue(ocup.tipo_principal);
+              const tipo1 = getSafeValue(ocup.tipo_1);
+              const tipo2 = getSafeValue(ocup.tipo_2);
+              const ingresos =
+                ocup.ingresos && !isNaN(ocup.ingresos)
+                  ? `$${ocup.ingresos.toLocaleString('es-ES')}`
+                  : '';
+
+              let ocupacionLinea = `   - Ocupación: ${tipoPrincipal}`;
+              if (tipo1 !== 'N/A' || tipo2 !== 'N/A') {
+                ocupacionLinea += ` (${[tipo1, tipo2]
+                  .filter((t) => t && t !== 'N/A')
+                  .join(' - ')})`;
+              }
+              if (ingresos) {
+                ocupacionLinea += ` | Ingresos: ${ingresos}`;
+              }
+
+              setFont(CONFIG.fonts.small);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(ocupacionLinea, membersCard.contentX + 4, membersY);
+              membersY += 3;
+            });
+          }
         });
       } else {
         setFont(CONFIG.fonts.cardValue);
@@ -2092,16 +2163,26 @@ async function generarPDF() {
       if (activos.length > 0) {
         setFont(CONFIG.fonts.cardLabel);
         setColor(CONFIG.colors.success);
-        doc.text('ACTIVOS:', programsCard.contentX, programsY);
+
         programsY += 4;
 
         activos.forEach((p) => {
           const tipo = getSafeValue(p.tipo);
           const ayuda = getSafeValue(p.ayuda);
-          if (tipo !== 'N/A' || ayuda !== 'N/A') {
+          const detalle = getSafeValue(p.detalle);
+          if (tipo !== 'N/A' || ayuda !== 'N/A' || detalle !== 'N/A') {
             setFont(CONFIG.fonts.cardValue);
             setColor(CONFIG.colors.text);
             doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
+            if (detalle && detalle !== 'N/A') {
+              setFont(CONFIG.fonts.tiny);
+              setColor(CONFIG.colors.textSecondary);
+              doc.text(
+                `  Detalle: ${detalle}`,
+                programsCard.contentX + 10,
+                programsY + 3
+              );
+            }
             programsY += 3;
           }
         });
