@@ -32,7 +32,7 @@
             debounce="300"
             clearable
             placeholder="Buscar Titular..."
-            class="col"
+            class="full-width"
           >
             <template v-slot:prepend>
               <q-icon name="search" />
@@ -48,7 +48,7 @@
               debounce="300"
               clearable
               placeholder="Buscar integrante por nombre o DNI..."
-              class="full-width"
+              class="col"
             >
               <template v-slot:prepend>
                 <q-icon name="person_search" />
