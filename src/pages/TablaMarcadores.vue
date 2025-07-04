@@ -4,7 +4,7 @@
     <div class="q-mb-md">
       <div class="row items-end q-col-gutter-md">
         <div class="col-12 col-md-3">
-          <h4 class="text-h5 q-mb-sm">Lista de Marcadores</h4>
+          <h4 class="text-h5 q-mb-sm">Informes creados</h4>
         </div>
         <div class="col-12 col-md-3">
           <q-select
@@ -26,34 +26,35 @@
         </div>
         <div class="col-12 col-md-3">
           <q-input
-            v-model="filtroIntegrante"
+            v-model="filtro"
             outlined
             dense
             debounce="300"
             clearable
-            placeholder="Buscar integrante por nombre o DNI..."
-            class="full-width"
+            placeholder="Buscar Titular..."
+            class="col"
           >
             <template v-slot:prepend>
-              <q-icon name="person_search" />
+              <q-icon name="search" />
             </template>
           </q-input>
         </div>
         <div class="col-12 col-md-3">
           <div class="row items-center q-gutter-sm">
             <q-input
-              v-model="filtro"
+              v-model="filtroIntegrante"
               outlined
               dense
               debounce="300"
               clearable
-              placeholder="Buscar marcador..."
-              class="col"
+              placeholder="Buscar integrante por nombre o DNI..."
+              class="full-width"
             >
               <template v-slot:prepend>
-                <q-icon name="search" />
+                <q-icon name="person_search" />
               </template>
             </q-input>
+
             <q-btn
               color="primary"
               icon="print"
