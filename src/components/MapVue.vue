@@ -417,7 +417,7 @@
     <!-- Drawer derecho mejorado -->
     <q-drawer v-model="drawerVisible" side="right" :width="500" overlay behavior="desktop" bordered>
       <!-- Header fijo con botón cerrar -->
-      <div class="drawer-header bg-primary text-white">
+      <div class="drawer-header bg-blue-5 text-white">
         <div class="row items-center justify-between q-pa-md">
           <div class="text-h6">Panel de Control</div>
           <q-btn icon="close" flat round color="white" @click="drawerVisible = false" class="close-btn" />
