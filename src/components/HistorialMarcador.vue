@@ -236,8 +236,8 @@
                         </q-item-section>
                         <q-item-section side>
                           <q-chip :color="programa.estado === 'activo'
-                              ? 'green-6'
-                              : 'grey-5'
+                            ? 'green-6'
+                            : 'grey-5'
                             " text-color="white" dense class="q-pa-xs" square>
                             <q-icon name="check_circle" size="16px" class="q-mr-xs"
                               v-if="programa.estado === 'activo'" />
@@ -312,8 +312,8 @@
                         </q-item-section>
                         <q-item-section side>
                           <q-chip :color="servicio.opcion_servicio === 'Conectado'
-                              ? 'green-6'
-                              : 'grey-5'
+                            ? 'green-6'
+                            : 'grey-5'
                             " text-color="white" dense square>
                             {{ servicio.opcion_servicio }}
                           </q-chip>
@@ -524,7 +524,7 @@ export default {
 
       try {
         const response = await axios.get(
-          `http://localhost:3006/marcador/${props.idMarcador}/historial`
+          `http://179.43.127.133:3006/marcador/${props.idMarcador}/historial`
         );
 
         // Filtrar solo los registros de pre-actualización
