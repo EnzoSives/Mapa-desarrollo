@@ -278,8 +278,7 @@
             <div class="row q-col-gutter-sm">
               <div v-for="(servicio, index) in gisStore.marcadorSeleccionado
                 .servicios" :key="index" class="col-6">
-                <q-chip :color="servicio.opcion_servicio === 'Conectado' ? 'green' : 'red'
-                  " text-color="white" size="sm" class="full-width">
+                <q-chip color="primary" text-color="white" size="sm" class="full-width">
                   <q-icon :name="servicio.opcion_servicio === 'Conectado'
                     ? 'check_circle'
                     : 'cancel'
@@ -307,6 +306,9 @@
                 :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
                 <div class="text-weight-medium">{{ programa.tipo }}</div>
                 <div class="text-caption">{{ programa.ayuda }}</div>
+                <div v-if="programa.detalle" class="text-caption text-grey q-mt-xs">
+                  Detalle: {{ programa.detalle }}
+                </div>
                 <!-- Mostrar notas del programa si existen -->
                 <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
                   <q-icon name="note" size="xs" class="q-mr-xs" />
@@ -332,7 +334,7 @@
             <q-card-section class="q-pa-md">
               <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
                 <q-icon name="note" class="q-mr-xs" />
-                Notas
+                Observaciones
               </div>
               <div class="text-body2 q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-grey-8' : 'bg-grey-2'">
                 {{ gisStore.marcadorSeleccionado.notas }}
@@ -520,32 +522,30 @@
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-sm-6">
                   <q-input v-model="nuevoMarcador.nombre" label="Nombre *" dense outlined
-                    :rules="[(val) => !!val || 'Requerido', (val) => val.length >= 3 || 'Min. 3 letras']" />
+                    :rules="[(val) => !!val || 'Requerido']" />
                 </div>
                 <div class="col-12 col-sm-6">
                   <q-input v-model="nuevoMarcador.apellido" label="Apellido *" dense outlined
-                    :rules="[(val) => !!val || 'Requerido', (val) => val.length >= 3 || 'Min. 3 letras']" />
+                    :rules="[(val) => !!val || 'Requerido']" />
                 </div>
                 <div class="col-12 col-sm-6">
                   <q-input v-model="nuevoMarcador.dni" label="DNI *" type="number" dense outlined
-                    :rules="[(val) => !!val || 'Requerido', (val) => /^\d{7,8}$/.test(val) || 'Debe tener 7 u 8 dígitos']" />
+                    :rules="[(val) => !!val || 'Requerido']" />
                 </div>
                 <div class="col-12 col-sm-6">
-                  <q-input v-model="nuevoMarcador.telefono" label="Teléfono *" type="number" dense outlined
-                    :rules="[(val) => !!val || 'Requerido', (val) => /^\d{8,12}$/.test(val) || 'Debe tener 8 a 12 dígitos']" />
+                  <q-input v-model="nuevoMarcador.telefono" label="Teléfono" type="number" dense outlined />
                 </div>
                 <div class="col-12">
                   <q-input v-model="nuevoMarcador.direccion" label="Domicilio *" dense outlined
-                    :rules="[(val) => !!val || 'Requerido', (val) => val.length >= 5 || 'Min. 5 caracteres']" />
+                    :rules="[(val) => !!val || 'Requerido']" />
                 </div>
                 <div class="col-12 col-sm-6">
                   <q-select v-model="nuevoMarcador.barrio" label="Barrio *" :options="opcionesBarrios" dense outlined
                     :rules="[(val) => !!val || 'Seleccione un barrio']" />
                 </div>
                 <div class="col-12 col-sm-6">
-                  <q-select v-model="nuevoMarcador.tiempo_residencia" label="Tiempo de residencia *"
-                    :options="opcionesResidencia" dense outlined
-                    :rules="[(val) => !!val || 'Seleccione tiempo de residencia']" />
+                  <q-select v-model="nuevoMarcador.tiempo_residencia" label="Tiempo de residencia"
+                    :options="opcionesResidencia" dense outlined />
                 </div>
               </div>
             </q-card>
@@ -559,8 +559,8 @@
               <div v-for="(estudio, index) in nuevoMarcador.estudios" :key="index" class="q-mb-md relative-position">
                 <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
                   @click="eliminarEstudio(index)" />
-                <q-select v-model="estudio.nivel" label="Nivel de estudios *" :options="opcionesEstudios" dense outlined
-                  style="width: 50%;" :rules="[(val) => !!val || 'Debe seleccionar un nivel']" />
+                <q-select v-model="estudio.nivel" label="Nivel de estudios" :options="opcionesEstudios" dense outlined
+                  style="width: 50%;" />
               </div>
 
               <q-btn icon="add_circle" label="Agregar estudio" color="primary" flat @click="agregarEstudio" />
@@ -602,11 +602,11 @@
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-3">
                     <q-select v-model="vivienda.tipo" label="Tipo de vivienda" :options="opcionesTipoVivienda" dense
-                      outlined :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
+                      outlined />
                   </div>
                   <div class="col-12 col-md-3">
                     <q-select v-model="vivienda.dominio" label="Dominio" :options="opcionesDominioVivienda" dense
-                      outlined :rules="[(val) => !!val || 'Debe seleccionar el dominio']" />
+                      outlined />
                   </div>
                   <div class="col-12 col-md-3">
                     <q-select v-model="vivienda.ambientes" label="Ambientes" :options="opcionesAmbientes" dense
@@ -633,8 +633,7 @@
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-4">
                     <q-select v-model="ocupacion.tipo_principal" label="Tipo de ocupación" :options="opcionesOcupacion"
-                      dense outlined @update:model-value="resetearTiposOcupacion(index)"
-                      :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
+                      dense outlined @update:model-value="resetearTiposOcupacion(index)" />
                   </div>
                   <div class="col-12 col-md-4">
                     <q-select v-model="ocupacion.tipo_1" label="Tipo 1"
@@ -645,18 +644,7 @@
                           'Estudiante',
                           'AUH/SUAF',
                         ].includes(ocupacion.tipo_principal)
-                        " :rules="[
-                          (val) =>
-                            !ocupacion.tipo_principal ||
-                            ![
-                              'Trabajo reproductivo',
-                              'Trabajo productivo',
-                              'Estudiante',
-                              'AUH/SUAF',
-                            ].includes(ocupacion.tipo_principal) ||
-                            !!val ||
-                            'Debe seleccionar un tipo',
-                        ]" />
+                        " />
                   </div>
                   <div class="col-12 col-md-4">
                     <q-select v-model="ocupacion.tipo_2" label="Tipo 2"
@@ -664,14 +652,7 @@
                         (ocupacion.tipo_principal !== 'Trabajo reproductivo' &&
                           ocupacion.tipo_principal !== 'Estudiante' &&
                           ocupacion.tipo_principal !== 'AUH/SUAF')
-                        " :rules="[
-                          (val) =>
-                            ocupacion.tipo_principal !== 'Trabajo reproductivo' ||
-                            ocupacion.tipo_principal !== 'Estudiante' ||
-                            ocupacion.tipo_principal !== 'AUH/SUAF' ||
-                            !!val ||
-                            'Debe seleccionar un tipo',
-                        ]" />
+                        " />
                   </div>
                   <div class="col-12">
                     <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined :min="0"
@@ -701,47 +682,25 @@
                 <!-- Información básica del integrante -->
                 <div class="row q-col-gutter-md q-mb-md q-pr-lg">
                   <div class="col-12 col-md-4">
-                    <q-input v-model="integrante.nombre" label="Nombre" dense outlined :rules="[
-                      (val) => !!val || 'El nombre es obligatorio',
-                      (val) =>
-                        val.length >= 2 || 'Debe tener al menos 2 caracteres',
-                      (val) =>
-                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                        'Solo se permiten letras y espacios',
-                    ]" />
+                    <q-input v-model="integrante.nombre" label="Nombre *" dense outlined
+                      :rules="[(val) => !!val || 'El nombre es obligatorio']" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-input v-model="integrante.apellido" label="Apellido" dense outlined :rules="[
-                      (val) => !!val || 'El apellido es obligatorio',
-                      (val) =>
-                        val.length >= 2 || 'Debe tener al menos 2 caracteres',
-                      (val) =>
-                        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val) ||
-                        'Solo se permiten letras y espacios',
-                    ]" />
+                    <q-input v-model="integrante.apellido" label="Apellido *" dense outlined
+                      :rules="[(val) => !!val || 'El apellido es obligatorio']" />
                   </div>
                   <div class="col-12 col-md-4">
-                    <q-select v-model="integrante.vinculo" label="Vínculo" :options="opcionesVinculo" dense outlined
+                    <q-select v-model="integrante.vinculo" label="Vínculo *" :options="opcionesVinculo" dense outlined
                       :rules="[(val) => !!val || 'Debe seleccionar un vínculo']" />
                   </div>
                 </div>
 
                 <div class="row q-col-gutter-md q-mb-md q-pr-lg">
                   <div class="col-12 col-md-6">
-                    <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined :rules="[
-                      (val) => !!val || 'La edad es obligatoria',
-                      (val) =>
-                        (val >= 0 && val <= 120) ||
-                        'La edad debe estar entre 0 y 120 años',
-                    ]" />
+                    <q-input v-model.number="integrante.edad" label="Edad" type="number" dense outlined />
                   </div>
                   <div class="col-12 col-md-6">
-                    <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined :rules="[
-                      (val) => !!val || 'El DNI es obligatorio',
-                      (val) =>
-                        /^\d{7,8}$/.test(val) ||
-                        'El DNI debe tener 7 u 8 dígitos',
-                    ]" />
+                    <q-input v-model="integrante.dni" label="DNI" type="number" dense outlined />
                   </div>
                 </div>
 
@@ -780,7 +739,7 @@
                             index,
                             ocupacionIndex
                           )
-                          " :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
+                          " />
                     </div>
                     <div class="col-12 col-md-4">
                       <q-select v-model="ocupacion.tipo_1" label="Tipo 1"
@@ -791,18 +750,7 @@
                             'Estudiante',
                             'AUH/SUAF',
                           ].includes(ocupacion.tipo_principal)
-                          " :rules="[
-                            (val) =>
-                              !ocupacion.tipo_principal ||
-                              ![
-                                'Trabajo reproductivo',
-                                'Trabajo productivo',
-                                'Estudiante',
-                                'AUH/SUAF',
-                              ].includes(ocupacion.tipo_principal) ||
-                              !!val ||
-                              'Debe seleccionar un tipo',
-                          ]" />
+                          " />
                     </div>
                     <div class="col-12 col-md-4">
                       <q-select v-model="ocupacion.tipo_2" label="Tipo 2"
@@ -811,15 +759,7 @@
                             'Trabajo reproductivo' &&
                             ocupacion.tipo_principal !== 'Estudiante' &&
                             ocupacion.tipo_principal !== 'AUH/SUAF')
-                          " :rules="[
-                            (val) =>
-                              ocupacion.tipo_principal !==
-                              'Trabajo reproductivo' ||
-                              ocupacion.tipo_principal !== 'Estudiante' ||
-                              ocupacion.tipo_principal !== 'AUH/SUAF' ||
-                              !!val ||
-                              'Debe seleccionar un tipo',
-                          ]" />
+                          " />
                     </div>
                     <div class="col-12">
                       <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined
@@ -851,18 +791,11 @@
                 <div class="row q-col-gutter-md q-pr-lg">
                   <div class="col-12 col-md-6">
                     <q-select v-model="servicio.nombre" label="Servicio" :options="opcionesServicios" dense outlined
-                      @update:model-value="resetearOpcionServicio(index)"
-                      :rules="[(val) => !!val || 'Debe seleccionar un servicio']" />
+                      @update:model-value="resetearOpcionServicio(index)" />
                   </div>
                   <div class="col-12 col-md-6">
                     <q-select v-model="servicio.opcion_servicio" label="Opción"
-                      :options="getOpcionesxServicios(servicio.nombre)" dense outlined :disable="!servicio.nombre"
-                      :rules="[
-                        (val) =>
-                          !servicio.nombre ||
-                          !!val ||
-                          'Debe seleccionar una opción',
-                      ]" />
+                      :options="getOpcionesxServicios(servicio.nombre)" dense outlined :disable="!servicio.nombre" />
                   </div>
                 </div>
               </div>
@@ -884,32 +817,23 @@
                 </q-btn>
 
                 <!-- Primera fila: Tipo + Ayuda -->
-                <div class="row q-col-gutter-md q-pr-lg q-mb-md">
-                  <div class="col-12 col-md-6">
-                    <q-select v-model="programa.tipo" label="Tipo" :options="tiposPrograma" dense outlined
-                      @update:model-value="resetearAyuda(index)"
-                      :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
-                      outlined :disable="!programa.tipo || programa.tipo === 'SUBSIDIOS'" :rules="[
-                        (val) =>
-                          programa.tipo === 'SUBSIDIOS' ||
-                          !!val ||
-                          'Debe seleccionar una ayuda',
-                      ]" />
-                  </div>
+                <div class="row q-col-gutter-md q-pr-lg">
+                  <q-select v-model="programa.tipo" label="Tipo *" :options="tiposPrograma" dense outlined class="col"
+                    @update:model-value="resetearAyuda(index)"
+                    :rules="[(val) => !!val || 'Debe seleccionar un tipo']" />
+
+                  <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
+                    outlined class="col"
+                    :disable="!programa.tipo || (programa.tipo !== 'CONTRAPRESTACIÓN' && programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')" />
+
+                  <q-select v-model="programa.detalle" label="Detalle" :options="detallesAyuda[programa.ayuda] || []"
+                    dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'" />
                 </div>
 
                 <!-- Segunda fila: Notas -->
                 <div class="row q-pr-lg">
                   <div class="col-12">
-                    <q-input v-model="programa.notas" label="Notas" type="textarea" dense outlined :rules="[
-                      (val) =>
-                        !val ||
-                        val.length <= 500 ||
-                        'Las notas no pueden exceder 500 caracteres',
-                    ]" />
+                    <q-input v-model="programa.notas" label="Notas" type="textarea" dense outlined />
                   </div>
                 </div>
               </div>
@@ -922,12 +846,7 @@
               Observaciones
             </q-banner>
             <q-card class="q-mb-md q-pa-md bg-grey-1 rounded-borders shadow-1">
-              <q-input v-model="nuevoMarcador.notas" label="Observaciones" type="textarea" dense outlined :rules="[
-                (val) =>
-                  !val ||
-                  val.length <= 500 ||
-                  'Las notas no pueden exceder 500 caracteres',
-              ]" />
+              <q-input v-model="nuevoMarcador.notas" label="Observaciones" type="textarea" dense outlined />
             </q-card>
 
             <!-- Ícono del Marcador -->
@@ -936,7 +855,7 @@
               Ícono del Marcador
             </q-banner>
             <q-card class="q-mb-md q-pa-md bg-grey-1 rounded-borders shadow-1">
-              <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador" :options="iconosDisponibles"
+              <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador *" :options="iconosDisponibles"
                 option-value="value" option-label="label" emit-value map-options outlined dense
                 :rules="[(val) => !!val || 'Debe seleccionar un ícono']">
                 <!-- Slot para opciones con imágenes -->
@@ -1070,24 +989,60 @@ const iconosDisponibles = [
   { label: 'Intervención Especifica', value: '/marker-icon-4.png' },
 ];
 
-// Opciones para los selectores de programas
+
+// Tipos de programa (primer selector)
 const tiposPrograma = [
-  'PROGRAMAS ALIMENTARIOS',
+  'SUBSIDIO ECONÓMICO',
+  'ALQUILER',
   'CONTRAPRESTACIÓN',
-  'SUBSIDIOS', // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
+  'SEPELIO',
+  'OTRAS AYUDAS',
+  'INF. SOCIALES',
+  'AYUDA SOCIAL SIN CONTRAPRESTACIÓN',
 ];
 
+// Ayudas disponibles por tipo de programa (segundo selector)
 const opcionesAyuda = {
-  'PROGRAMAS ALIMENTARIOS': [
-    'AM - Ayuda Mensual',
-    'DBT - Diabéticos',
-    'ES - Esp. Solidario',
-    'AU - Ayuda Urgente',
-    'DE - Dietas Especiales',
+  'SUBSIDIO ECONÓMICO': [],
+  'ALQUILER': [],
+  'CONTRAPRESTACIÓN': [
+    'Banco Materiales',
+    'Gas',
+    'Luz',
+    'Desagote pozo',
+    'Colchón',
+    'Frazadas',
+    'Otros',
   ],
-  CONTRAPRESTACIÓN: ['Gas', 'Luz', 'Banco Materiales'],
-  SUBSIDIOS: [], // ✅ CORREGIDO: Cambié de 'SUBSIDIOS' a 'SUBSIDIOS'
+  'SEPELIO': [],
+  'OTRAS AYUDAS': [],
+  'INF. SOCIALES': [],
+  'AYUDA SOCIAL SIN CONTRAPRESTACIÓN': [
+    'Banco Materiales',
+    'Gas',
+    'Luz',
+    'Desagote pozo',
+    'Colchón',
+    'Frazadas',
+    'Otros',
+  ],
 };
+
+// Detalles por ayuda (tercer selector, opcional según la ayuda)
+const detallesAyuda = {
+  'Banco Materiales': [
+    'Membrana',
+    'Chapa',
+    'Tirante / Aislajás',
+    'Aberturas',
+    'Otros materiales',
+    'Módulo habitacional',
+    'Baño',
+    'Otros',
+  ],
+  // Si en el futuro quisieras agregar detalles para otras ayudas, podés hacerlo acá.
+};
+
 
 // Agregar estas opciones después de las existentes
 const opcionesVinculo = ['Pareja', 'Hijo/a', 'Padre/Madre', 'Otro'];
@@ -1166,7 +1121,7 @@ const opcionesDominioVivienda = [
 
 const opcionesAmbientes = ['1 ambiente', '2 ambientes', '3 ambientes o más'];
 
-const opcionesBaño = ['Interior', 'Exterior', 'Compartido', 'Sin baño'];
+const opcionesBaño = ['Interior', 'Exterior', 'Compartido interior', 'Compartido exterior', 'Sin baño'];
 
 const opcionesServicios = [
   'Agua',
@@ -1210,6 +1165,7 @@ const nuevoMarcador = ref({
   programas: [] as Array<{
     tipo: string;
     ayuda: string;
+    detalle: string;
     notas: string;
   }>,
   integrantes: [] as Array<{
@@ -1585,6 +1541,7 @@ function agregarPrograma() {
   nuevoMarcador.value.programas.push({
     tipo: '',
     ayuda: '',
+    detalle: '',
     notas: '',
   });
 }
