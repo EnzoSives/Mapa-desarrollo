@@ -482,10 +482,18 @@
     </q-drawer>
 
     <!-- Botón para abrir el drawer -->
-    <q-btn v-if="!drawerVisible" icon="menu" round size="lg" color="primary" class="fixed-bottom-right q-mb-md q-mr-md"
-      @click="drawerVisible = true">
-      <q-tooltip> Ver referencias y datos </q-tooltip>
-    </q-btn>
+    <div class="fixed-bottom-right q-mb-md q-mr-md" style="display: flex; flex-direction: column; gap: 12px;">
+      <q-btn v-if="!drawerVisible" icon="menu" round size="lg" color="primary" @click="drawerVisible = true">
+        <q-tooltip> Ver referencias y datos </q-tooltip>
+      </q-btn>
+
+      <q-btn icon="map" round size="lg" color="primary" @click="cambiarMapaBase">
+        <q-tooltip anchor="center right" self="center left" :offset="[10, 10]" max-width="200px">
+          {{ capaBase === 'osm' ? 'Cambiar a Secundario' : 'Cambiar a Principal' }}
+        </q-tooltip>
+      </q-btn>
+    </div>
+
 
 
     <!-- Modal -->
@@ -566,6 +574,7 @@
               <q-btn icon="add_circle" label="Agregar estudio" color="primary" flat @click="agregarEstudio" />
             </q-card>
 
+
             <!-- Salud General -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="health_and_safety" class="q-mr-sm" />
@@ -576,14 +585,24 @@
                 <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
                   @click="eliminarSalud(index)" />
                 <div class="row q-col-gutter-md q-pr-lg">
-                  <div class="col-12 col-md-2">
-                    <q-checkbox v-model="saludItem.cud" label="CUD" />
-                  </div>
-                  <div class="col-12 col-md-2">
-                    <q-checkbox v-model="saludItem.obra_social" label="Obra Social" />
-                  </div>
-                  <div class="col-12 col-md-8">
-                    <q-input v-model="saludItem.problema_salud" label="Problema de salud" dense outlined />
+                  <div class="row q-col-gutter-md items-center q-pr-lg">
+                    <div class="col-12 col-md-6">
+                      <q-select v-model="saludItem.cud" label="CUD" :options="[
+                        { label: 'Sí', value: true },
+                        { label: 'No', value: false }
+                      ]" map-options emit-value dense outlined />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                      <q-select v-model="saludItem.obra_social" label="Obra Social" :options="[
+                        { label: 'Sí', value: true },
+                        { label: 'No', value: false }
+                      ]" map-options emit-value dense outlined />
+                    </div>
+
+                    <div class="col-12 col-md-12">
+                      <q-input v-model="saludItem.problema_salud" label="Problema de salud" dense outlined />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -655,13 +674,8 @@
                         " />
                   </div>
                   <div class="col-12">
-                    <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined :min="0"
-                      :disable="!ocupacion.tipo_principal ||
-                        (ocupacion.tipo_principal !== 'Trabajo reproductivo' &&
-                          ocupacion.tipo_principal !== 'Trabajo productivo' &&
-                          ocupacion.tipo_principal !== 'AUH/SUAF' &&
-                          ocupacion.tipo_principal !== 'Estudiante')
-                        " />
+                    <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined
+                      :min="0" />
                   </div>
                 </div>
               </div>
@@ -671,7 +685,7 @@
             <!-- Integrantes -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="people" class="q-mr-sm" />
-              Integrantes *
+              Integrantes
             </q-banner>
             <q-card class="q-mb-md q-pa-md bg-grey-1 rounded-borders shadow-1">
               <div v-for="(integrante, index) in nuevoMarcador.integrantes" :key="index"
@@ -710,20 +724,31 @@
                   class="q-mb-md q-pa-sm bg-white rounded relative-position">
                   <q-btn icon="close" color="negative" flat dense round size="sm" class="absolute-top-right q-ma-xs"
                     @click="eliminarSaludIntegrante(index, saludIndex)" />
+
                   <div class="row q-col-gutter-md items-center q-pr-lg">
                     <div class="col-12 col-md-3">
-                      <q-checkbox v-model="saludItem.cud" label="CUD" />
+                      <q-select v-model="saludItem.cud" label="CUD" :options="[
+                        { label: 'Sí', value: true },
+                        { label: 'No', value: false }
+                      ]" map-options emit-value dense outlined />
                     </div>
+
                     <div class="col-12 col-md-3">
-                      <q-checkbox v-model="saludItem.obra_social" label="Obra Social" />
+                      <q-select v-model="saludItem.obra_social" label="Obra Social" :options="[
+                        { label: 'Sí', value: true },
+                        { label: 'No', value: false }
+                      ]" map-options emit-value dense outlined />
                     </div>
+
                     <div class="col-12 col-md-6">
                       <q-input v-model="saludItem.problema_salud" label="Problema de salud" dense outlined />
                     </div>
                   </div>
                 </div>
+
                 <q-btn icon="add" label="Agregar info salud" color="primary" flat size="sm"
                   @click="agregarSaludIntegrante(index)" />
+
 
                 <!-- Ocupación del integrante -->
                 <div class="text-subtitle2 q-mb-sm q-mt-md">Ocupación</div>
@@ -763,13 +788,7 @@
                     </div>
                     <div class="col-12">
                       <q-input v-model.number="ocupacion.ingresos" label="Ingresos" type="number" dense outlined
-                        :min="0" :disable="!ocupacion.tipo_principal ||
-                          (ocupacion.tipo_principal !==
-                            'Trabajo reproductivo' &&
-                            ocupacion.tipo_principal !== 'Trabajo productivo' &&
-                            ocupacion.tipo_principal !== 'AUH/SUAF' &&
-                            ocupacion.tipo_principal !== 'Estudiante')
-                          " />
+                        :min="0" />
                     </div>
                   </div>
                 </div>
@@ -805,7 +824,7 @@
             <!-- Programas -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="library_books" class="q-mr-sm" />
-              Programas *
+              Programas
             </q-banner>
             <q-card class="q-mb-md q-pa-md bg-grey-1 rounded-borders shadow-1">
               <div v-for="(programa, index) in nuevoMarcador.programas" :key="index" class="q-mb-md relative-position">
@@ -824,7 +843,7 @@
 
                   <q-select v-model="programa.ayuda" label="Ayuda" :options="getOpcionesAyuda(programa.tipo)" dense
                     outlined class="col"
-                    :disable="!programa.tipo || (programa.tipo !== 'CONTRAPRESTACIÓN' && programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')" />
+                    :disable="!programa.tipo || (programa.tipo !== 'CONTRAPRESTACIÓN' && programa.tipo !== 'PROGRAMAS ALIMENTARIOS' && programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')" />
 
                   <q-select v-model="programa.detalle" label="Detalle" :options="detallesAyuda[programa.ayuda] || []"
                     dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'" />
@@ -899,7 +918,7 @@ import { useGisStore, Marcador } from 'src/stores/gisStore';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
 import { Tile as TileLayer } from 'ol/layer';
-import { OSM } from 'ol/source';
+import { OSM, XYZ } from 'ol/source';
 import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
@@ -999,10 +1018,18 @@ const tiposPrograma = [
   'OTRAS AYUDAS',
   'INF. SOCIALES',
   'AYUDA SOCIAL SIN CONTRAPRESTACIÓN',
+  'PROGRAMAS ALIMENTARIOS',
 ];
 
 // Ayudas disponibles por tipo de programa (segundo selector)
 const opcionesAyuda = {
+  'PROGRAMAS ALIMENTARIOS': [
+    'AM - Ayuda Mensual',
+    'DBT - Diabéticos',
+    'ES - Esp. Solidario',
+    'AU - Ayuda Urgente',
+    'DE - Dietas Especiales',
+  ],
   'SUBSIDIO ECONÓMICO': [],
   'ALQUILER': [],
   'CONTRAPRESTACIÓN': [
@@ -1220,6 +1247,19 @@ let map: Map;
 let hoveredFeature: Feature | null = null;
 let vectorSource = new VectorSource();
 
+const mapTilerLayer = new TileLayer({
+  source: new XYZ({
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attributions: 'Tiles © Esri & contributors',
+    maxZoom: 20,
+  }),
+  visible: false, // inicia visible
+});
+const osmLayer = new TileLayer({
+  source: new OSM(),
+  visible: true, // inicia visible
+});
+
 const marcadoresFiltrados = computed(() => {
   const term = searchTerm.value.toLowerCase();
   return gisStore.marcadores
@@ -1246,17 +1286,22 @@ onMounted(() => {
   );
   map = new Map({
     target: mapContainer.value as HTMLElement,
-    layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+    layers: [
+      mapTilerLayer, // en vez de new OSM()
+      osmLayer,
+      vectorLayer,
+    ],
     view: new View({
       center: fromLonLat([-57.1339, -37.0017]),
-      zoom: 15,
-      minZoom: 14, // Zoom mínimo permitido
-      maxZoom: 18, // Zoom máximo permitido
-      extent: extent, // Límites del área visible
-      constrainOnlyCenter: false, // Restringe toda la vista, no solo el centro
+      zoom: 17, // más cerca para ver numeración
+      minZoom: 14,
+      maxZoom: 20,
+      extent: extent,
+      constrainOnlyCenter: false,
     }),
     controls: [],
   });
+
 
   // Agregar los marcadores cuando estén disponibles
   watch(
@@ -1347,6 +1392,21 @@ onMounted(() => {
     }
   });
 });
+
+const capaBase = ref<'osm' | 'esri'>('osm');
+
+function cambiarMapaBase() {
+  if (capaBase.value === 'osm') {
+    osmLayer.setVisible(false);
+    mapTilerLayer.setVisible(true);
+    capaBase.value = 'esri';
+  } else {
+    osmLayer.setVisible(true);
+    mapTilerLayer.setVisible(false);
+    capaBase.value = 'osm';
+  }
+}
+
 
 // ====== MÉTODOS DE VALIDACIÓN ======
 
