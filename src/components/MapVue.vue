@@ -1293,7 +1293,7 @@ onMounted(() => {
     ],
     view: new View({
       center: fromLonLat([-57.1339, -37.0017]),
-      zoom: 15, // más cerca para ver numeración
+      zoom: 14, // más cerca para ver numeración
       minZoom: 14,
       maxZoom: 20,
       extent: extent,
