@@ -5,7 +5,9 @@ export interface Programa {
   id: number;
   tipo: string;
   ayuda: string;
-  deralle: string; // ⬅️ nuevo campo
+  detalle: string; // ⬅️ nuevo campo
+  mes: string; // ⬅️ nuevo campo 
+  cantidad: number;
   notas?: string; // ⬅️ nuevo campo opcional
   estado: string;
   fechaInicio: string;

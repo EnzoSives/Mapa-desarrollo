@@ -6,7 +6,6 @@
 
     <InfoCard />
 
-    <!-- Tooltip para mostrar el nombre del marcador -->
     <div v-if="tooltipVisible" class="tooltip-marcador" :style="{
       left: tooltipPosition.x + 'px',
       top: tooltipPosition.y + 'px',
@@ -14,7 +13,6 @@
       {{ tooltipContent }}
     </div>
 
-    <!-- Panel Info del marcador (izquierda arriba) -->
     <div id="area-imprimir">
       <q-card v-if="gisStore.marcadorSeleccionado" class="info-panel q-mx-auto" style="
           min-width: 400px;
@@ -25,16 +23,13 @@
           display: flex;
           flex-direction: column;
         ">
-        <!-- Contenido con scroll -->
         <div style="
             flex: 1;
             overflow-y: auto;
             scrollbar-width: none;
             scrollbar-color: #888 #f0f0f0;
           ">
-          <!-- Encabezado simple -->
           <q-card-section class="q-pa-md relative-position">
-            <!-- Botón cerrar en esquina superior derecha -->
             <q-btn icon="close" flat round dense class="absolute-top-right q-ma-sm" style="z-index: 2"
               @click="gisStore.cerrarInfo" />
 
@@ -61,14 +56,12 @@
 
           <q-separator />
 
-          <!-- 1. INFORMACIÓN BÁSICA -->
           <q-card-section class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="person" class="q-mr-xs" />
               Información Básica
             </div>
 
-            <!-- Nombre y Apellido en la misma fila -->
             <div class="row q-col-gutter-md q-mb-md">
               <div class="col-6">
                 <div class="text-caption text-grey">Nombre</div>
@@ -84,7 +77,6 @@
               </div>
             </div>
 
-            <!-- DNI campo completo -->
             <div class="q-mb-md">
               <div class="text-caption text-grey">DNI</div>
               <div class="text-body2">
@@ -92,7 +84,6 @@
               </div>
             </div>
 
-            <!-- Domicilio campo completo -->
             <div class="q-mb-md">
               <div class="text-caption text-grey">Domicilio</div>
               <div class="text-body2">
@@ -100,7 +91,6 @@
               </div>
             </div>
 
-            <!-- Teléfono campo completo -->
             <div class="q-mb-md">
               <div class="text-caption text-grey">Teléfono</div>
               <div class="text-body2">
@@ -108,7 +98,6 @@
               </div>
             </div>
 
-            <!-- Barrio y Tiempo de residencia en la misma fila -->
             <div class="row q-col-gutter-md q-mb-md">
               <div class="col-6">
                 <div class="text-caption text-grey">Barrio</div>
@@ -127,7 +116,6 @@
 
           <q-separator />
 
-          <!-- 2. NIVEL DE ESTUDIOS -->
           <q-card-section v-if="gisStore.marcadorSeleccionado.estudios?.length" class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="school" class="q-mr-xs" />
@@ -143,7 +131,6 @@
 
           <q-separator v-if="gisStore.marcadorSeleccionado.estudios?.length" />
 
-          <!-- 3. INFORMACIÓN DE SALUD -->
           <q-card-section v-if="gisStore.marcadorSeleccionado.salud?.length" class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="medical_services" class="q-mr-xs" />
@@ -155,7 +142,8 @@
               class="q-mb-xs q-pa-sm rounded-borders" :class="$q.dark.isActive ? 'bg-red-9' : 'bg-red-1'">
               <div class="row items-center">
                 <div class="col">
-                  <div v-if="saludItem.problema_salud" class="text-body2">
+                  <div v-if="saludItem.problema_salud" class="text-body2"
+                    style="word-break: break-word; white-space: pre-line; max-width: 100%;">
                     {{ saludItem.problema_salud }}
                   </div>
                   <div class="q-mt-xs">
@@ -169,7 +157,6 @@
 
           <q-separator v-if="gisStore.marcadorSeleccionado.salud?.length" />
 
-          <!-- 4. VIVIENDA -->
           <q-card-section v-if="gisStore.marcadorSeleccionado.viviendas?.length" class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="home" class="q-mr-xs" />
@@ -196,7 +183,6 @@
 
           <q-separator v-if="gisStore.marcadorSeleccionado.viviendas?.length" />
 
-          <!-- 5. OCUPACIÓN -->
           <q-card-section v-if="gisStore.marcadorSeleccionado.ocupaciones?.length" class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="work" class="q-mr-xs" />
@@ -207,7 +193,6 @@
             <div v-for="(ocupacion, index) in gisStore.marcadorSeleccionado
               .ocupaciones" :key="index" class="q-mb-xs q-pa-sm rounded-borders"
               :class="$q.dark.isActive ? 'bg-orange-9' : 'bg-orange-1'">
-              <!-- Mostrar nombre si existe, sino el tipo principal -->
               <div class="text-body2 text-weight-medium">
                 {{ ocupacion.nombre || ocupacion.tipo_principal }}
               </div>
@@ -224,7 +209,6 @@
 
           <q-separator v-if="gisStore.marcadorSeleccionado.ocupaciones?.length" />
 
-          <!-- 6. INTEGRANTES -->
           <q-card-section class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="people" class="q-mr-xs" />
@@ -248,7 +232,6 @@
                     {{ integrante.edad }} años • {{ integrante.vinculo }} • DNI:
                     {{ integrante.dni }}
                   </div>
-                  <!-- Salud del integrante -->
                   <div v-if="integrante.salud?.length" class="q-mt-xs">
                     <div v-for="(saludItem, sIndex) in integrante.salud" :key="sIndex" class="text-caption">
                       <q-badge v-if="saludItem.cud" color="purple" text-color="white" class="q-mr-xs">CUD</q-badge>
@@ -267,7 +250,6 @@
 
           <q-separator />
 
-          <!-- 7. SERVICIOS -->
           <q-card-section v-if="gisStore.marcadorSeleccionado.servicios?.length" class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="electrical_services" class="q-mr-xs" />
@@ -291,33 +273,57 @@
 
           <q-separator v-if="gisStore.marcadorSeleccionado.servicios?.length" />
 
-          <!-- 8. PROGRAMAS -->
           <q-card-section class="q-pa-md">
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="assignment" class="q-mr-xs" />
-              Programas Activos
-              <q-chip v-if="programasActivos.length" :label="programasActivos.length" color="primary" text-color="white"
-                size="sm" class="q-ml-sm" />
+              Programas
+              <q-chip v-if="programasFiltradosPorMes.length" :label="programasFiltradosPorMes.length" color="primary"
+                text-color="white" size="sm" class="q-ml-sm" />
             </div>
 
-            <div v-if="programasActivos.length">
-              <div v-for="(programa, index) in programasActivos" :key="index"
+            <div class="q-mb-md">
+              <q-select v-model="filtroMes" :options="opcionesMeses" label="Filtrar por Mes" clearable dense outlined />
+            </div>
+
+            <div v-if="programasFiltradosPorMes.length">
+              <div v-for="(programa, index) in programasFiltradosPorMes" :key="index"
                 class="text-body2 q-mb-xs q-pa-sm rounded-borders"
                 :class="$q.dark.isActive ? 'bg-green-9' : 'bg-green-1'">
-                <div class="text-weight-medium">{{ programa.tipo }}</div>
-                <div class="text-caption">{{ programa.ayuda }}</div>
-                <div v-if="programa.detalle" class="text-caption text-grey q-mt-xs">
-                  Detalle: {{ programa.detalle }}
+                <div class="row items-center">
+                  <div class="col">
+                    <div class="text-weight-medium">
+                      {{ programa.tipo }}
+                    </div>
+                    <div class="text-caption">
+                      {{ programa.ayuda }}
+                    </div>
+                    <div v-if="programa.detalle" class="text-caption text-grey q-mt-xs">
+                      Detalle: {{ programa.detalle }}
+                    </div>
+                    <div class="text-caption q-mt-xs">
+                      <span v-if="programa.mes" class="q-mr-md">
+                        <q-icon name="event" size="xs" />
+                        Mes: {{ programa.mes }}
+                      </span>
+                      <span v-if="programa.cantidad">
+                        <q-icon name="format_list_numbered" size="xs" />
+                        Cantidad: {{ programa.cantidad }}
+                      </span>
+                    </div>
+                    <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
+                      <q-icon name="note" size="xs" class="q-mr-xs" />
+                      {{ programa.notas }}
+                    </div>
+                    <q-badge v-if="programa.fechaInicio" color="green" class="q-mt-xs" text-color="white">
+                      Desde:
+                      {{ new Date(programa.fechaInicio).toLocaleDateString() }}
+                    </q-badge>
+                  </div>
                 </div>
-                <!-- Mostrar notas del programa si existen -->
-                <div v-if="programa.notas" class="text-caption text-grey q-mt-xs">
-                  <q-icon name="note" size="xs" class="q-mr-xs" />
-                  {{ programa.notas }}
-                </div>
-                <q-badge v-if="programa.fechaInicio" color="green" class="q-mt-xs" text-color="white">
-                  Desde:
-                  {{ new Date(programa.fechaInicio).toLocaleDateString() }}
-                </q-badge>
+              </div>
+              <q-separator class="q-my-md" />
+              <div class="text-subtitle1 text-weight-bold text-right">
+                Total de Cantidad: {{ totalCantidadPorMes }}
               </div>
             </div>
             <div v-else class="text-caption text-grey">Ninguno</div>
@@ -328,7 +334,6 @@
             </div>
           </q-card-section>
 
-          <!-- Notas (al final si existen) -->
           <div v-if="gisStore.marcadorSeleccionado.notas">
             <q-separator />
             <q-card-section class="q-pa-md">
@@ -343,7 +348,6 @@
           </div>
         </div>
 
-        <!-- Acciones fijas en la parte inferior -->
         <div style="flex-shrink: 0">
           <q-separator />
           <q-card-actions class="q-pa-sm justify-end">
@@ -416,9 +420,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Drawer derecho mejorado -->
     <q-drawer v-model="drawerVisible" side="right" :width="500" overlay behavior="desktop" bordered>
-      <!-- Header fijo con botón cerrar -->
       <div class="drawer-header bg-blue-5 text-white">
         <div class="row items-center justify-between q-pa-md">
           <div class="text-h6">Panel de Control</div>
@@ -426,10 +428,8 @@
         </div>
       </div>
 
-      <!-- Contenido scrolleable -->
       <q-scroll-area class="drawer-content">
         <q-card flat class="no-shadow">
-          <!-- Panel de Referencias -->
           <q-card-section class="q-pa-md">
             <div class="section-title">
               <q-icon name="bookmark" class="q-mr-sm" color="primary" />
@@ -447,18 +447,15 @@
 
           <q-separator />
 
-          <!-- Datos cargados -->
           <q-card-section class="q-pa-md">
             <div class="section-title">
               <q-icon name="database" class="q-mr-sm" color="primary" />
               Datos cargados
             </div>
 
-            <!-- Buscador mejorado -->
             <q-input dense outlined debounce="300" v-model="searchTerm" placeholder="Buscar por nombre o dirección"
               class="q-mt-md search-input" clearable prepend-inner-icon="search" />
 
-            <!-- Lista de marcadores -->
             <div class="marcadores-lista q-mt-md">
               <div v-for="(marcador, index) in marcadoresFiltrados" :key="marcador.id" class="marcador-item"
                 @click="verInfoMarcador(marcador)">
@@ -481,7 +478,6 @@
       </q-scroll-area>
     </q-drawer>
 
-    <!-- Botón para abrir el drawer -->
     <div class="fixed-bottom-right q-mb-md q-mr-md" style="display: flex; flex-direction: column; gap: 12px;">
       <q-btn v-if="!drawerVisible" icon="menu" round size="lg" color="primary" @click="drawerVisible = true">
         <q-tooltip> Ver referencias y datos </q-tooltip>
@@ -496,11 +492,9 @@
 
 
 
-    <!-- Modal -->
     <q-drawer v-model="modalVisible" side="right" :width="800" overlay bordered behavior="desktop"
       v-if="!permisos.soloLectura">
       <q-card class="full-height column no-wrap">
-        <!-- Header fijo -->
         <q-card-section class="bg-blue-5 text-white q-pa-md">
           <div class="row items-center no-wrap">
             <div class="col">
@@ -517,11 +511,9 @@
           </div>
         </q-card-section>
 
-        <!-- Contenido scrollable -->
         <q-card-section class="scroll-y q-pa-sm" style="max-height: calc(100vh - 150px);">
           <q-form ref="formulario" @submit="guardarMarcador">
 
-            <!-- Información Básica -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="person" class="q-mr-sm" />
               Información Básica del Beneficiario
@@ -558,7 +550,6 @@
               </div>
             </q-card>
 
-            <!-- Estudios -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="school" class="q-mr-sm" />
               Nivel de Estudios
@@ -575,7 +566,6 @@
             </q-card>
 
 
-            <!-- Salud General -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="health_and_safety" class="q-mr-sm" />
               Información de Salud
@@ -609,7 +599,6 @@
               <q-btn icon="add_circle" label="Agregar info salud" color="primary" flat @click="agregarSalud" />
             </q-card>
 
-            <!-- Viviendas -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="home" class="q-mr-sm" />
               Vivienda
@@ -639,7 +628,6 @@
               <q-btn icon="add_circle" label="Agregar vivienda" color="primary" flat @click="agregarVivienda" />
             </q-card>
 
-            <!-- Ocupaciones -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="work" class="q-mr-sm" />
               Ocupación
@@ -682,7 +670,6 @@
               <q-btn icon="add_circle" label="Agregar ocupación" color="primary" flat @click="agregarOcupacion" />
             </q-card>
 
-            <!-- Integrantes -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="people" class="q-mr-sm" />
               Integrantes
@@ -693,7 +680,6 @@
                 <q-btn icon="close" color="negative" dense round size="sm" class="absolute-top-right q-ma-xs"
                   @click="eliminarIntegrante(index)" />
 
-                <!-- Información básica del integrante -->
                 <div class="row q-col-gutter-md q-mb-md q-pr-lg">
                   <div class="col-12 col-md-4">
                     <q-input v-model="integrante.nombre" label="Nombre *" dense outlined
@@ -718,7 +704,6 @@
                   </div>
                 </div>
 
-                <!-- Salud del integrante -->
                 <div class="text-subtitle2 q-mb-sm q-mt-md">Información de Salud</div>
                 <div v-for="(saludItem, saludIndex) in integrante.salud" :key="saludIndex"
                   class="q-mb-md q-pa-sm bg-white rounded relative-position">
@@ -750,7 +735,6 @@
                   @click="agregarSaludIntegrante(index)" />
 
 
-                <!-- Ocupación del integrante -->
                 <div class="text-subtitle2 q-mb-sm q-mt-md">Ocupación</div>
                 <div v-for="(ocupacion, ocupacionIndex) in integrante.ocupaciones" :key="ocupacionIndex"
                   class="q-mb-md q-pa-sm bg-white rounded relative-position">
@@ -798,7 +782,6 @@
               <q-btn icon="add_circle" label="Agregar integrante" color="primary" flat @click="agregarIntegrante" />
             </q-card>
 
-            <!-- Servicios -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="miscellaneous_services" class="q-mr-sm" />
               Servicios
@@ -821,7 +804,6 @@
               <q-btn icon="add_circle" label="Agregar servicio" color="primary" flat @click="agregarServicio" />
             </q-card>
 
-            <!-- Programas -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="library_books" class="q-mr-sm" />
               Programas
@@ -835,7 +817,6 @@
                   </q-tooltip>
                 </q-btn>
 
-                <!-- Primera fila: Tipo + Ayuda -->
                 <div class="row q-col-gutter-md q-pr-lg">
                   <q-select v-model="programa.tipo" label="Tipo *" :options="tiposPrograma" dense outlined class="col"
                     @update:model-value="resetearAyuda(index)"
@@ -849,8 +830,13 @@
                     dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'" />
                 </div>
 
-                <!-- Segunda fila: Notas -->
-                <div class="row q-pr-lg">
+                <div class="row q-col-gutter-md q-pr-lg q-mt-sm">
+                  <q-select v-model="programa.mes" label="Mes" :options="opcionesMeses" dense outlined class="col" />
+                  <q-input v-model.number="programa.cantidad" label="Cantidad" type="number" dense outlined class="col"
+                    :min="0" />
+                </div>
+
+                <div class="row q-pr-lg q-mt-sm">
                   <div class="col-12">
                     <q-input v-model="programa.notas" label="Notas" type="textarea" dense outlined />
                   </div>
@@ -859,7 +845,6 @@
               <q-btn icon="add_circle" label="Agregar programa" color="primary" flat @click="agregarPrograma" />
             </q-card>
 
-            <!-- Observaciones -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="notes" class="q-mr-sm" />
               Observaciones
@@ -868,7 +853,6 @@
               <q-input v-model="nuevoMarcador.notas" label="Observaciones" type="textarea" dense outlined />
             </q-card>
 
-            <!-- Ícono del Marcador -->
             <q-banner dense class="bg-grey-3 text-dark q-pa-sm q-mb-sm">
               <q-icon name="place" class="q-mr-sm" />
               Ícono del Marcador
@@ -877,7 +861,6 @@
               <q-select v-model="nuevoMarcador.icono" label="Ícono del marcador *" :options="iconosDisponibles"
                 option-value="value" option-label="label" emit-value map-options outlined dense
                 :rules="[(val) => !!val || 'Debe seleccionar un ícono']">
-                <!-- Slot para opciones con imágenes -->
                 <template v-slot:option="scope">
                   <q-item clickable v-bind="scope.itemProps">
                     <q-item-section avatar>
@@ -889,7 +872,6 @@
                   </q-item>
                 </template>
 
-                <!-- Slot para mostrar la imagen seleccionada -->
                 <template v-slot:selected-item="scope">
                   <q-chip dense square class="q-ma-none">
                     <q-img :src="scope.opt.value" style="width: 20px; height: 20px" class="q-mr-sm" />
@@ -899,7 +881,6 @@
               </q-select>
             </q-card>
 
-            <!-- Botones de acción -->
             <q-card-actions align="right" class="q-pa-md">
               <q-btn flat label="Cancelar" @click="cerrarModal" color="negative" :disable="guardando" />
               <q-btn flat :label="editando ? 'Guardar cambios' : 'Guardar'" @click="validarYGuardar" color="positive"
@@ -946,15 +927,11 @@ const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 const searchTerm = ref('');
-const guardando = ref(false); // ✅ NUEVO: Variable para el loading
+const guardando = ref(false);
 const drawerVisible = ref(false);
 
-
-
-// Ref para el formulario
 const formulario = ref();
 
-// Variables para el tooltip
 const tooltipVisible = ref(false);
 const tooltipContent = ref('');
 const tooltipPosition = ref({ x: 0, y: 0 });
@@ -975,6 +952,37 @@ const programasInactivos = computed(
       (p) => p.estado !== 'activo'
     ) || []
 );
+
+// ✅ NUEVO: Referencia para el filtro por mes
+const filtroMes = ref<string | null>(null);
+
+// ✅ NUEVO: Opciones de meses
+const opcionesMeses = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+// ✅ NUEVO: Propiedad computada para filtrar programas por mes y estado
+const programasFiltradosPorMes = computed(() => {
+  if (!gisStore.marcadorSeleccionado?.programas) {
+    return [];
+  }
+  const programas = gisStore.marcadorSeleccionado.programas.filter(p => p.estado === 'activo');
+  if (filtroMes.value) {
+    return programas.filter(p => p.mes === filtroMes.value);
+  }
+  return programas;
+});
+
+// ✅ NUEVO: Propiedad computada para calcular la cantidad total del mes filtrado
+const totalCantidadPorMes = computed(() => {
+  if (!programasFiltradosPorMes.value) {
+    return 0;
+  }
+  return programasFiltradosPorMes.value.reduce((total, programa) => {
+    return total + (programa.cantidad || 0);
+  }, 0);
+});
 
 function colorPorEstado(estado: any) {
   switch (estado) {
@@ -1194,6 +1202,8 @@ const nuevoMarcador = ref({
     ayuda: string;
     detalle: string;
     notas: string;
+    mes?: string;
+    cantidad?: number;
   }>,
   integrantes: [] as Array<{
     nombre: string;
@@ -1603,6 +1613,8 @@ function agregarPrograma() {
     ayuda: '',
     detalle: '',
     notas: '',
+    mes: '',
+    cantidad: null,
   });
 }
 
@@ -1854,7 +1866,7 @@ function desactivarEdicionTemporal() {
   }
 }
 
-// Función mejorada para generar PDF con diseño de tarjetas/cuadros
+// Función mejorada para generar PDF con diseño de tarjetas
 async function generarPDF() {
   if (!gisStore.marcadorSeleccionado) {
     alert('No hay ningún marcador seleccionado');
@@ -1865,20 +1877,17 @@ async function generarPDF() {
     // Verificar si jsPDF está disponible
     if (typeof jsPDF === 'undefined') {
       console.error('jsPDF no está disponible');
-      alert(
-        'Error: La librería jsPDF no está cargada. Verifique la conexión a internet.'
-      );
+      alert('Error: La librería jsPDF no está cargada. Verifique la conexión a internet.');
       return;
     }
 
     const marcador = gisStore.marcadorSeleccionado;
-    const doc = new jsPDF('p', 'mm', 'a4');
 
-    // ===== CONFIGURACIÓN OPTIMIZADA =====
+    // --- CONFIGURACIÓN OPTIMIZADA ---
     const CONFIG = {
       margins: { top: 12, right: 12, bottom: 15, left: 12 },
-      pageWidth: doc.internal.pageSize.width,
-      pageHeight: doc.internal.pageSize.height,
+      pageWidth: (new jsPDF('p', 'mm', 'a4')).internal.pageSize.width,
+      pageHeight: (new jsPDF('p', 'mm', 'a4')).internal.pageSize.height,
       colors: {
         primary: [25, 118, 210],
         success: [76, 175, 80],
@@ -1887,896 +1896,477 @@ async function generarPDF() {
         info: [33, 150, 243],
         text: [33, 33, 33],
         textSecondary: [117, 117, 117],
-        light: [248, 249, 250],
-        cardBg: [250, 250, 250],
+        cardBg: [255, 255, 255],
         cardBorder: [220, 220, 220],
       },
       fonts: {
-        title: { size: 14, style: 'bold' },
-        cardTitle: { size: 9, style: 'bold' },
-        cardLabel: { size: 7, style: 'bold' },
-        cardValue: { size: 7, style: 'normal' },
-        small: { size: 6, style: 'normal' },
-        tiny: { size: 5, style: 'normal' },
+        title: { size: 16, style: 'bold' },
+        cardTitle: { size: 10, style: 'bold' },
+        cardLabel: { size: 8, style: 'bold' },
+        cardValue: { size: 8, style: 'normal' },
+        small: { size: 7, style: 'normal' },
+        tiny: { size: 6, style: 'normal' },
       },
       card: {
-        padding: 3,
-        margin: 2,
+        padding: 5,
+        margin: 5,
         cornerRadius: 1,
         headerHeight: 8,
-        minHeight: 15,
       },
     };
 
-    let yPos = CONFIG.margins.top;
-    const contentWidth =
-      CONFIG.pageWidth - CONFIG.margins.left - CONFIG.margins.right;
-
-    // ===== FUNCIONES HELPER MEJORADAS =====
-
-    // Función para limpiar caracteres especiales
-    function cleanText(text, preserveSpaces = true) {
-      if (!text || typeof text !== 'string') return '';
-
-      let cleaned = text
-        .replace(/%ª/g, '')
-        .replace(/%Ï/g, '')
-        .replace(/%[a-zA-Z]/g, '')
-        .replace(/[^\w\s\-.,;:()\[\]\/]/g, '')
-        .trim();
-
-      if (preserveSpaces) {
-        cleaned = cleaned.replace(/\s+/g, ' ');
+    // --- CLASE PARA ENCAPSULAR TODA LA LÓGICA DE GENERACIÓN ---
+    class PDFGenerator {
+      constructor(data) {
+        this.doc = new jsPDF('p', 'mm', 'a4');
+        this.data = data;
+        this.yPos = CONFIG.margins.top;
+        this.contentWidth = CONFIG.pageWidth - CONFIG.margins.left - CONFIG.margins.right;
       }
 
-      return cleaned;
-    }
-
-    function getSafeValue(value, defaultValue = 'N/A') {
-      if (value === null || value === undefined || value === '') {
-        return defaultValue;
-      }
-
-      const cleanedValue = cleanText(String(value));
-      return cleanedValue || defaultValue;
-    }
-
-    function setColor(colorArray) {
-      doc.setTextColor(colorArray[0], colorArray[1], colorArray[2]);
-    }
-
-    function setFont(fontConfig) {
-      doc.setFontSize(fontConfig.size);
-      doc.setFont('helvetica', fontConfig.style);
-    }
-
-    function checkPageBreak(requiredSpace = 15) {
-      if (yPos > CONFIG.pageHeight - CONFIG.margins.bottom - requiredSpace) {
-        doc.addPage();
-        yPos = CONFIG.margins.top + 5;
-        return true;
-      }
-      return false;
-    }
-
-    // ===== FUNCIONES PARA TARJETAS =====
-
-    // Crear tarjeta básica
-    function createCard(
-      x,
-      y,
-      width,
-      height,
-      title,
-      color = CONFIG.colors.primary
-    ) {
-      // Fondo de la tarjeta
-      doc.setFillColor(
-        CONFIG.colors.cardBg[0],
-        CONFIG.colors.cardBg[1],
-        CONFIG.colors.cardBg[2]
-      );
-      doc.rect(x, y, width, height, 'F');
-
-      // Borde de la tarjeta
-      doc.setDrawColor(
-        CONFIG.colors.cardBorder[0],
-        CONFIG.colors.cardBorder[1],
-        CONFIG.colors.cardBorder[2]
-      );
-      doc.setLineWidth(0.3);
-      doc.rect(x, y, width, height, 'S');
-
-      // Header de la tarjeta
-      doc.setFillColor(color[0], color[1], color[2]);
-      doc.rect(x, y, width, CONFIG.card.headerHeight, 'F');
-
-      // Título de la tarjeta
-      setFont(CONFIG.fonts.cardTitle);
-      doc.setTextColor(255, 255, 255);
-      doc.text(cleanText(title).toUpperCase(), x + CONFIG.card.padding, y + 5);
-
-      return {
-        contentX: x + CONFIG.card.padding,
-        contentY: y + CONFIG.card.headerHeight + CONFIG.card.padding,
-        contentWidth: width - CONFIG.card.padding * 2,
-        contentHeight:
-          height - CONFIG.card.headerHeight - CONFIG.card.padding * 2,
-      };
-    }
-
-    // Agregar campo en tarjeta
-    function addCardField(label, value, x, y, maxWidth) {
-      const cleanLabel = getSafeValue(label);
-      const cleanValue = getSafeValue(value);
-
-      if (cleanValue === 'N/A') return y;
-
-      // Label
-      setFont(CONFIG.fonts.cardLabel);
-      setColor(CONFIG.colors.textSecondary);
-      doc.text(`${cleanLabel}:`, x, y);
-
-      // Value
-      setFont(CONFIG.fonts.cardValue);
-      setColor(CONFIG.colors.text);
-
-      const valueLines = doc.splitTextToSize(cleanValue, maxWidth - 5);
-      valueLines.forEach((line, index) => {
-        doc.text(line, x, y + 3 + index * 3);
-      });
-
-      return y + 3 + valueLines.length * 3 + 1;
-    }
-
-    // Agregar lista en tarjeta
-    function addCardList(items, x, y, maxWidth, columns = 1) {
-      const cleanItems = items
-        .filter((item) => item && item.toString().trim())
-        .map((item) => getSafeValue(item))
-        .filter((item) => item !== 'N/A');
-
-      if (cleanItems.length === 0) return y;
-
-      const columnWidth = maxWidth / columns;
-      let currentColumn = 0;
-      let currentY = y;
-      let maxY = y;
-
-      setFont(CONFIG.fonts.cardValue);
-      setColor(CONFIG.colors.text);
-
-      cleanItems.forEach((item, index) => {
-        const itemX = x + currentColumn * columnWidth;
-
-        // Bullet
-        doc.text('•', itemX, currentY);
-
-        // Texto
-        const lines = doc.splitTextToSize(item, columnWidth - 8);
-        lines.forEach((line, lineIndex) => {
-          doc.text(line, itemX + 4, currentY + lineIndex * 3);
-        });
-
-        const itemHeight = lines.length * 3;
-        maxY = Math.max(maxY, currentY + itemHeight);
-
-        currentColumn++;
-        if (currentColumn >= columns) {
-          currentColumn = 0;
-          currentY = maxY + 2;
+      // --- FUNCIONES AUXILIARES ---
+      _getSafeValue(value, defaultValue = 'N/A') {
+        if (value === null || value === undefined || value === '') {
+          return defaultValue;
         }
-      });
+        const cleaned = String(value)
+          .replace(/[^\w\s\-.,;:()\[\]\/áéíóúÁÉÍÓÚñÑüÜ]/g, '')
+          .trim()
+          .replace(/\s+/g, ' ');
+        return cleaned || defaultValue;
+      }
 
-      return Math.max(maxY, currentY) + 2;
-    }
+      _setColor(colorArray) {
+        this.doc.setTextColor(colorArray[0], colorArray[1], colorArray[2]);
+      }
 
-    // Calcular altura necesaria para contenido
-    function calculateContentHeight(fields) {
-      let height = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
+      _setFont(fontConfig) {
+        this.doc.setFontSize(fontConfig.size);
+        this.doc.setFont('helvetica', fontConfig.style);
+      }
 
-      fields.forEach((field) => {
-        if (field.value && getSafeValue(field.value) !== 'N/A') {
-          height += 8; // Altura base por campo
-
-          // Calcular líneas adicionales si el texto es largo
-          const lines = doc.splitTextToSize(getSafeValue(field.value), 60);
-          if (lines.length > 1) {
-            height += (lines.length - 1) * 3;
-          }
+      _checkPageBreak(requiredSpace = 25) {
+        if (this.yPos > CONFIG.pageHeight - CONFIG.margins.bottom - requiredSpace) {
+          this.doc.addPage();
+          this.yPos = CONFIG.margins.top + 5;
+          return true;
         }
-      });
-
-      return Math.max(height, CONFIG.card.minHeight);
-    }
-
-    // ===== GENERACIÓN DEL DOCUMENTO CON TARJETAS =====
-
-    // Título principal
-    doc.setFillColor(
-      CONFIG.colors.primary[0],
-      CONFIG.colors.primary[1],
-      CONFIG.colors.primary[2]
-    );
-    doc.rect(CONFIG.margins.left - 5, yPos - 3, contentWidth + 10, 20, 'F');
-
-    setFont(CONFIG.fonts.title);
-    doc.setTextColor(255, 255, 255);
-    const titleText = 'REPORTE DE INFORMACIÓN PERSONAL';
-    const titleWidth = doc.getTextWidth(titleText);
-    const titleX = (CONFIG.pageWidth - titleWidth) / 2;
-    doc.text(titleText, titleX, yPos + 8);
-
-    setFont(CONFIG.fonts.small);
-    const subtitleText = `Generado: ${new Date().toLocaleDateString(
-      'es-ES'
-    )} ${new Date().toLocaleTimeString('es-ES')}`;
-    const subtitleWidth = doc.getTextWidth(subtitleText);
-    const subtitleX = (CONFIG.pageWidth - subtitleWidth) / 2;
-    doc.text(subtitleText, subtitleX, yPos + 14);
-
-    yPos += 25;
-
-    // ===== TARJETAS DE INFORMACIÓN =====
-
-    // 1. INFORMACIÓN BÁSICA
-    {
-      const baseHeight = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-      const lineHeight = 5;
-      const basicHeight = baseHeight + 3 * lineHeight;
-      checkPageBreak(basicHeight);
-      const basicCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        contentWidth,
-        basicHeight,
-        'INFORMACION BASICA',
-        CONFIG.colors.primary
-      );
-
-      let cardY = basicCard.contentY;
-      cardY = addCardField(
-        'Nombre Completo',
-        `${getSafeValue(marcador.nombre)} ${getSafeValue(marcador.apellido)}`,
-        basicCard.contentX,
-        cardY,
-        basicCard.contentWidth
-      );
-      cardY = addCardField(
-        'DNI',
-        marcador.dni,
-        basicCard.contentX,
-        cardY,
-        basicCard.contentWidth
-      );
-      cardY = addCardField(
-        'Domicilio',
-        marcador.direccion,
-        basicCard.contentX,
-        cardY,
-        basicCard.contentWidth
-      );
-
-      const col2X = basicCard.contentX + basicCard.contentWidth / 2;
-      let cardY2 = basicCard.contentY;
-      cardY2 = addCardField(
-        'Teléfono',
-        marcador.telefono,
-        col2X,
-        cardY2,
-        basicCard.contentWidth / 2
-      );
-      cardY2 = addCardField(
-        'Barrio',
-        marcador.barrio,
-        col2X,
-        cardY2,
-        basicCard.contentWidth / 2
-      );
-      cardY2 = addCardField(
-        'Tiempo Residencia',
-        marcador.tiempo_residencia,
-        col2X,
-        cardY2,
-        basicCard.contentWidth / 2
-      );
-
-      yPos += basicHeight + 3;
-    }
-
-    // 2. EDUCACION Y SALUD
-    {
-      const cardWidth = (contentWidth - 5) / 2;
-
-      // Educación
-      let estudiosItems =
-        marcador.estudios
-          ?.map((e) => getSafeValue(e.nivel))
-          .filter((e) => e !== 'N/A') || [];
-      let alturaEstudios =
-        CONFIG.card.headerHeight +
-        CONFIG.card.padding * 2 +
-        estudiosItems.length * 4;
-      if (estudiosItems.length === 0) alturaEstudios += 4;
-
-      checkPageBreak(alturaEstudios);
-      const studyCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        cardWidth,
-        alturaEstudios,
-        'EDUCACION',
-        CONFIG.colors.info
-      );
-      if (estudiosItems.length > 0) {
-        addCardList(
-          estudiosItems,
-          studyCard.contentX,
-          studyCard.contentY,
-          studyCard.contentWidth,
-          1
-        );
-      } else {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text('Sin información', studyCard.contentX, studyCard.contentY);
+        return false;
       }
 
-      // Salud
-      let alturaSalud = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-      if (marcador.salud?.length > 0) {
-        marcador.salud.forEach((s) => {
-          if (getSafeValue(s.problema_salud) !== 'N/A') {
-            alturaSalud += 4;
-            if (s.cud || s.obra_social) alturaSalud += 3;
-          }
-        });
-        if (alturaSalud === CONFIG.card.headerHeight + CONFIG.card.padding * 2)
-          alturaSalud += 4;
-      } else {
-        alturaSalud += 4;
+      // MEJORA: La función ahora recibe la coordenada 'y' para mayor control
+      _createCard(title, x, y, width, height, color = CONFIG.colors.primary) {
+        // Sombra
+        this.doc.setFillColor(235, 235, 235);
+        this.doc.rect(x + 1, y + 1, width, height, 'F');
+
+        // Fondo y borde de la tarjeta
+        this.doc.setFillColor(...CONFIG.colors.cardBg);
+        this.doc.setDrawColor(...CONFIG.colors.cardBorder);
+        this.doc.setLineWidth(0.3);
+        this.doc.rect(x, y, width, height, 'FD');
+
+        // Header de la tarjeta
+        this.doc.setFillColor(...color);
+        this.doc.rect(x, y, width, CONFIG.card.headerHeight, 'F');
+
+        // Título de la tarjeta
+        this._setFont(CONFIG.fonts.cardTitle);
+        this._setColor([255, 255, 255]);
+        this.doc.text(this._getSafeValue(title).toUpperCase(), x + CONFIG.card.padding, y + 5);
+
+        return {
+          contentX: x + CONFIG.card.padding,
+          contentY: y + CONFIG.card.headerHeight + CONFIG.card.padding,
+          contentWidth: width - CONFIG.card.padding * 2,
+        };
       }
 
-      const healthCard = createCard(
-        CONFIG.margins.left + cardWidth + 5,
-        yPos,
-        cardWidth,
-        alturaSalud,
-        'SALUD',
-        CONFIG.colors.error
-      );
-      if (marcador.salud?.length > 0) {
-        let healthY = healthCard.contentY;
-        let hasValidHealth = false;
+      // Función para agregar campos en una o más columnas
+      _addCardFields(card, fields, columns = 1) {
+        let currentY = card.contentY;
+        let lastY = currentY;
+        const columnWidth = card.contentWidth / columns;
+        const lineHeight = 4;
+        const fieldVerticalSpace = 10;
 
-        marcador.salud.forEach((saludItem) => {
-          const problema = getSafeValue(saludItem.problema_salud);
-          if (problema !== 'N/A') {
-            hasValidHealth = true;
-            setFont(CONFIG.fonts.cardValue);
-            setColor(CONFIG.colors.text);
-            doc.text(`• ${problema}`, healthCard.contentX, healthY);
-            healthY += 4;
+        fields.forEach((field, index) => {
+          if (this._getSafeValue(field.value) === 'N/A') return;
 
-            let cobertura = [];
-            if (saludItem.cud) cobertura.push('CUD');
-            if (saludItem.obra_social) cobertura.push('O.S.');
+          const colIndex = index % columns;
+          const colX = card.contentX + colIndex * columnWidth;
 
-            if (cobertura.length > 0) {
-              setFont(CONFIG.fonts.tiny);
-              setColor(CONFIG.colors.textSecondary);
-              doc.text(
-                `  ${cobertura.join(', ')}`,
-                healthCard.contentX,
-                healthY
-              );
-              healthY += 3;
-            }
-          }
-        });
+          // Etiqueta del campo
+          this._setFont(CONFIG.fonts.cardLabel);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text(`${field.label}:`, colX, currentY);
 
-        if (!hasValidHealth) {
-          setFont(CONFIG.fonts.cardValue);
-          setColor(CONFIG.colors.textSecondary);
-          doc.text('Sin información', healthCard.contentX, healthCard.contentY);
-        }
-      } else {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text('Sin información', healthCard.contentX, healthCard.contentY);
-      }
+          // Valor del campo
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.text);
 
-      yPos += Math.max(alturaEstudios, alturaSalud) + 3;
-    }
-
-    {
-      let alturaVivienda = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-
-      if (marcador.viviendas?.length > 0) {
-        // Cada vivienda ocupa 2 filas de campos → 2 * altura por vivienda
-        alturaVivienda += marcador.viviendas.length * (2 * 6); // 6 es el alto estimado por campo
-      } else {
-        alturaVivienda += 5;
-      }
-
-      checkPageBreak(alturaVivienda);
-      const housingCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        contentWidth,
-        alturaVivienda,
-        'VIVIENDA',
-        CONFIG.colors.warning
-      );
-
-      if (marcador.viviendas?.length > 0) {
-        let housingY = housingCard.contentY;
-        const col1X = housingCard.contentX;
-        const col2X = housingCard.contentX + housingCard.contentWidth / 2;
-        const colWidth = housingCard.contentWidth / 2;
-
-        marcador.viviendas.forEach((vivienda, index) => {
-          // Fila 1
-          housingY = addCardField(
-            'Tipo',
-            getSafeValue(vivienda.tipo),
-            col1X,
-            housingY,
-            colWidth
-          );
-          housingY = addCardField(
-            'Dominio',
-            getSafeValue(vivienda.dominio),
-            col2X,
-            housingY - 6,
-            colWidth
-          ); // misma fila
-
-          // Fila 2
-          housingY = addCardField(
-            'Ambientes',
-            getSafeValue(vivienda.ambientes),
-            col1X,
-            housingY,
-            colWidth
-          );
-
-          const bañoInfo =
-            getSafeValue(vivienda.baño) +
-            (vivienda.baño_opcion
-              ? ` (${getSafeValue(vivienda.baño_opcion)})`
-              : '');
-          housingY = addCardField(
-            'Baño',
-            bañoInfo,
-            col2X,
-            housingY - 6,
-            colWidth
-          ); // misma fila
-
-          housingY += 2; // espacio entre viviendas
-        });
-      } else {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text(
-          'Sin información de vivienda',
-          housingCard.contentX,
-          housingCard.contentY
-        );
-      }
-
-      yPos += alturaVivienda + 3;
-    }
-
-    // 4. OCUPACION
-    // 4. TARJETA DE OCUPACIÓN (con altura dinámica)
-    if (marcador.ocupaciones && marcador.ocupaciones.length > 0) {
-      // Calcular altura necesaria
-      const ocupacionesAltura = marcador.ocupaciones.reduce(
-        (acc, ocupacion) => {
-          let altura = 6; // ocupación + título
-          if (ocupacion.tipo_1 || ocupacion.tipo_2) altura += 5;
-          if (ocupacion.ingresos) altura += 5;
-          return acc + altura + 2; // +2 de espacio extra
-        },
-        CONFIG.card.headerHeight + CONFIG.card.padding * 2
-      );
-
-      checkPageBreak(ocupacionesAltura);
-      const jobCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        contentWidth,
-        ocupacionesAltura,
-        'OCUPACIÓN',
-        CONFIG.colors.success
-      );
-
-      let jobY = jobCard.contentY;
-
-      marcador.ocupaciones.forEach((ocupacion, index) => {
-        const nombreOcupacion = getSafeValue(
-          ocupacion.nombre || ocupacion.tipo_principal
-        );
-        if (nombreOcupacion !== 'N/A') {
-          jobY = addCardField(
-            `Ocupación ${index + 1}`,
-            nombreOcupacion,
-            jobCard.contentX,
-            jobY,
-            jobCard.contentWidth
-          );
-
-          const tipo1 = getSafeValue(ocupacion.tipo_1);
-          const tipo2 = getSafeValue(ocupacion.tipo_2);
-          if (tipo1 !== 'N/A' || tipo2 !== 'N/A') {
-            jobY = addCardField(
-              'Tipo',
-              `${tipo1} - ${tipo2}`,
-              jobCard.contentX + 10,
-              jobY,
-              jobCard.contentWidth - 10
-            );
-          }
-
-          if (ocupacion.ingresos && !isNaN(ocupacion.ingresos)) {
-            jobY = addCardField(
-              'Ingresos',
-              `$${ocupacion.ingresos.toLocaleString('es-ES')}`,
-              jobCard.contentX + 10,
-              jobY,
-              jobCard.contentWidth - 10
-            );
-          }
-
-          jobY += 2; // espacio entre ocupaciones
-        }
-      });
-
-      yPos += ocupacionesAltura + 3;
-    } else {
-      checkPageBreak(25);
-      const jobCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        contentWidth,
-        22,
-        'OCUPACIÓN',
-        CONFIG.colors.success
-      );
-      setFont(CONFIG.fonts.cardValue);
-      setColor(CONFIG.colors.textSecondary);
-      doc.text(
-        'Sin ocupaciones registradas',
-        jobCard.contentX,
-        jobCard.contentY
-      );
-      yPos += 25;
-    }
-
-    // 5. INTEGRANTES
-    {
-      let alturaIntegrantes =
-        CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-      if (marcador.integrantes?.length > 0)
-        alturaIntegrantes += 10 + marcador.integrantes.length * 4;
-      else alturaIntegrantes += 4;
-
-      checkPageBreak(alturaIntegrantes);
-      const membersCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        contentWidth,
-        alturaIntegrantes,
-        'INTEGRANTES DEL HOGAR',
-        CONFIG.colors.success
-      );
-
-      if (marcador.integrantes?.length > 0) {
-        let membersY = membersCard.contentY;
-
-        const totalIntegrantes = marcador.integrantes.length;
-        const edadesValidas = marcador.integrantes
-          .filter((i) => i.edad && !isNaN(i.edad))
-          .map((i) => parseInt(i.edad));
-        const edadPromedio =
-          edadesValidas.length > 0
-            ? Math.round(
-              edadesValidas.reduce((sum, edad) => sum + edad, 0) /
-              edadesValidas.length
-            )
-            : 'N/A';
-
-        membersY = addCardField(
-          'Total',
-          `${totalIntegrantes} integrantes`,
-          membersCard.contentX,
-          membersY,
-          membersCard.contentWidth / 2
-        );
-        addCardField(
-          'Edad Promedio',
-          edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A',
-          membersCard.contentX + membersCard.contentWidth / 2,
-          membersCard.contentY,
-          membersCard.contentWidth / 2
-        );
-
-        setFont(CONFIG.fonts.cardLabel);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text('DETALLE:', membersCard.contentX, membersY + 2);
-        membersY += 6;
-
-        marcador.integrantes.forEach((i, index) => {
-          const nombre = getSafeValue(i.nombre);
-          const apellido = getSafeValue(i.apellido);
-          const edad = getSafeValue(i.edad);
-          const vinculo = getSafeValue(i.vinculo);
-
-          setFont(CONFIG.fonts.cardValue);
-          setColor(CONFIG.colors.text);
-          doc.text(
-            `${index + 1}. ${nombre} ${apellido} (${edad} años) - ${vinculo}`,
-            membersCard.contentX,
-            membersY
-          );
-          membersY += 4;
-        });
-      } else {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text(
-          'No hay integrantes registrados',
-          membersCard.contentX,
-          membersCard.contentY
-        );
-      }
-
-      yPos += alturaIntegrantes + 3;
-    }
-
-    {
-      const cardWidth = (contentWidth - 5) / 2;
-
-      // ==== Servicios ====
-      let conectados =
-        marcador.servicios?.filter((s) => s.opcion_servicio === 'Conectado') ||
-        [];
-      let noConectados =
-        marcador.servicios?.filter((s) => s.opcion_servicio !== 'Conectado') ||
-        [];
-      let serviciosAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-
-      if (conectados.length > 0) serviciosAltura += 4 + conectados.length * 3;
-      if (noConectados.length > 0)
-        serviciosAltura += 4 + noConectados.length * 3;
-      if (conectados.length === 0 && noConectados.length === 0)
-        serviciosAltura += 4;
-
-      checkPageBreak(serviciosAltura);
-      const servicesCard = createCard(
-        CONFIG.margins.left,
-        yPos,
-        cardWidth,
-        serviciosAltura,
-        'SERVICIOS',
-        CONFIG.colors.info
-      );
-
-      let servicesY = servicesCard.contentY;
-
-      if (conectados.length > 0) {
-        setFont(CONFIG.fonts.cardLabel);
-        setColor(CONFIG.colors.success);
-        // doc.text('✓ CONECTADOS:', servicesCard.contentX, servicesY);
-        servicesY += 4;
-
-        conectados.forEach((s) => {
-          const nombre = getSafeValue(s.nombre);
-          if (nombre !== 'N/A') {
-            setFont(CONFIG.fonts.cardValue);
-            setColor(CONFIG.colors.text);
-            doc.text(`• ${nombre}`, servicesCard.contentX, servicesY);
-            servicesY += 3;
-          }
-        });
-      }
-
-      if (noConectados.length > 0) {
-        setFont(CONFIG.fonts.cardLabel);
-        setColor(CONFIG.colors.error);
-        // doc.text('✗ NO CONECTADOS:', servicesCard.contentX, servicesY);
-        servicesY += 4;
-
-        noConectados.forEach((s) => {
-          const nombre = getSafeValue(s.nombre);
-          if (nombre !== 'N/A') {
-            setFont(CONFIG.fonts.cardValue);
-            setColor(CONFIG.colors.text);
-            doc.text(`• ${nombre}`, servicesCard.contentX, servicesY);
-            servicesY += 3;
-          }
-        });
-      }
-
-      if (conectados.length === 0 && noConectados.length === 0) {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text('Sin servicios registrados', servicesCard.contentX, servicesY);
-      }
-
-      // ==== Programas ====
-      let activos =
-        marcador.programas?.filter((p) => p.estado === 'activo') || [];
-      let inactivos =
-        marcador.programas?.filter((p) => p.estado !== 'activo') || [];
-      let programasAltura = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
-
-      if (activos.length > 0) programasAltura += 4 + activos.length * 3;
-      if (inactivos.length > 0) programasAltura += 4 + inactivos.length * 3;
-      if (activos.length === 0 && inactivos.length === 0) programasAltura += 4;
-
-      const programsCard = createCard(
-        CONFIG.margins.left + cardWidth + 5,
-        yPos,
-        cardWidth,
-        programasAltura,
-        'PROGRAMAS',
-        CONFIG.colors.warning
-      );
-      let programsY = programsCard.contentY;
-
-      if (activos.length > 0) {
-        setFont(CONFIG.fonts.cardLabel);
-        setColor(CONFIG.colors.success);
-        doc.text('ACTIVOS:', programsCard.contentX, programsY);
-        programsY += 4;
-
-        activos.forEach((p) => {
-          const tipo = getSafeValue(p.tipo);
-          const ayuda = getSafeValue(p.ayuda);
-          if (tipo !== 'N/A' || ayuda !== 'N/A') {
-            setFont(CONFIG.fonts.cardValue);
-            setColor(CONFIG.colors.text);
-            doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
-            programsY += 3;
-          }
-        });
-      }
-
-      if (inactivos.length > 0) {
-        setFont(CONFIG.fonts.cardLabel);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text('FINALIZADOS:', programsCard.contentX, programsY);
-        programsY += 4;
-
-        inactivos.forEach((p) => {
-          const tipo = getSafeValue(p.tipo);
-          const ayuda = getSafeValue(p.ayuda);
-          if (tipo !== 'N/A' || ayuda !== 'N/A') {
-            setFont(CONFIG.fonts.cardValue);
-            setColor(CONFIG.colors.textSecondary);
-            doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
-            programsY += 3;
-          }
-        });
-      }
-
-      if (activos.length === 0 && inactivos.length === 0) {
-        setFont(CONFIG.fonts.cardValue);
-        setColor(CONFIG.colors.textSecondary);
-        doc.text(
-          'Sin programas asignados',
-          programsCard.contentX,
-          programsCard.contentY
-        );
-      }
-
-      yPos += Math.max(serviciosAltura, programasAltura) + 3;
-    }
-
-    {
-      if (marcador.notas && marcador.notas.trim()) {
-        const notasLimpias = getSafeValue(marcador.notas.trim());
-        if (notasLimpias !== 'N/A') {
-          const notasLines = doc.splitTextToSize(notasLimpias, contentWidth);
-          const notasAltura =
-            CONFIG.card.headerHeight +
-            CONFIG.card.padding * 2 +
-            notasLines.length * 4;
-
-          checkPageBreak(notasAltura);
-          const notesCard = createCard(
-            CONFIG.margins.left,
-            yPos,
-            contentWidth,
-            notasAltura,
-            'NOTAS ADICIONALES',
-            [121, 85, 72]
-          );
-
-          setFont(CONFIG.fonts.cardValue);
-          setColor(CONFIG.colors.text);
-
-          notasLines.forEach((linea, index) => {
-            doc.text(linea, notesCard.contentX, notesCard.contentY + index * 4);
+          const valueLines = this.doc.splitTextToSize(this._getSafeValue(field.value), columnWidth - 5);
+          valueLines.forEach((line, lineIndex) => {
+            this.doc.text(line, colX, currentY + lineHeight + lineIndex * lineHeight);
           });
 
-          yPos += notasAltura + 3;
+          lastY = Math.max(lastY, currentY + lineHeight * valueLines.length + 3);
+
+          if (colIndex === columns - 1 || index === fields.length - 1) {
+            currentY = lastY + 2;
+          }
+        });
+        return lastY;
+      }
+
+      // --- FUNCIONES PARA GENERAR CADA SECCIÓN DEL PDF ---
+
+      _addHeader() {
+        this.doc.setFillColor(...CONFIG.colors.primary);
+        this.doc.rect(CONFIG.margins.left - 5, this.yPos - 3, this.contentWidth + 10, 20, 'F');
+        this._setFont(CONFIG.fonts.title);
+        this._setColor([255, 255, 255]);
+        const titleText = 'REPORTE DE INFORMACIÓN PERSONAL';
+        const titleX = (CONFIG.pageWidth - this.doc.getTextWidth(titleText)) / 2;
+        this.doc.text(titleText, titleX, this.yPos + 8);
+        this._setFont(CONFIG.fonts.small);
+        const subtitleText = `Generado: ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES')}`;
+        const subtitleX = (CONFIG.pageWidth - this.doc.getTextWidth(subtitleText)) / 2;
+        this.doc.text(subtitleText, subtitleX, this.yPos + 14);
+        this.yPos += 25;
+      }
+
+      _addBasicInfoCard() {
+        const fields = [
+          { label: 'Nombre Completo', value: `${this._getSafeValue(this.data.nombre)} ${this._getSafeValue(this.data.apellido)}` },
+          { label: 'DNI', value: this.data.dni },
+          { label: 'Teléfono', value: this.data.telefono },
+          { label: 'Domicilio', value: this.data.direccion },
+          { label: 'Barrio', value: this.data.barrio },
+          { label: 'Tiempo Residencia', value: this.data.tiempo_residencia },
+        ];
+        const cardHeight = 25 + Math.ceil(fields.length / 2) * 12;
+        this._checkPageBreak(cardHeight);
+        const card = this._createCard('INFORMACION BASICA', CONFIG.margins.left, this.yPos, this.contentWidth, cardHeight, CONFIG.colors.primary);
+        this._addCardFields(card, fields, 2);
+        this.yPos += cardHeight + CONFIG.card.margin;
+      }
+
+      _addEducationHealthCards() {
+        const cardWidth = (this.contentWidth - CONFIG.card.margin) / 2;
+        const estudios = this.data.estudios?.map(e => this._getSafeValue(e.nivel)).filter(e => e !== 'N/A') || [];
+        const alturaEstudios = 20 + estudios.length * 4;
+        const saludItems = this.data.salud || [];
+        const alturaSalud = 20 + saludItems.length * 8;
+        const requiredHeight = Math.max(alturaEstudios, alturaSalud) + CONFIG.card.margin;
+        this._checkPageBreak(requiredHeight);
+
+        // Tarjeta de Educación
+        const studyCard = this._createCard('EDUCACION', CONFIG.margins.left, this.yPos, cardWidth, alturaEstudios, CONFIG.colors.info);
+        if (estudios.length > 0) {
+          estudios.forEach((item, index) => {
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.text);
+            this.doc.text(`• ${item}`, studyCard.contentX, studyCard.contentY + index * 4);
+          });
+        } else {
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin información', studyCard.contentX, studyCard.contentY);
         }
+
+        // Tarjeta de Salud
+        const healthCard = this._createCard('SALUD', CONFIG.margins.left + cardWidth + CONFIG.card.margin, this.yPos, cardWidth, alturaSalud, CONFIG.colors.error);
+        let healthY = healthCard.contentY;
+
+        if (saludItems.length > 0) {
+          saludItems.forEach((item) => {
+            const problema = this._getSafeValue(item.problema_salud);
+            if (problema !== 'N/A') {
+              this._setFont(CONFIG.fonts.cardValue);
+              this._setColor(CONFIG.colors.text);
+              this.doc.text(`• ${problema}`, healthCard.contentX, healthY);
+              healthY += 4;
+              let cobertura = [];
+              if (item.cud) cobertura.push('CUD');
+              if (item.obra_social) cobertura.push('O.S.');
+              if (cobertura.length > 0) {
+                this._setFont(CONFIG.fonts.tiny);
+                this._setColor(CONFIG.colors.textSecondary);
+                this.doc.text(`  (${cobertura.join(', ')})`, healthCard.contentX + 2, healthY);
+                healthY += 4;
+              }
+            }
+          });
+        } else {
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin información', healthCard.contentX, healthCard.contentY);
+        }
+
+        this.yPos += requiredHeight;
+      }
+
+      _addHousingCard() {
+        const viviendas = this.data.viviendas;
+        if (!viviendas || viviendas.length === 0) {
+          const card = this._createCard('VIVIENDA', CONFIG.margins.left, this.yPos, this.contentWidth, 22, CONFIG.colors.warning);
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin información de vivienda', card.contentX, card.contentY);
+          this.yPos += 22 + CONFIG.card.margin;
+          return;
+        }
+
+        const alturaVivienda = 20 + viviendas.length * 20;
+        this._checkPageBreak(alturaVivienda);
+        const card = this._createCard('VIVIENDA', CONFIG.margins.left, this.yPos, this.contentWidth, alturaVivienda, CONFIG.colors.warning);
+        let currentY = card.contentY;
+
+        viviendas.forEach(vivienda => {
+          const fields = [
+            { label: 'Tipo', value: vivienda.tipo },
+            { label: 'Dominio', value: vivienda.dominio },
+            { label: 'Ambientes', value: vivienda.ambientes },
+            { label: 'Baño', value: `${this._getSafeValue(vivienda.baño)} (${this._getSafeValue(vivienda.baño_opcion)})` },
+          ];
+          this._addCardFields({ ...card, contentY: currentY }, fields, 2);
+          currentY += 20; // Espacio para la siguiente vivienda
+        });
+        this.yPos += alturaVivienda + CONFIG.card.margin;
+      }
+
+      _addOccupationCard() {
+        const ocupaciones = this.data.ocupaciones;
+        if (!ocupaciones || ocupaciones.length === 0) {
+          const card = this._createCard('OCUPACIÓN', CONFIG.margins.left, this.yPos, this.contentWidth, 22, CONFIG.colors.success);
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin ocupaciones registradas', card.contentX, card.contentY);
+          this.yPos += 22 + CONFIG.card.margin;
+          return;
+        }
+
+        const alturaOcupaciones = 20 + ocupaciones.length * 20;
+        this._checkPageBreak(alturaOcupaciones);
+        const card = this._createCard('OCUPACIÓN', CONFIG.margins.left, this.yPos, this.contentWidth, alturaOcupaciones, CONFIG.colors.success);
+        let currentY = card.contentY;
+
+        ocupaciones.forEach((ocupacion, index) => {
+          const fields = [
+            { label: `Ocupación ${index + 1}`, value: ocupacion.nombre || ocupacion.tipo_principal },
+            { label: 'Tipo', value: `${ocupacion.tipo_1} - ${ocupacion.tipo_2}` },
+            { label: 'Ingresos', value: ocupacion.ingresos ? `$${ocupacion.ingresos.toLocaleString('es-ES')}` : 'N/A' },
+          ];
+          this._addCardFields({ ...card, contentY: currentY }, fields, 1);
+          currentY += 20;
+        });
+
+        this.yPos += alturaOcupaciones + CONFIG.card.margin;
+      }
+
+      _addMembersCard() {
+        const integrantes = this.data.integrantes;
+        if (!integrantes || integrantes.length === 0) {
+          const card = this._createCard('INTEGRANTES DEL HOGAR', CONFIG.margins.left, this.yPos, this.contentWidth, 22, CONFIG.colors.primary);
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('No hay integrantes registrados', card.contentX, card.contentY);
+          this.yPos += 22 + CONFIG.card.margin;
+          return;
+        }
+
+        const alturaIntegrantes = 30 + integrantes.length * 8;
+        this._checkPageBreak(alturaIntegrantes);
+        const card = this._createCard('INTEGRANTES DEL HOGAR', CONFIG.margins.left, this.yPos, this.contentWidth, alturaIntegrantes, CONFIG.colors.primary);
+        let currentY = card.contentY;
+
+        const totalIntegrantes = integrantes.length;
+        const edadesValidas = integrantes.filter(i => i.edad && !isNaN(i.edad)).map(i => parseInt(i.edad));
+        const edadPromedio = edadesValidas.length > 0 ? Math.round(edadesValidas.reduce((sum, edad) => sum + edad, 0) / edadesValidas.length) : 'N/A';
+
+        const fields = [
+          { label: 'Total', value: `${totalIntegrantes} integrantes` },
+          { label: 'Edad Promedio', value: edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A' },
+        ];
+        currentY = this._addCardFields({ ...card, contentY: currentY }, fields, 2);
+
+        this._setFont(CONFIG.fonts.cardLabel);
+        this._setColor(CONFIG.colors.textSecondary);
+        this.doc.text('DETALLE:', card.contentX, currentY + 2);
+        currentY += 6;
+
+        integrantes.forEach((i, index) => {
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.text);
+          const text = `${index + 1}. ${this._getSafeValue(i.nombre)} ${this._getSafeValue(i.apellido)} (${this._getSafeValue(i.edad)} años) - ${this._getSafeValue(i.vinculo)}`;
+          this.doc.text(text, card.contentX, currentY);
+          currentY += 4;
+        });
+        this.yPos += alturaIntegrantes + CONFIG.card.margin;
+      }
+
+      _addServicesAndProgramsCards() {
+        const cardWidth = (this.contentWidth - CONFIG.card.margin) / 2;
+        const conectados = this.data.servicios?.filter(s => s.opcion_servicio === 'Conectado') || [];
+        const noConectados = this.data.servicios?.filter(s => s.opcion_servicio !== 'Conectado') || [];
+        const alturaServicios = 20 + (conectados.length + noConectados.length) * 4;
+        const activos = this.data.programas?.filter(p => p.estado === 'activo') || [];
+        const inactivos = this.data.programas?.filter(p => p.estado !== 'activo') || [];
+        const alturaProgramas = 20 + (activos.length + inactivos.length) * 4;
+        const requiredHeight = Math.max(alturaServicios, alturaProgramas) + CONFIG.card.margin;
+        this._checkPageBreak(requiredHeight);
+
+        // Tarjeta de Servicios
+        const servicesCard = this._createCard('SERVICIOS', CONFIG.margins.left, this.yPos, cardWidth, alturaServicios, CONFIG.colors.info);
+        let servicesY = servicesCard.contentY;
+        if (conectados.length > 0) {
+          conectados.forEach(s => {
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.success);
+            this.doc.text(`✓ ${this._getSafeValue(s.nombre)}`, servicesCard.contentX, servicesY);
+            servicesY += 4;
+          });
+        }
+        if (noConectados.length > 0) {
+          noConectados.forEach(s => {
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.error);
+            this.doc.text(`✗ ${this._getSafeValue(s.nombre)}`, servicesCard.contentX, servicesY);
+            servicesY += 4;
+          });
+        }
+        if (conectados.length === 0 && noConectados.length === 0) {
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin servicios', servicesCard.contentX, servicesY);
+        }
+
+        // Tarjeta de Programas
+        const programsCard = this._createCard('PROGRAMAS', CONFIG.margins.left + cardWidth + CONFIG.card.margin, this.yPos, cardWidth, alturaProgramas, CONFIG.colors.warning);
+        let programsY = programsCard.contentY;
+        if (activos.length > 0) {
+          this._setFont(CONFIG.fonts.cardLabel);
+          this._setColor(CONFIG.colors.success);
+          this.doc.text('ACTIVOS:', programsCard.contentX, programsY);
+          programsY += 4;
+          activos.forEach(p => {
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.text);
+            this.doc.text(`• ${this._getSafeValue(p.tipo)} - ${this._getSafeValue(p.ayuda)}`, programsCard.contentX, programsY);
+            programsY += 4;
+          });
+        }
+        if (inactivos.length > 0) {
+          this._setFont(CONFIG.fonts.cardLabel);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('FINALIZADOS:', programsCard.contentX, programsY);
+          programsY += 4;
+          inactivos.forEach(p => {
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.textSecondary);
+            this.doc.text(`• ${this._getSafeValue(p.tipo)} - ${this._getSafeValue(p.ayuda)}`, programsCard.contentX, programsY);
+            programsY += 4;
+          });
+        }
+        if (activos.length === 0 && inactivos.length === 0) {
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text('Sin programas', programsCard.contentX, programsCard.contentY);
+        }
+
+        this.yPos += requiredHeight;
+      }
+
+      _addNotesCard() {
+        const notasLimpias = this._getSafeValue(this.data.notas);
+        if (notasLimpias !== 'N/A') {
+          const notasLines = this.doc.splitTextToSize(notasLimpias, this.contentWidth);
+          const notasAltura = 20 + notasLines.length * 4;
+          this._checkPageBreak(notasAltura);
+          const notesCard = this._createCard('NOTAS ADICIONALES', CONFIG.margins.left, this.yPos, this.contentWidth, notasAltura, [121, 85, 72]);
+          let notesY = notesCard.contentY;
+          this._setFont(CONFIG.fonts.cardValue);
+          this._setColor(CONFIG.colors.text);
+          notasLines.forEach((linea) => {
+            this.doc.text(linea, notesCard.contentX, notesY);
+            notesY += 4;
+          });
+          this.yPos += notasAltura + CONFIG.card.margin;
+        }
+      }
+
+      _addFooter() {
+        const totalPages = this.doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          this.doc.setPage(i);
+          this.doc.setDrawColor(...CONFIG.colors.primary);
+          this.doc.setLineWidth(0.5);
+          this.doc.line(
+            CONFIG.margins.left,
+            CONFIG.pageHeight - 12,
+            CONFIG.pageWidth - CONFIG.margins.right,
+            CONFIG.pageHeight - 12
+          );
+          this._setFont(CONFIG.fonts.tiny);
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text(
+            `Sistema GIS - ${new Date().toLocaleDateString('es-ES')}`,
+            CONFIG.margins.left,
+            CONFIG.pageHeight - 6
+          );
+          this.doc.text(
+            `Página ${i} de ${totalPages}`,
+            CONFIG.pageWidth - CONFIG.margins.right - 15,
+            CONFIG.pageHeight - 6
+          );
+        }
+      }
+
+      // --- ORDEN DE GENERACIÓN ---
+      generate() {
+        this._addHeader();
+        this._addBasicInfoCard();
+        this._addEducationHealthCards();
+        this._addHousingCard();
+        this._addOccupationCard();
+        this._addMembersCard();
+        this._addServicesAndProgramsCards();
+        this._addNotesCard();
+        this._addFooter();
+        return this;
+      }
+
+      // --- FUNCIÓN FINAL PARA GUARDAR ---
+      save() {
+        const nombreLimpio = this._getSafeValue(this.data.nombre) || 'Usuario';
+        const apellidoLimpio = this._getSafeValue(this.data.apellido) || 'Desconocido';
+        const fileName = `Reporte_${nombreLimpio}_${apellidoLimpio}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const pdfBlob = this.doc.output('blob');
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(blobUrl, '_blank');
+        if (printWindow) {
+          printWindow.onload = function () {
+            printWindow.focus();
+            setTimeout(() => printWindow.print(), 1000);
+          };
+        } else {
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          alert('PDF generado y descargado. Verifique su carpeta de descargas.');
+        }
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
       }
     }
 
-    // ===== FOOTER =====
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
+    // --- CÓDIGO FINAL SIMPLIFICADO ---
+    const generator = new PDFGenerator(marcador);
+    generator.generate().save();
 
-      // Línea decorativa
-      doc.setDrawColor(
-        CONFIG.colors.primary[0],
-        CONFIG.colors.primary[1],
-        CONFIG.colors.primary[2]
-      );
-      doc.setLineWidth(0.5);
-      doc.line(
-        CONFIG.margins.left,
-        CONFIG.pageHeight - 12,
-        CONFIG.pageWidth - CONFIG.margins.right,
-        CONFIG.pageHeight - 12
-      );
-
-      // Información del sistema
-      setFont(CONFIG.fonts.tiny);
-      setColor(CONFIG.colors.textSecondary);
-      doc.text(
-        `Sistema GIS - ${new Date().toLocaleDateString(
-          'es-ES'
-        )} ${new Date().toLocaleTimeString('es-ES')}`,
-        CONFIG.margins.left,
-        CONFIG.pageHeight - 6
-      );
-      doc.text(
-        `Página ${i} de ${totalPages}`,
-        CONFIG.pageWidth - CONFIG.margins.right - 15,
-        CONFIG.pageHeight - 6
-      );
-    }
-
-    // ===== GENERAR PDF =====
-    const nombreLimpio = getSafeValue(marcador.nombre) || 'Usuario';
-    const apellidoLimpio = getSafeValue(marcador.apellido) || 'Desconocido';
-    const fileName = `Reporte_${nombreLimpio}_${apellidoLimpio}_${new Date().toISOString().split('T')[0]
-      }.pdf`;
-
-    const pdfBlob = doc.output('blob');
-    const blobUrl = URL.createObjectURL(pdfBlob);
-
-    // Abrir para imprimir
-    const printWindow = window.open(blobUrl, '_blank');
-    if (printWindow) {
-      printWindow.onload = function () {
-        printWindow.focus();
-        setTimeout(() => {
-          printWindow.print();
-        }, 1000);
-      };
-    } else {
-      // Fallback: descargar
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      alert('PDF generado y descargado. Verifique su carpeta de descargas.');
-    }
-
-    // Limpiar URL después de 10 segundos
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 10000);
   } catch (error) {
     console.error('Error detallado al generar el PDF:', error);
     alert(
@@ -2784,6 +2374,7 @@ async function generarPDF() {
     );
   }
 }
+
 
 function abrirModal(coords: [number, number]) {
   if (permisos.value.soloLectura) {
