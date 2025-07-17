@@ -420,11 +420,25 @@
       </q-card>
     </q-dialog>
 
-    <q-drawer v-model="drawerVisible" side="right" :width="500" overlay behavior="desktop" bordered>
+    <q-drawer
+      v-model="drawerVisible"
+      side="right"
+      :width="500"
+      overlay
+      behavior="desktop"
+      bordered
+    >
       <div class="drawer-header bg-blue-5 text-white">
         <div class="row items-center justify-between q-pa-md">
           <div class="text-h6">Panel de Control</div>
-          <q-btn icon="close" flat round color="white" @click="drawerVisible = false" class="close-btn" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            color="white"
+            @click="drawerVisible = false"
+            class="close-btn"
+          />
         </div>
       </div>
 
@@ -433,10 +447,14 @@
           <q-card-section class="q-pa-md">
             <div class="section-title">
               <q-icon name="bookmark" class="q-mr-sm" color="primary" />
-              Referencias
+              Vulnerabilidad
             </div>
             <div class="referencias-grid q-mt-md">
-              <div v-for="icono in iconosDisponibles" :key="icono.value" class="referencia-item">
+              <div
+                v-for="icono in iconosDisponibles"
+                :key="icono.value"
+                class="referencia-item"
+              >
                 <div class="referencia-icon">
                   <img :src="icono.value" width="28" height="28" />
                 </div>
@@ -453,12 +471,35 @@
               Datos cargados
             </div>
 
-            <q-input dense outlined debounce="300" v-model="searchTerm" placeholder="Buscar por nombre o dirección"
-              class="q-mt-md search-input" clearable prepend-inner-icon="search" />
+            <q-input
+              dense
+              outlined
+              debounce="300"
+              v-model="searchTerm"
+              placeholder="Buscar por nombre, dirección o DNI"
+              class="q-mt-md search-input"
+              clearable
+              prepend-inner-icon="search"
+            />
+
+            <q-input
+              dense
+              outlined
+              debounce="300"
+              v-model="searchTermIntegrantes"
+              placeholder="Buscar por integrante (nombre o DNI)"
+              class="q-mt-md search-input"
+              clearable
+              prepend-inner-icon="person_search"
+            />
 
             <div class="marcadores-lista q-mt-md">
-              <div v-for="(marcador, index) in marcadoresFiltrados" :key="marcador.id" class="marcador-item"
-                @click="verInfoMarcador(marcador)">
+              <div
+                v-for="(marcador, index) in marcadoresFiltrados"
+                :key="marcador.id"
+                class="marcador-item"
+                @click="verInfoMarcador(marcador)"
+              >
                 <div class="marcador-content">
                   <div class="marcador-numero">{{ index + 1 }}</div>
                   <div class="marcador-info">
@@ -467,6 +508,37 @@
                     </div>
                     <div class="marcador-direccion">
                       {{ marcador.direccion }}
+                    </div>
+                    <div
+                      v-if="
+                        marcador.integrantes && marcador.integrantes.length > 0
+                      "
+                      class="marcador-integrantes"
+                    >
+                      <span class="text-caption text-grey-7"
+                        >Integrantes:
+                      </span>
+                      <q-chip
+                        v-for="integrante in marcador.integrantes.slice(0, 2)"
+                        :key="integrante.dni"
+                        color="blue-1"
+                        text-color="blue-9"
+                        size="sm"
+                        class="q-ma-none q-mr-xs"
+                        :title="`${integrante.nombre} ${integrante.apellido} - DNI: ${integrante.dni}`"
+                      >
+                        {{ integrante.nombre.split(' ')[0] }}
+                      </q-chip>
+                      <q-chip
+                        v-if="marcador.integrantes.length > 2"
+                        color="grey-3"
+                        text-color="grey-7"
+                        size="sm"
+                        class="q-ma-none"
+                        :title="`Y ${marcador.integrantes.length - 2} más`"
+                      >
+                        +{{ marcador.integrantes.length - 2 }}
+                      </q-chip>
                     </div>
                   </div>
                   <q-icon name="chevron_right" class="marcador-arrow" />
@@ -927,6 +999,7 @@ const editando = ref(false);
 const mostrarReferencias = ref(false);
 const mostrarDatosActuales = ref(false);
 const searchTerm = ref('');
+const searchTermIntegrantes = ref(''); // Nuevo ref para el filtro de integrantes
 const guardando = ref(false);
 const drawerVisible = ref(false);
 
@@ -1009,11 +1082,12 @@ const permisos = computed(() => {
     soloLectura: rol.value === 'visor',
   };
 });
+// Modificación de los labels de iconosDisponibles para ocupar menos espacio
 const iconosDisponibles = [
-  { label: 'Vulnerabilidad Alta', value: '/marker-icon.png' },
-  { label: 'Vulnerabilidad Media', value: '/marker-icon-2.png' },
-  { label: 'Vulnerabilidad Baja', value: '/marker-icon-3.png' },
-  { label: 'Intervención Especifica', value: '/marker-icon-4.png' },
+  { label: 'Alta', value: '/marker-icon.png' },
+  { label: 'Media', value: '/marker-icon-2.png' },
+  { label: 'Baja', value: '/marker-icon-3.png' },
+  { label: 'Específica', value: '/marker-icon-4.png' },
 ];
 
 
@@ -1272,13 +1346,45 @@ const osmLayer = new TileLayer({
 
 const marcadoresFiltrados = computed(() => {
   const term = searchTerm.value.toLowerCase();
+  const termIntegrantes = searchTermIntegrantes.value.toLowerCase(); // Nuevo término de búsqueda para integrantes
+
   return gisStore.marcadores
     .filter((m) => {
-      return (
+      // Filtrar por nombre, apellido o dirección del marcador
+      const matchesMainSearch =
         m.nombre.toLowerCase().includes(term) ||
         m.apellido.toLowerCase().includes(term) ||
-        m.direccion.toLowerCase().includes(term)
+        m.direccion.toLowerCase().includes(term) ||
+        m.dni.toLowerCase().includes(term);
+
+      // Filtrar por nombre, apellido o DNI de los integrantes
+      const matchesIntegrantesSearch = m.integrantes?.some(
+        (integrante: any) => {
+          const nombreCompletoIntegrante = `${integrante.nombre || ''} ${
+            integrante.apellido || ''
+          }`.toLowerCase();
+          return (
+            nombreCompletoIntegrante.includes(termIntegrantes) ||
+            String(integrante.dni || '')
+              .toLowerCase()
+              .includes(termIntegrantes)
+          );
+        }
       );
+
+      // Si ambos campos de búsqueda están vacíos, mostrar todos los marcadores.
+      // Si solo un campo de búsqueda tiene valor, aplicar solo ese filtro.
+      // Si ambos campos de búsqueda tienen valor, aplicar un OR lógico.
+      if (!term && !termIntegrantes) {
+        return true; // No hay filtros aplicados
+      } else if (term && !termIntegrantes) {
+        return matchesMainSearch;
+      } else if (!term && termIntegrantes) {
+        return matchesIntegrantesSearch;
+      } else {
+        // Ambos filtros están activos, usar OR para mostrar si coincide con alguno
+        return matchesMainSearch || matchesIntegrantesSearch;
+      }
     })
     .slice()
     .reverse();
@@ -2677,11 +2783,11 @@ function verInfoMarcador(marcador: Marcador) {
 
 .referencias-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 4px;
+  padding: 4px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .referencia-item {
@@ -2775,6 +2881,18 @@ function verInfoMarcador(marcador: Marcador) {
   white-space: nowrap;
 }
 
+.marcador-integrantes {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.marcador-integrantes .q-chip {
+  height: 20px; /* Ajusta la altura de los chips para hacerlos más pequeños */
+  font-size: 0.7rem; /* Ajusta el tamaño de la fuente */
+}
+
 .marcador-arrow {
   color: #1976d2;
   margin-left: 8px;
@@ -2814,15 +2932,22 @@ function verInfoMarcador(marcador: Marcador) {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-  .info-panel {
-    min-width: 100% !important;
-    margin: 0 !important;
+  .info-panel,
+  .referencias-panel,
+  .datos-actuales-panel {
+    width: 90vw;
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
   }
 
-  .header-gradient .absolute-top-right {
-    position: relative !important;
-    text-align: right;
-    padding: 0 !important;
+  .referencias-panel {
+    top: 1rem;
+    max-height: 35vh;
+  }
+
+  .info-panel {
+    top: calc(1rem + 36vh + 1rem);
   }
 }
 
@@ -2910,26 +3035,5 @@ function verInfoMarcador(marcador: Marcador) {
 .datos-actuales-panel::-webkit-scrollbar {
   display: none;
   /* Chrome, Safari y Opera */
-}
-
-@media (max-width: 768px) {
-
-  .info-panel,
-  .referencias-panel,
-  .datos-actuales-panel {
-    width: 90vw;
-    left: 50%;
-    transform: translateX(-50%);
-    right: auto;
-  }
-
-  .referencias-panel {
-    top: 1rem;
-    max-height: 35vh;
-  }
-
-  .info-panel {
-    top: calc(1rem + 36vh + 1rem);
-  }
 }
 </style>
