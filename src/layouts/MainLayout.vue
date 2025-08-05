@@ -82,6 +82,25 @@
             <q-item-label>Marcadores</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item
+          clickable
+          @click="$router.push('/dashboard')"
+          :active="$route.path === '/dashboard'"
+          active-class="bg-primary text-white"
+          v-ripple
+        >
+          <q-tooltip anchor="center right" self="center left" :offset="[10, 0]">
+            Ir a Dashboard
+          </q-tooltip>
+
+          <q-item-section avatar>
+            <q-icon name="table_chart" />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>Dashboard</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-btn
           :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
           class="fixed-top-right q-mt-md q-mr-sm"

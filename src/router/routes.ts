@@ -20,6 +20,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/TablaMarcadores.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: '/dashboard',
+        component: () => import('pages/DashboardPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
   {
