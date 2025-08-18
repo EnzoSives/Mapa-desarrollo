@@ -30,6 +30,7 @@ export interface Marcador {
   icono: string;
   integrantes?: string[];
   programas?: Programa[];
+  fechaCreacion: string; // ⬅️ nuevo campo
 }
 
 export const useGisStore = defineStore('gis', {

@@ -1,22 +1,12 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
-      <h4 class="text-h4 q-my-none">Dashboard</h4>
+      <h4 class="text-h4 q-my-none text-weight-bold text-primary">Dashboard</h4>
       <div class="row q-gutter-md">
-        <q-input
-          filled
-          v-model="startDate"
-          mask="date"
-          :rules="['date']"
-          label="Fecha de inicio"
-        >
+        <q-input filled v-model="startDate" mask="date" :rules="['date']" label="Fecha de inicio">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                 <q-date v-model="startDate">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Cerrar" color="primary" flat />
@@ -26,20 +16,10 @@
             </q-icon>
           </template>
         </q-input>
-        <q-input
-          filled
-          v-model="endDate"
-          mask="date"
-          :rules="['date']"
-          label="Fecha de fin"
-        >
+        <q-input filled v-model="endDate" mask="date" :rules="['date']" label="Fecha de fin">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                 <q-date v-model="endDate">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Cerrar" color="primary" flat />
@@ -80,37 +60,23 @@
       <div class="col-12 col-lg-6">
         <q-card>
           <q-card-section>
-            <apexchart
-              type="bar"
-              height="350"
-              :options="chartOptionsInformes"
-              :series="seriesInformes"
-            ></apexchart>
+            <apexchart type="bar" height="350" :options="chartOptionsInformes" :series="seriesInformes"></apexchart>
           </q-card-section>
         </q-card>
       </div>
       <div class="col-12 col-lg-6">
         <q-card>
           <q-card-section>
-            <apexchart
-              type="line"
-              height="350"
-              :options="chartOptionsIntegrantes"
-              :series="seriesIntegrantes"
-            ></apexchart>
+            <apexchart type="line" height="350" :options="chartOptionsIntegrantes" :series="seriesIntegrantes">
+            </apexchart>
           </q-card-section>
         </q-card>
       </div>
       <div class="col-12">
         <q-card>
           <q-card-section>
-            <apexchart
-              v-if="seriesVulnerabilidad.length > 0"
-              type="pie"
-              height="350"
-              :options="chartOptionsVulnerabilidad"
-              :series="seriesVulnerabilidad"
-            ></apexchart>
+            <apexchart v-if="seriesVulnerabilidad.length > 0" type="pie" height="350"
+              :options="chartOptionsVulnerabilidad" :series="seriesVulnerabilidad"></apexchart>
             <div v-else class="text-center text-grey-7 q-pa-xl">
               Cargando datos de vulnerabilidad...
             </div>
