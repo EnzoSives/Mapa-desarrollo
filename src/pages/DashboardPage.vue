@@ -97,8 +97,7 @@
                 <div class="chart-title">Vulnerabilidad</div>
                 <div class="chart-subtitle">Distribución por nivel</div>
               </div>
-              <apexchart type="donut" height="350" :options="chartOptionsVulnerabilidadSimple"
-                :series="seriesVulnerabilidadSimple">
+              <apexchart type="donut" height="350" :options="chartOptionsVulnerabilidad" :series="seriesVulnerabilidad">
               </apexchart>
             </q-card-section>
           </q-card>
@@ -115,8 +114,7 @@
                 <div class="chart-title">Marcadores por Barrios</div>
                 <div class="chart-subtitle">Distribución geográfica</div>
               </div>
-              <apexchart type="donut" height="350" :options="testChartOptionsBarrios" :series="testSeriesBarrios">
-              </apexchart>
+              <apexchart type="donut" height="350" :options="chartOptionsBarrios" :series="seriesBarrios"></apexchart>
             </q-card-section>
           </q-card>
         </div>
@@ -180,13 +178,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, shallowRef } from 'vue';
 import { useGisStore } from 'src/stores/gisStore';
-import VueApexCharts from 'vue3-apexcharts';
 import { ApexOptions } from 'apexcharts';
 
 const gisStore = useGisStore();
-const apexchart = VueApexCharts;
 
 const filteredMarcadores = computed(() => {
   return gisStore.marcadores;
@@ -334,72 +330,65 @@ const informesPorMes = computed(() => {
   }));
 });
 
-const chartOptionsVulnerabilidad = computed<ApexOptions>(() => {
-  const data = vulnerabilidadCounts.value;
-  const labels = Object.keys(data);
-
-  // Si no hay datos reales, usar etiquetas de ejemplo
-  const finalLabels = labels.length > 0 ? labels : ['Alto', 'Medio', 'Bajo'];
-
-  return {
-    chart: {
-      id: 'distribucion-vulnerabilidad',
-      type: 'donut',
-      fontFamily: 'Roboto, sans-serif'
-    },
-    colors: ['#1976D2', '#26A69A', '#F2C037', '#31CCEC', '#9C27B0'],
-    labels: finalLabels,
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '65%',
-          labels: {
+const chartOptionsVulnerabilidad = shallowRef<ApexOptions>({
+  chart: {
+    id: 'distribucion-vulnerabilidad',
+    type: 'donut',
+    fontFamily: 'Roboto, sans-serif',
+    animations: { enabled: false },
+    redrawOnParentResize: true,
+    redrawOnWindowResize: true,
+  },
+  colors: ['#1976D2', '#26A69A', '#F2C037', '#31CCEC', '#9C27B0'],
+  labels: [],
+  plotOptions: {
+    pie: {
+      donut: {
+        size: '65%',
+        labels: {
+          show: true,
+          total: {
             show: true,
-            total: {
-              show: true,
-              label: 'Total',
-              fontSize: '16px',
-              fontWeight: 'bold'
-            }
+            label: 'Total',
+            fontSize: '16px',
+            fontWeight: 'bold'
           }
         }
       }
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: function (val: number) {
+      return Math.round(val) + '%';
     },
-    dataLabels: {
-      enabled: true,
+    style: {
+      fontSize: '12px',
+      fontWeight: 'bold'
+    }
+  },
+  legend: {
+    position: 'bottom',
+    fontSize: '12px'
+  },
+  tooltip: {
+    theme: 'light',
+    y: {
       formatter: function (val: number) {
-        return Math.round(val) + '%';
-      },
-      style: {
-        fontSize: '12px',
-        fontWeight: 'bold'
+        return val + ' casos';
       }
-    },
-    legend: {
-      position: 'bottom',
-      fontSize: '12px'
-    },
-    tooltip: {
-      theme: 'light',
-      y: {
-        formatter: function (val: number) {
-          return val + ' casos';
-        }
-      }
-    },
-    responsive: [{
-      breakpoint: 480,
-      options: {
-        chart: {
-          width: 300
-        },
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }]
-  };
+    }
+  }
 });
+
+// Actualizar etiquetas sin recrear todo el objeto de opciones
+watch(
+  () => Object.keys(vulnerabilidadCounts.value),
+  (labels) => {
+    chartOptionsVulnerabilidad.value.labels = labels.length > 0 ? labels : ['Alto', 'Medio', 'Bajo'];
+  },
+  { immediate: true }
+);
 
 const seriesVulnerabilidad = computed(() => {
   const data = vulnerabilidadCounts.value;
@@ -410,9 +399,17 @@ const seriesVulnerabilidad = computed(() => {
     return values;
   }
 
-  // Si no hay datos reales, usar datos de ejemplo
-  return [3, 5, 2]; // Datos de ejemplo: Alto, Medio, Bajo
+  // Si no hay datos reales (todos ceros), devolver una serie que
+  // mantenga la misma cantidad de etiquetas para evitar desincronización
+  const labelCount = Object.keys(data).length;
+  if (labelCount > 0) {
+    return Array(labelCount).fill(1);
+  }
+  // Fallback final cuando no hay etiquetas
+  return [1];
 });
+
+// Eliminado: claves y banderas de readiness para evitar ciclos de actualización
 
 // Nuevos gráficos
 const programasPorTipo = computed(() => {
@@ -561,6 +558,33 @@ const barriosDelSistema = [
   'Otro'
 ];
 
+// Normalización de nombres de barrios (sin tildes, minúsculas y sin espacios extra)
+const normalize = (s?: string) =>
+  (s || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remover tildes
+    .replace(/\s+/g, ' ');
+
+// Mapa de equivalencias: variantes -> nombre canónico del sistema
+const barrioCanonicalMap: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  // Todas las claves canónicas por defecto
+  barriosDelSistema.forEach((b) => {
+    map[normalize(b)] = b;
+  });
+  // Alias comunes y errores frecuentes
+  map[normalize('Kennedy')] = 'Kenedy';
+  map[normalize('San Martín A')] = 'San Martin A';
+  map[normalize('San Martín B')] = 'San Martin B';
+  map[normalize('Centro')] = 'Barrio Centro';
+  map[normalize('Norte')] = 'Barrio Norte';
+  map[normalize('Pinos')] = 'Los Pinos';
+  map[normalize('Rural')] = 'Zona Rural';
+  return map;
+})();
+
 const marcadoresPorBarrio = computed(() => {
   const barriosCounts: Record<string, number> = {};
 
@@ -576,17 +600,10 @@ const marcadoresPorBarrio = computed(() => {
   }
 
   gisStore.marcadores.forEach(marcador => {
-    let barrio = 'Otro'; // Por defecto usar "Otro" si no coincide
-
-    // Verificar si el barrio del marcador está en la lista del sistema
-    if (marcador.barrio && marcador.barrio.trim() !== '') {
-      const barrioMarcador = marcador.barrio.trim();
-      if (barriosDelSistema.includes(barrioMarcador)) {
-        barrio = barrioMarcador;
-      }
-    }
-
-    barriosCounts[barrio] = (barriosCounts[barrio] || 0) + 1;
+    // Normalizar y mapear a nombre canónico
+    const norm = normalize(marcador.barrio);
+    const canonical = barrioCanonicalMap[norm] || 'Otro';
+    barriosCounts[canonical] = (barriosCounts[canonical] || 0) + 1;
   });
 
   // Filtrar barrios con 0 marcadores para no mostrarlos en el gráfico
@@ -613,29 +630,39 @@ const seriesBarrios = computed(() => {
     return values;
   }
 
-  // Si no hay datos reales, usar datos de ejemplo
-  return [2, 3, 1, 4, 2]; // Datos de ejemplo para algunos barrios
+  // Si no hay datos reales (todos ceros), devolver una serie que
+  // mantenga la misma cantidad de etiquetas para evitar desincronización
+  const labelCount = Object.keys(marcadoresPorBarrio.value).length;
+  if (labelCount > 0) {
+    return Array(labelCount).fill(1);
+  }
+  return [1];
 });
 
-const chartOptionsBarrios = computed<ApexOptions>(() => ({
+// Eliminado: readiness y claves reactivas para evitar ciclos de actualización
+
+const chartOptionsBarrios = shallowRef<ApexOptions>({
   chart: {
     id: 'marcadores-por-barrios',
     type: 'donut',
-    fontFamily: 'Roboto, sans-serif'
+    fontFamily: 'Roboto, sans-serif',
+    animations: { enabled: false },
+    redrawOnParentResize: true,
+    redrawOnWindowResize: true,
   },
   colors: [
-    '#1976D2', // Primary (azul)
-    '#26A69A', // Secondary (teal)
-    '#F2C037', // Warning (amarillo)
-    '#31CCEC', // Info (celeste)
-    '#21BA45', // Positive (verde)
-    '#9C27B0', // Purple
-    '#FF5722', // Deep Orange
-    '#795548', // Brown
-    '#607D8B', // Blue Grey
-    '#E91E63'  // Pink
+    '#1976D2',
+    '#26A69A',
+    '#F2C037',
+    '#31CCEC',
+    '#21BA45',
+    '#9C27B0',
+    '#FF5722',
+    '#795548',
+    '#607D8B',
+    '#E91E63'
   ],
-  labels: Object.keys(marcadoresPorBarrio.value),
+  labels: [],
   plotOptions: {
     pie: {
       donut: {
@@ -675,179 +702,21 @@ const chartOptionsBarrios = computed<ApexOptions>(() => ({
         return val + ' marcadores';
       }
     }
-  },
-  responsive: [{
-    breakpoint: 480,
-    options: {
-      chart: {
-        width: 200
-      },
-      legend: {
-        position: 'bottom'
-      }
-    }
-  }]
-}));
-
-// Gráficos de prueba para barrios (mantener hasta que se integren datos reales)
-const testSeriesVulnerabilidad = ref([25, 35, 40]);
-const testChartOptionsVulnerabilidad = ref<ApexOptions>({
-  chart: {
-    type: 'donut',
-    fontFamily: 'Roboto, sans-serif'
-  },
-  colors: ['#1976D2', '#26A69A', '#F2C037'],
-  labels: ['Alta', 'Media', 'Baja'],
-  plotOptions: {
-    pie: {
-      donut: {
-        size: '65%',
-        labels: {
-          show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }
-        }
-      }
-    }
-  },
-  dataLabels: {
-    enabled: true,
-    formatter: function (val: number) {
-      return Math.round(val) + '%';
-    }
-  },
-  legend: {
-    position: 'bottom',
-    fontSize: '12px'
   }
 });
 
-// Versión simplificada para debugging
-const seriesVulnerabilidadSimple = computed(() => {
-  console.log('Computing series vulnerabilidad simple...');
-  const data = vulnerabilidadCounts.value;
-  console.log('Vulnerabilidad data:', data);
-
-  // Retornar array de valores directamente
-  const values = Object.values(data);
-  console.log('Values array:', values);
-
-  // Si no hay valores, usar datos por defecto
-  if (values.length === 0 || values.every(v => v === 0)) {
-    console.log('No data found, using default values');
-    return [10, 15, 5]; // Alta, Media, Baja
-  }
-
-  return values;
-});
-
-const chartOptionsVulnerabilidadSimple = computed<ApexOptions>(() => {
-  console.log('Computing chart options vulnerabilidad simple...');
-  const data = vulnerabilidadCounts.value;
-  const labels = Object.keys(data);
-  console.log('Labels:', labels);
-
-  // Si no hay etiquetas, usar por defecto
-  const finalLabels = labels.length > 0 ? labels : ['Alta', 'Media', 'Baja'];
-  console.log('Final labels:', finalLabels);
-
-  return {
-    chart: {
-      type: 'donut',
-      fontFamily: 'Roboto, sans-serif'
-    },
-    colors: ['#1976D2', '#26A69A', '#F2C037', '#31CCEC'],
-    labels: finalLabels,
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '65%',
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: 'Total',
-              fontSize: '16px',
-              fontWeight: 'bold'
-            }
-          }
-        }
-      }
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: function (val: number) {
-        return Math.round(val) + '%';
-      }
-    },
-    legend: {
-      position: 'bottom',
-      fontSize: '12px'
-    }
-  };
-});
-
-const testSeriesBarrios = ref([3, 5, 2, 4, 6, 1, 8, 2, 3, 1]);
-const testChartOptionsBarrios = ref<ApexOptions>({
-  chart: {
-    type: 'donut',
-    fontFamily: 'Roboto, sans-serif'
+// Actualizar etiquetas sin recrear todo el objeto de opciones
+watch(
+  () => Object.keys(marcadoresPorBarrio.value),
+  (labels) => {
+    chartOptionsBarrios.value.labels = labels.length > 0 ? labels : ['Sin datos'];
   },
-  colors: [
-    '#1976D2', // San Martin A
-    '#26A69A', // San Martin B  
-    '#F2C037', // Kenedy
-    '#31CCEC', // Los Pinos
-    '#21BA45', // Belgrano
-    '#9C27B0', // Barrio Norte
-    '#FF5722', // Barrio Centro
-    '#795548', // Quintanilla
-    '#607D8B', // Zona Rural
-    '#E91E63'  // Otro
-  ],
-  labels: [
-    'San Martin A',
-    'San Martin B',
-    'Kenedy',
-    'Los Pinos',
-    'Belgrano',
-    'Barrio Norte',
-    'Barrio Centro',
-    'Quintanilla',
-    'Zona Rural',
-    'Otro'
-  ],
-  plotOptions: {
-    pie: {
-      donut: {
-        size: '65%',
-        labels: {
-          show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }
-        }
-      }
-    }
-  },
-  dataLabels: {
-    enabled: true,
-    formatter: function (val: number) {
-      return Math.round(val) + '%';
-    }
-  },
-  legend: {
-    position: 'bottom',
-    fontSize: '12px'
-  }
-});
+  { immediate: true }
+);
+
+// Eliminado: variables de prueba y versión simplificada del gráfico de vulnerabilidad
+
+// Eliminado: testSeriesBarrios y testChartOptionsBarrios (ya usamos datos reales)
 
 onMounted(() => {
   if (gisStore.marcadores.length === 0) {
@@ -891,6 +760,9 @@ onMounted(() => {
     page.style.setProperty('height', 'auto', 'important');
   }
 });
+
+// Debug reactivo: observar cambios y estado de readiness de los donuts
+// Eliminado: watchers profundos que podían causar ciclos con apexcharts
 </script>
 
 <style scoped>
