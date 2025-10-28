@@ -3477,18 +3477,13 @@ async function generarPDF() {
         let servicesY = servicesCard.contentY;
 
         if (conectados.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.success);
-          this.doc.text('✓ CONECTADOS:', servicesCard.contentX + 2, servicesY);
-          servicesY += 6;
-
           conectados.forEach((servicio) => {
             const nombre = this._getSafeValue(servicio.nombre);
             const opcion = this._getSafeValue(servicio.opcion_servicio);
             if (nombre !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
-              let serviceText = `  • ${nombre}`;
+              this._setColor(CONFIG.colors.success); // Verde para conectados
+              let serviceText = `• ${nombre}`;
               if (opcion !== 'N/A' && opcion !== 'Conectado') {
                 serviceText += ` (${opcion})`;
               }
@@ -3510,22 +3505,13 @@ async function generarPDF() {
         }
 
         if (noConectados.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.error);
-          this.doc.text(
-            '✗ NO CONECTADOS:',
-            servicesCard.contentX + 2,
-            servicesY
-          );
-          servicesY += 6;
-
           noConectados.forEach((servicio) => {
             const nombre = this._getSafeValue(servicio.nombre);
             const opcion = this._getSafeValue(servicio.opcion_servicio);
             if (nombre !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
-              let serviceText = `  • ${nombre}`;
+              this._setColor(CONFIG.colors.error); // Rojo para no conectados
+              let serviceText = `• ${nombre}`;
               if (opcion !== 'N/A' && opcion !== 'No conectado') {
                 serviceText += ` (${opcion})`;
               }
@@ -3568,11 +3554,6 @@ async function generarPDF() {
         let programsY = programsCard.contentY;
 
         if (activos.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.success);
-          this.doc.text('★ ACTIVOS:', programsCard.contentX + 2, programsY);
-          programsY += 6;
-
           activos.forEach((programa) => {
             const tipo = this._getSafeValue(programa.tipo);
             const ayuda = this._getSafeValue(programa.ayuda);
@@ -3581,8 +3562,8 @@ async function generarPDF() {
 
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
-              let programText = `  • ${tipo}`;
+              this._setColor(CONFIG.colors.success); // Verde para activos
+              let programText = `• ${tipo}`;
               if (ayuda !== 'N/A') programText += ` - ${ayuda}`;
               if (detalle !== 'N/A') programText += ` (${detalle})`;
 
@@ -3619,18 +3600,13 @@ async function generarPDF() {
         }
 
         if (inactivos.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text('◐ FINALIZADOS:', programsCard.contentX + 2, programsY);
-          programsY += 6;
-
           inactivos.forEach((programa) => {
             const tipo = this._getSafeValue(programa.tipo);
             const ayuda = this._getSafeValue(programa.ayuda);
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.textSecondary);
-              let programText = `  • ${tipo}`;
+              this._setColor(CONFIG.colors.textSecondary); // Gris para inactivos
+              let programText = `• ${tipo}`;
               if (ayuda !== 'N/A') programText += ` - ${ayuda}`;
 
               const programLines = this.doc.splitTextToSize(
