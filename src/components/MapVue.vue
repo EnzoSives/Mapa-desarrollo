@@ -707,6 +707,23 @@
 
           <q-card-section class="q-pa-md">
             <div class="section-title">
+              <q-icon name="event_year" class="q-mr-sm" color="primary" />
+              Filtrar por Año
+            </div>
+            <q-select
+              v-model="filtroAño"
+              :options="años"
+              label="Seleccionar año"
+              outlined
+              dense
+              class="q-mt-md"
+            />
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section class="q-pa-md">
+            <div class="section-title">
               <q-icon name="database" class="q-mr-sm" color="primary" />
               Datos cargados
             </div>
@@ -1668,7 +1685,7 @@
   </q-page>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { useGisStore, Marcador } from 'src/stores/gisStore';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
@@ -1722,7 +1739,7 @@ const programasActivos = computed(
 );
 const programasInactivos = computed(
   () =>
-    gisStore.marcadorSeleccionadoProgramasCompletos?.filter(
+    gisStore.marcadorSeleccionado?.programas?.filter(
       (p) => p.estado !== 'activo'
     ) || []
 );
@@ -1804,6 +1821,19 @@ const iconosDisponibles = [
 ];
 
 const filtrosVulnerabilidad = ref<string[]>([]);
+
+// ✅ NUEVO: Filtro por año
+const años = (() => {
+  const currentYear = new Date().getFullYear();
+  const startYear = 2020;
+  const result = [];
+  for (let year = startYear; year <= currentYear; year++) {
+    result.push(year.toString());
+  }
+  return result.reverse();
+})();
+
+const filtroAño = ref<string>('2025'); // Inicializar a diferente año para forzar reactividad en onMounted
 
 function toggleFiltroVulnerabilidad(icono: string) {
   const index = filtrosVulnerabilidad.value.indexOf(icono);
@@ -2079,9 +2109,28 @@ const osmLayer = new TileLayer({
 const marcadoresFiltrados = computed(() => {
   const term = unifiedSearchTerm.value.toLowerCase();
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
+  const selectedYear = filtroAño.value;
 
-  return gisStore.marcadores
+  // 🔍 LOG para debuguear
+  const inicio = performance.now();
+  console.log(`🔄 [marcadoresFiltrados] Recalculando... Año seleccionado: "${selectedYear}", Total marcadores: ${gisStore.marcadores.length}`);
+
+  const filtered = gisStore.marcadores
     .filter((m) => {
+      // Filtrado por año - si no tiene fechaCreacion, se muestra en TODOS los años
+      if (m.fechaCreacion) {
+        try {
+          const marcadorYear = new Date(m.fechaCreacion).getFullYear().toString();
+          if (marcadorYear !== selectedYear) {
+            return false; // NO coincide con el año seleccionado, excluir
+          }
+        } catch (error) {
+          console.warn('Error al parsear fecha:', m.fechaCreacion);
+          // Si hay error al parsear, incluir el marcador (mostrar en todos)
+        }
+      }
+      // Si no tiene fechaCreacion, continúa (se mostrará en todos los años)
+
       // Filtrado por vulnerabilidad
       const matchesVulnerabilidad =
         vulnerabilidadFilters.length === 0 ||
@@ -2116,30 +2165,100 @@ const marcadoresFiltrados = computed(() => {
         return matchesMainSearch || matchesIntegrantesSearch;
       }
 
-      // Si no hay término de búsqueda, y pasó el filtro de vulnerabilidad
+      // Si no hay término de búsqueda, y pasó el filtro de vulnerabilidad y año
       return true;
     })
     .slice()
     .reverse();
+
+  const tiempo = (performance.now() - inicio).toFixed(2);
+  console.log(`✅ [marcadoresFiltrados] Resultado: ${filtered.length} elementos filtrados (${tiempo}ms)`);
+
+  return filtered;
 });
 
 const marcadoresFiltradosParaMapa = computed(() => {
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
-  if (vulnerabilidadFilters.length === 0) {
-    return gisStore.marcadores;
-  }
-  return gisStore.marcadores.filter((marcador) =>
-    vulnerabilidadFilters.includes(marcador.icono)
-  );
+  const selectedYear = filtroAño.value;
+
+  return gisStore.marcadores.filter((marcador) => {
+    // Filtrado por año
+    if (marcador.fechaCreacion) {
+      try {
+        const marcadorYear = new Date(marcador.fechaCreacion).getFullYear().toString();
+        if (marcadorYear !== selectedYear) {
+          return false;
+        }
+      } catch (error) {
+        console.warn('Error al parsear fecha del mapa:', marcador.fechaCreacion);
+        return false;
+      }
+    } else {
+      // Si no tiene fechaCreacion, no mostrar en el mapa
+      return false;
+    }
+
+    // Filtrado por vulnerabilidad
+    if (vulnerabilidadFilters.length === 0) {
+      return true;
+    }
+    return vulnerabilidadFilters.includes(marcador.icono);
+  });
 });
 
 watch(marcadoresFiltradosParaMapa, (nuevosMarcadores) => {
   vectorSource.clear();
   nuevosMarcadores.forEach(agregarMarcadorAlMapa);
-});
+}, { immediate: true });
+
+// ✅ Watch para asegurar que el filtro de año funcione por defecto
+watch(
+  () => gisStore.marcadores.length,
+  () => {
+    // Resetear a año actual por defecto cuando se cargan datos
+    const currentYear = new Date().getFullYear().toString();
+    console.log(`🔄 [Watch marcadores.length] Marcadores cargados. Asignando filtroAño a: ${currentYear}`);
+    if (filtroAño.value !== currentYear) {
+      filtroAño.value = currentYear;
+    }
+  }
+);
+
+// ✅ Watch para monitorear cambios de filtroAño y loguear
+watch(
+  () => filtroAño.value,
+  (nuevoAño, viejoAño) => {
+    console.log(`🎯 [Watch filtroAño] Cambio de año: ${viejoAño} → ${nuevoAño}`);
+    console.log(`   Marcadores totales: ${gisStore.marcadores.length}`);
+    console.log(`   Marcadores filtrados: ${marcadoresFiltrados.value.length}`);
+  },
+  { flush: 'post' }
+);
 
 onMounted(() => {
-  gisStore.cargarMarcadoresDesdeAPI();
+  // Asegurar que filtroAño esté initialized al año actual
+  const currentYear = new Date().getFullYear().toString();
+  console.log(`🚀 onMounted iniciado. Año actual: ${currentYear}`);
+  console.log(`1️⃣ filtroAño ANTES de asignación: ${filtroAño.value}`);
+  filtroAño.value = currentYear;
+  console.log(`2️⃣ filtroAño DESPUÉS de asignación: ${filtroAño.value}`);
+  console.log(`3️⃣ marcadoresFiltrados ANTES de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
+
+  gisStore.cargarMarcadoresDesdeAPI().then(async () => {
+    // Esperar al siguiente tick para que Vue actualice los datos
+    await nextTick();
+
+    // Log para verificar si los marcadores tienen fechaCreacion
+    if (gisStore.marcadores.length > 0) {
+      console.log('🔍 Primeros 3 marcadores recibidos:', gisStore.marcadores.slice(0, 3));
+      console.log('✅ Propiedades disponibles:', Object.keys(gisStore.marcadores[0]));
+      const conFecha = gisStore.marcadores.filter(m => m.fechaCreacion).length;
+      const sinFecha = gisStore.marcadores.length - conFecha;
+      console.log(`📊 Total marcadores: ${gisStore.marcadores.length}, con fechaCreacion: ${conFecha}, sin fechaCreacion: ${sinFecha}`);
+      console.log(`📅 filtroAño en este momento: ${filtroAño.value}`);
+      console.log(`4️⃣ marcadoresFiltrados DESPUÉS de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
+    }
+  });
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
   // Definir los límites del área permitida
@@ -2166,15 +2285,8 @@ onMounted(() => {
     controls: [],
   });
 
-  // Agregar los marcadores cuando estén disponibles
-  watch(
-    () => gisStore.marcadores,
-    (marcadores) => {
-      vectorSource.clear();
-      marcadores.forEach(agregarMarcadorAlMapa);
-    },
-    { immediate: true }
-  );
+  // Ya no se necesita este watch aquí porque marcadoresFiltradosParaMapa
+  // está fuera del onMounted y maneja la renderización filtrada automáticamente
 
   map.on('pointermove', (event) => {
     const pixel = event.pixel;
