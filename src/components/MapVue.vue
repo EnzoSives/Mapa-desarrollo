@@ -3558,6 +3558,7 @@ async function generarPDF() {
           alturaProgramas += 6;
           activos.forEach((p) => {
             alturaProgramas += 5; // Línea principal
+            alturaProgramas += 3; // Espacio para fechas
             const notas = this._getSafeValue(p.notas);
             if (notas !== 'N/A') {
               const noteLines = this.doc.splitTextToSize(
@@ -3568,7 +3569,13 @@ async function generarPDF() {
             }
           });
         }
-        if (inactivos.length > 0) alturaProgramas += 6 + inactivos.length * 5;
+        if (inactivos.length > 0) {
+          alturaProgramas += 6;
+          inactivos.forEach((p) => {
+            alturaProgramas += 5; // Línea principal
+            alturaProgramas += 3; // Espacio para fechas
+          });
+        }
         if (activos.length === 0 && inactivos.length === 0)
           alturaProgramas += 15;
 
@@ -3672,6 +3679,14 @@ async function generarPDF() {
             const detalle = this._getSafeValue(programa.detalle);
             const notas = this._getSafeValue(programa.notas);
 
+            // Formatear fechas
+            const fechaInicio = programa.fechaInicio
+              ? new Date(programa.fechaInicio).toLocaleDateString('es-ES')
+              : 'N/A';
+            const fechaFin = programa.fechaFin
+              ? new Date(programa.fechaFin).toLocaleDateString('es-ES')
+              : 'Sin fecha final';
+
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
               this._setColor(CONFIG.colors.success); // Verde para activos
@@ -3692,11 +3707,25 @@ async function generarPDF() {
               });
               programsY += programLines.length * 4;
 
+              // Agregar fechas
+              this._setFont(CONFIG.fonts.tiny);
+              this._setColor(CONFIG.colors.textSecondary);
+              const dateText = `Desde: ${fechaInicio} | Hasta: ${fechaFin}`;
+              const dateLines = this.doc.splitTextToSize(
+                dateText,
+                cardWidth - 15
+              );
+              dateLines.forEach((line) => {
+                this.doc.text(line, programsCard.contentX + 4, programsY);
+                programsY += 3;
+              });
+              programsY += 1;
+
               if (notas !== 'N/A') {
                 this._setFont(CONFIG.fonts.tiny);
                 this._setColor(CONFIG.colors.textSecondary);
                 const noteLines = this.doc.splitTextToSize(
-                  `    Notas: ${notas}`,
+                  `Notas: ${notas}`,
                   cardWidth - 15
                 );
                 noteLines.forEach((line) => {
@@ -3715,6 +3744,13 @@ async function generarPDF() {
           inactivos.forEach((programa) => {
             const tipo = this._getSafeValue(programa.tipo);
             const ayuda = this._getSafeValue(programa.ayuda);
+            const fechaInicio = programa.fechaInicio
+              ? new Date(programa.fechaInicio).toLocaleDateString('es-ES')
+              : 'N/A';
+            const fechaFin = programa.fechaFin
+              ? new Date(programa.fechaFin).toLocaleDateString('es-ES')
+              : 'Sin fecha final';
+
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
               this._setColor(CONFIG.colors.textSecondary); // Gris para inactivos
@@ -3732,7 +3768,21 @@ async function generarPDF() {
                   programsY + lineIndex * 4
                 );
               });
-              programsY += programLines.length * 4 + 1;
+              programsY += programLines.length * 4;
+
+              // Agregar fechas para inactivos
+              this._setFont(CONFIG.fonts.tiny);
+              this._setColor(CONFIG.colors.textSecondary);
+              const dateText = `Desde: ${fechaInicio} | Hasta: ${fechaFin}`;
+              const dateLines = this.doc.splitTextToSize(
+                dateText,
+                cardWidth - 15
+              );
+              dateLines.forEach((line) => {
+                this.doc.text(line, programsCard.contentX + 4, programsY);
+                programsY += 3;
+              });
+              programsY += 2;
             }
           });
         }
