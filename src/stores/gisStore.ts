@@ -15,10 +15,51 @@ export interface Programa {
   fechaFin?: string | null;
 }
 
+export interface Estudio {
+  nivel: string;
+}
+
+export interface Salud {
+  cud: boolean;
+  obra_social: boolean;
+  problema_salud: string;
+}
+
+export interface Ocupacion {
+  nombre?: string;
+  tipo_principal: string;
+  tipo_1: string;
+  tipo_2: string;
+  ingresos: number | null;
+}
+
+export interface Vivienda {
+  tipo: string;
+  dominio: string;
+  ambientes: string;
+  baño: string;
+  baño_opcion: string;
+}
+
+export interface Servicio {
+  nombre: string;
+  opcion_servicio: string;
+}
+
+export interface Integrante {
+  nombre: string;
+  apellido: string;
+  edad: number | null;
+  dni: string;
+  vinculo: string;
+  salud: Salud[];
+  ocupaciones: Ocupacion[];
+}
+
 export interface Marcador {
   id: number;
   nombre: string;
-  apellido: string; // ⬅️ nuevo campo
+  apellido: string;
   direccion: string;
   telefono: string;
   dni: string;
@@ -28,9 +69,15 @@ export interface Marcador {
   latitud: number;
   longitud: number;
   icono: string;
-  integrantes?: string[];
+  integrantes?: Integrante[];
   programas?: Programa[];
-  fechaCreacion: string; // ⬅️ nuevo campo
+  estudios?: Estudio[];
+  salud?: Salud[];
+  ocupaciones?: Ocupacion[];
+  viviendas?: Vivienda[];
+  servicios?: Servicio[];
+  notas?: string;
+  fechaCreacion: string;
 }
 
 export const useGisStore = defineStore('gis', {
@@ -59,8 +106,10 @@ export const useGisStore = defineStore('gis', {
         const nuevoMarcador: Marcador = response.data;
         this.marcadores.push(nuevoMarcador);
         this.marcadorSeleccionado = nuevoMarcador;
+        return nuevoMarcador;
       } catch (error) {
         console.error('Error al agregar marcador:', error);
+        throw error;
       }
     },
 

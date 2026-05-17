@@ -265,8 +265,8 @@
                 .servicios" :key="index" class="col-6">
                 <q-chip color="primary" text-color="white" size="sm" class="full-width">
                   <q-icon :name="servicio.opcion_servicio === 'Conectado'
-                      ? 'check_circle'
-                      : 'cancel'
+                    ? 'check_circle'
+                    : 'cancel'
                     " class="q-mr-xs" />
                   {{ servicio.nombre }}
                 </q-chip>
@@ -284,8 +284,13 @@
                 text-color="white" size="sm" class="q-ml-sm" />
             </div>
 
-            <div class="q-mb-md">
-              <q-select v-model="filtroMes" :options="opcionesMeses" label="Filtrar por Mes" clearable dense outlined />
+            <div class="q-mb-md row q-gutter-sm">
+              <div class="col">
+                <q-select v-model="filtroAnio" :options="opcionesAnios" label="Año" dense outlined />
+              </div>
+              <div class="col">
+                <q-select v-model="filtroMes" :options="opcionesMeses" label="Mes" dense outlined />
+              </div>
             </div>
 
             <div v-if="programasFiltradosPorMes.length">
@@ -848,9 +853,8 @@
                         programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')
                       " />
 
-                  <q-select v-model="programa.detalle" label="Detalle" :options="detallesAyuda[programa.ayuda] || []"
-                    dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'
-                      " />
+                  <q-select v-model="programa.detalle" label="Detalle" :options="(detallesAyuda as Record<string, string[]>)[programa.ayuda] || []"
+                    dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'" />
                 </div>
 
                 <div class="row q-col-gutter-md q-pr-lg q-mt-sm">
@@ -978,6 +982,9 @@ const programasInactivos = computed(
 // ✅ NUEVO: Referencia para el filtro por mes
 const filtroMes = ref<string | null>(null);
 
+// Referencia para el filtro por año, por defecto el año actual
+const filtroAnio = ref<number | null>(new Date().getFullYear());
+
 // ✅ NUEVO: Opciones de meses
 const opcionesMeses = [
   'Enero',
@@ -994,16 +1001,38 @@ const opcionesMeses = [
   'Diciembre',
 ];
 
-// ✅ NUEVO: Propiedad computada para filtrar programas por mes y estado
+// Opciones de años derivadas de los programas activos del marcador seleccionado
+const opcionesAnios = computed(() => {
+  const programas = gisStore.marcadorSeleccionado?.programas?.filter(
+    (p) => p.estado === 'activo'
+  ) || [];
+  const years = new Set<number>();
+  years.add(new Date().getFullYear());
+  programas.forEach((p) => {
+    if (p.fechaInicio) {
+      const y = new Date(p.fechaInicio).getFullYear();
+      if (!isNaN(y)) years.add(y);
+    }
+  });
+  return Array.from(years).sort((a, b) => b - a);
+});
+
+// ✅ NUEVO: Propiedad computada para filtrar programas por año, mes y estado
 const programasFiltradosPorMes = computed(() => {
   if (!gisStore.marcadorSeleccionado?.programas) {
     return [];
   }
-  const programas = gisStore.marcadorSeleccionado.programas.filter(
+  let programas = gisStore.marcadorSeleccionado.programas.filter(
     (p) => p.estado === 'activo'
   );
+  if (filtroAnio.value !== null) {
+    programas = programas.filter((p) => {
+      if (!p.fechaInicio) return false;
+      return new Date(p.fechaInicio).getFullYear() === filtroAnio.value;
+    });
+  }
   if (filtroMes.value) {
-    return programas.filter((p) => p.mes === filtroMes.value);
+    programas = programas.filter((p) => p.mes === filtroMes.value);
   }
   return programas;
 });
@@ -1304,6 +1333,7 @@ const nuevoMarcador = ref({
   }>,
   latitud: null as number | null,
   longitud: null as number | null,
+  notas: '',
   icono: '',
 });
 
@@ -1619,8 +1649,12 @@ async function guardarMarcador() {
 
   try {
     if (editando.value) {
-      await gisStore.editarMarcador(marcador);
-      // Para edición, recargamos todos los marcadores
+      const marcadorConId = {
+        ...marcador,
+        id: gisStore.marcadorSeleccionado!.id,
+        fechaCreacion: gisStore.marcadorSeleccionado!.fechaCreacion,
+      };
+      await gisStore.editarMarcador(marcadorConId as unknown as Marcador);
       await gisStore.cargarMarcadoresDesdeAPI();
       $q.notify({
         type: 'positive',
@@ -1628,71 +1662,42 @@ async function guardarMarcador() {
         position: 'top',
       });
     } else {
-      // Para creación
-      console.log('Creando nuevo marcador...'); // Debug
-
-      const respuestaServidor = await gisStore.agregarMarcador(marcador);
-      console.log('Respuesta del servidor:', respuestaServidor); // Debug: ver qué devuelve el servidor
-
-      // Verificar diferentes estructuras de respuesta posibles
-      let nuevoMarcadorCreado = null;
-
-      if (respuestaServidor?.id) {
-        // Caso 1: El servidor devuelve directamente el marcador
-        nuevoMarcadorCreado = respuestaServidor;
-      } else if (respuestaServidor?.data?.id) {
-        // Caso 2: El servidor devuelve { data: marcador }
-        nuevoMarcadorCreado = respuestaServidor.data;
-      } else if (respuestaServidor?.marcador?.id) {
-        // Caso 3: El servidor devuelve { marcador: marcador }
-        nuevoMarcadorCreado = respuestaServidor.marcador;
-      } else if (respuestaServidor?.success && respuestaServidor?.result?.id) {
-        // Caso 4: El servidor devuelve { success: true, result: marcador }
-        nuevoMarcadorCreado = respuestaServidor.result;
-      }
+      const marcadorNuevo = {
+        ...marcador,
+        fechaCreacion: new Date().toISOString(),
+      };
+      const nuevoMarcadorCreado = await gisStore.agregarMarcador(marcadorNuevo as unknown as Omit<Marcador, 'id'>);
 
       if (nuevoMarcadorCreado?.id) {
-        console.log('Marcador creado exitosamente:', nuevoMarcadorCreado); // Debug
-
-        // Agregar al mapa inmediatamente
         agregarMarcadorAlMapa(nuevoMarcadorCreado);
-
-        // Actualizar la lista local del store si no existe
         if (!gisStore.marcadores.find((m) => m.id === nuevoMarcadorCreado.id)) {
           gisStore.marcadores.push(nuevoMarcadorCreado);
         }
-
         $q.notify({
           type: 'positive',
           message: 'Marcador creado correctamente',
           position: 'top',
         });
       } else {
-        // Si no se puede identificar el marcador creado, recargar desde el servidor
-        console.warn(
-          'No se pudo identificar el marcador creado, recargando desde servidor...'
-        ); // Debug
-
         await gisStore.cargarMarcadoresDesdeAPI();
-
         $q.notify({
           type: 'positive',
-          message: 'Marcador creado correctamente (recargado desde servidor)',
+          message: 'Marcador creado correctamente',
           position: 'top',
         });
       }
     }
 
     cerrarModal();
-  } catch (error) {
-    console.error('Error completo al guardar marcador:', error); // Debug mejorado
+  } catch (error: unknown) {
+    console.error('Error completo al guardar marcador:', error);
 
-    // Mostrar más detalles del error
     let mensajeError = 'Error al guardar el marcador';
-    if (error.response?.data?.message) {
-      mensajeError = error.response.data.message;
-    } else if (error.message) {
-      mensajeError = error.message;
+    const e = error as { response?: { data?: { message?: string } }; message?: string };
+    if (e?.response?.data?.message) {
+      mensajeError = e.response.data.message;
+    } else if (e?.message) {
+      mensajeError = e.message;
     }
 
     $q.notify({
@@ -1713,7 +1718,7 @@ function agregarPrograma() {
     detalle: '',
     notas: '',
     mes: '',
-    cantidad: null,
+    cantidad: undefined,
   });
 }
 
@@ -1734,12 +1739,12 @@ function agregarIntegrante() {
   });
 }
 
-function eliminarIntegrante(index) {
+function eliminarIntegrante(index: number) {
   nuevoMarcador.value.integrantes.splice(index, 1);
 }
 
 // Funciones para manejar salud de integrantes
-function agregarSaludIntegrante(integranteIndex) {
+function agregarSaludIntegrante(integranteIndex: number) {
   if (!nuevoMarcador.value.integrantes[integranteIndex].salud) {
     nuevoMarcador.value.integrantes[integranteIndex].salud = [];
   }
@@ -1750,37 +1755,37 @@ function agregarSaludIntegrante(integranteIndex) {
   });
 }
 
-function eliminarSaludIntegrante(integranteIndex, saludIndex) {
+function eliminarSaludIntegrante(integranteIndex: number, saludIndex: number) {
   nuevoMarcador.value.integrantes[integranteIndex].salud.splice(saludIndex, 1);
 }
 
 // Funciones para manejar ocupaciones de integrantes
-function agregarOcupacionIntegrante(integranteIndex) {
+function agregarOcupacionIntegrante(integranteIndex: number) {
   if (!nuevoMarcador.value.integrantes[integranteIndex].ocupaciones) {
     nuevoMarcador.value.integrantes[integranteIndex].ocupaciones = [];
   }
   nuevoMarcador.value.integrantes[integranteIndex].ocupaciones.push({
-    tipo_principal: null,
-    tipo_1: null,
-    tipo_2: null,
+    tipo_principal: '',
+    tipo_1: '',
+    tipo_2: '',
     ingresos: null,
   });
 }
 
-function eliminarOcupacionIntegrante(integranteIndex, ocupacionIndex) {
+function eliminarOcupacionIntegrante(integranteIndex: number, ocupacionIndex: number) {
   nuevoMarcador.value.integrantes[integranteIndex].ocupaciones.splice(
     ocupacionIndex,
     1
   );
 }
 
-function resetearTiposOcupacionIntegrante(integranteIndex, ocupacionIndex) {
+function resetearTiposOcupacionIntegrante(integranteIndex: number, ocupacionIndex: number) {
   const ocupacion =
     nuevoMarcador.value.integrantes[integranteIndex].ocupaciones[
     ocupacionIndex
     ];
-  ocupacion.tipo_1 = null;
-  ocupacion.tipo_2 = null;
+  ocupacion.tipo_1 = '';
+  ocupacion.tipo_2 = '';
   ocupacion.ingresos = null;
 }
 
@@ -1886,6 +1891,7 @@ function limpiarFormulario() {
     tiempo_residencia: '',
     latitud: null,
     longitud: null,
+    notas: '',
     icono: '',
     programas: [],
     integrantes: [],
@@ -1898,25 +1904,25 @@ function limpiarFormulario() {
 }
 
 // Nuevos métodos para ocupaciones
-function getTipoOcupacion1(tipoOcupacion) {
-  return opcionesTipoOcupacion1[tipoOcupacion] || [];
+function getTipoOcupacion1(tipoOcupacion: string) {
+  return (opcionesTipoOcupacion1 as Record<string, string[]>)[tipoOcupacion] || [];
 }
 
-function getTipoOcupacion2(tipoOcupacion) {
-  return opcionesTipoOcupacion2[tipoOcupacion] || [];
+function getTipoOcupacion2(tipoOcupacion: string) {
+  return (opcionesTipoOcupacion2 as Record<string, string[]>)[tipoOcupacion] || [];
 }
 
-function resetearTiposOcupacion(index) {
+function resetearTiposOcupacion(index: number) {
   nuevoMarcador.value.ocupaciones[index].tipo_1 = '';
   nuevoMarcador.value.ocupaciones[index].tipo_2 = '';
 }
 
 // Nuevos métodos para servicios
-function getOpcionesxServicios(servicio) {
-  return opcionesxServicios[servicio] || [];
+function getOpcionesxServicios(servicio: string) {
+  return (opcionesxServicios as Record<string, string[]>)[servicio] || [];
 }
 
-function resetearOpcionServicio(index) {
+function resetearOpcionServicio(index: number) {
   nuevoMarcador.value.servicios[index].opcion_servicio = '';
 }
 
@@ -2018,7 +2024,12 @@ async function generarPDF() {
 
     // --- CLASE PARA ENCAPSULAR TODA LA LÓGICA DE GENERACIÓN ---
     class PDFGenerator {
-      constructor(data) {
+      doc: jsPDF;
+      data: Marcador;
+      yPos: number;
+      contentWidth: number;
+
+      constructor(data: Marcador) {
         this.doc = new jsPDF('p', 'mm', 'a4');
         this.data = data;
         this.yPos = CONFIG.margins.top;
@@ -2027,7 +2038,7 @@ async function generarPDF() {
       }
 
       // --- FUNCIONES AUXILIARES ---
-      _getSafeValue(value, defaultValue = 'N/A') {
+      _getSafeValue(value: unknown, defaultValue = 'N/A') {
         if (value === null || value === undefined || value === '') {
           return defaultValue;
         }
@@ -2038,11 +2049,11 @@ async function generarPDF() {
         return cleaned || defaultValue;
       }
 
-      _setColor(colorArray) {
-        this.doc.setTextColor(colorArray[0], colorArray[1], colorArray[2]);
+      _setColor(colorArray: readonly number[]) {
+        this.doc.setTextColor(colorArray[0]!, colorArray[1]!, colorArray[2]!);
       }
 
-      _setFont(fontConfig) {
+      _setFont(fontConfig: { size: number; style: string }) {
         this.doc.setFontSize(fontConfig.size);
         this.doc.setFont('helvetica', fontConfig.style);
       }
@@ -2060,19 +2071,19 @@ async function generarPDF() {
       }
 
       // MEJORA: La función ahora recibe la coordenada 'y' para mayor control
-      _createCard(title, x, y, width, height, color = CONFIG.colors.primary) {
+      _createCard(title: string, x: number, y: number, width: number, height: number, color: readonly number[] = CONFIG.colors.primary) {
         // Sombra
         this.doc.setFillColor(235, 235, 235);
         this.doc.rect(x + 1, y + 1, width, height, 'F');
 
         // Fondo y borde de la tarjeta
-        this.doc.setFillColor(...CONFIG.colors.cardBg);
-        this.doc.setDrawColor(...CONFIG.colors.cardBorder);
+        this.doc.setFillColor(CONFIG.colors.cardBg[0]!, CONFIG.colors.cardBg[1]!, CONFIG.colors.cardBg[2]!);
+        this.doc.setDrawColor(CONFIG.colors.cardBorder[0]!, CONFIG.colors.cardBorder[1]!, CONFIG.colors.cardBorder[2]!);
         this.doc.setLineWidth(0.3);
         this.doc.rect(x, y, width, height, 'FD');
 
         // Header de la tarjeta
-        this.doc.setFillColor(...color);
+        this.doc.setFillColor(color[0]!, color[1]!, color[2]!);
         this.doc.rect(x, y, width, CONFIG.card.headerHeight, 'F');
 
         // Título de la tarjeta
@@ -2092,14 +2103,14 @@ async function generarPDF() {
       }
 
       // Función para agregar campos en una o más columnas
-      _addCardFields(card, fields, columns = 1) {
+      _addCardFields(card: { contentX: number; contentY: number; contentWidth: number }, fields: { label: string; value: unknown }[], columns = 1) {
         let currentY = card.contentY;
         let lastY = currentY;
         const columnWidth = card.contentWidth / columns;
         const lineHeight = 4;
         const fieldVerticalSpace = 10;
 
-        fields.forEach((field, index) => {
+        fields.forEach((field: { label: string; value: unknown }, index: number) => {
           if (this._getSafeValue(field.value) === 'N/A') return;
 
           const colIndex = index % columns;
@@ -2118,7 +2129,7 @@ async function generarPDF() {
             this._getSafeValue(field.value),
             columnWidth - 5
           );
-          valueLines.forEach((line, lineIndex) => {
+          (valueLines as string[]).forEach((line: string, lineIndex: number) => {
             this.doc.text(
               line,
               colX,
@@ -2141,7 +2152,7 @@ async function generarPDF() {
       // --- FUNCIONES PARA GENERAR CADA SECCIÓN DEL PDF ---
 
       _addHeader() {
-        this.doc.setFillColor(...CONFIG.colors.primary);
+        this.doc.setFillColor(CONFIG.colors.primary[0]!, CONFIG.colors.primary[1]!, CONFIG.colors.primary[2]!);
         this.doc.rect(
           CONFIG.margins.left - 5,
           this.yPos - 3,
@@ -2216,7 +2227,7 @@ async function generarPDF() {
           CONFIG.colors.info
         );
         if (estudios.length > 0) {
-          estudios.forEach((item, index) => {
+          estudios.forEach((item: string, index: number) => {
             this._setFont(CONFIG.fonts.cardValue);
             this._setColor(CONFIG.colors.text);
             this.doc.text(
@@ -2247,7 +2258,7 @@ async function generarPDF() {
         let healthY = healthCard.contentY;
 
         if (saludItems.length > 0) {
-          saludItems.forEach((item) => {
+          saludItems.forEach((item: (typeof saludItems)[number]) => {
             const problema = this._getSafeValue(item.problema_salud);
             if (problema !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
@@ -2316,7 +2327,7 @@ async function generarPDF() {
         );
         let currentY = card.contentY;
 
-        viviendas.forEach((vivienda) => {
+        viviendas.forEach((vivienda: (typeof viviendas)[number]) => {
           const fields = [
             { label: 'Tipo', value: vivienda.tipo },
             { label: 'Dominio', value: vivienda.dominio },
@@ -2368,7 +2379,7 @@ async function generarPDF() {
         );
         let currentY = card.contentY;
 
-        ocupaciones.forEach((ocupacion, index) => {
+        ocupaciones.forEach((ocupacion: (typeof ocupaciones)[number], index: number) => {
           const fields = [
             {
               label: `Ocupación ${index + 1}`,
@@ -2428,12 +2439,12 @@ async function generarPDF() {
 
         const totalIntegrantes = integrantes.length;
         const edadesValidas = integrantes
-          .filter((i) => i.edad && !isNaN(i.edad))
-          .map((i) => parseInt(i.edad));
+          .filter((i) => i.edad !== null && !isNaN(i.edad))
+          .map((i) => i.edad as number);
         const edadPromedio =
           edadesValidas.length > 0
             ? Math.round(
-              edadesValidas.reduce((sum, edad) => sum + edad, 0) /
+              edadesValidas.reduce((sum: number, edad: number) => sum + edad, 0) /
               edadesValidas.length
             )
             : 'N/A';
@@ -2626,7 +2637,7 @@ async function generarPDF() {
                 this._setFont(CONFIG.fonts.tiny);
                 this._setColor(CONFIG.colors.textSecondary);
                 const noteLines = this.doc.splitTextToSize(`  Notas: ${notas}`, cardWidth - 10);
-                noteLines.forEach(line => {
+                noteLines.forEach((line: string) => {
                   this.doc.text(line, programsCard.contentX, programsY);
                   programsY += 3;
                 });
@@ -2687,7 +2698,7 @@ async function generarPDF() {
           let notesY = notesCard.contentY;
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.text);
-          notasLines.forEach((linea) => {
+          notasLines.forEach((linea: string) => {
             this.doc.text(linea, notesCard.contentX, notesY);
             notesY += 4;
           });
@@ -2696,10 +2707,10 @@ async function generarPDF() {
       }
 
       _addFooter() {
-        const totalPages = this.doc.internal.getNumberOfPages();
+        const totalPages = this.doc.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
           this.doc.setPage(i);
-          this.doc.setDrawColor(...CONFIG.colors.primary);
+          this.doc.setDrawColor(CONFIG.colors.primary[0]!, CONFIG.colors.primary[1]!, CONFIG.colors.primary[2]!);
           this.doc.setLineWidth(0.5);
           this.doc.line(
             CONFIG.margins.left,
@@ -2769,10 +2780,11 @@ async function generarPDF() {
     // --- CÓDIGO FINAL SIMPLIFICADO ---
     const generator = new PDFGenerator(marcador);
     generator.generate().save();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error detallado al generar el PDF:', error);
+    const e = error as { message?: string };
     alert(
-      `Error al generar el PDF: ${error.message}. Verifique que jsPDF esté correctamente cargado.`
+      `Error al generar el PDF: ${e.message ?? 'error desconocido'}. Verifique que jsPDF esté correctamente cargado.`
     );
   }
 }
@@ -2800,6 +2812,7 @@ function abrirModal(coords: [number, number]) {
     integrantes: [],
     latitud: lat,
     longitud: lon,
+    notas: '',
     icono: iconosDisponibles[0].value,
   };
 
@@ -2880,7 +2893,7 @@ function editarMarcadorSeleccionado() {
   const { longitud, latitud } = nuevoMarcador.value;
 
   marcadorTemporal = new Feature({
-    geometry: new Point(fromLonLat([longitud, latitud])),
+    geometry: new Point(fromLonLat([longitud as number, latitud as number])),
   });
 
   const iconoEdicion = '/marker-icon-7.png';
@@ -2915,13 +2928,9 @@ function eliminarMarcadorSeleccionado() {
       color: 'negative',
       label: 'Eliminar',
     },
-    cancel: {
-      color: 'primary',
-      label: 'Cancelar',
-    },
   }).onOk(() => {
     // Si confirma, procedemos con la eliminación
-    const id = gisStore.marcadorSeleccionado.id;
+    const id = gisStore.marcadorSeleccionado!.id;
     gisStore.eliminarMarcador(id);
 
     vectorSource.getFeatures().forEach((feature) => {
