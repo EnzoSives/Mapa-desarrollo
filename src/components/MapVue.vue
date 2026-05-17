@@ -284,13 +284,18 @@
                 text-color="white" size="sm" class="q-ml-sm" />
             </div>
 
-            <div class="q-mb-md row q-gutter-sm">
-              <div class="col">
-                <q-select v-model="filtroAnio" :options="opcionesAnios" label="Año" dense outlined />
+            <div class="row q-col-gutter-sm q-mb-xs">
+              <div class="col-6">
+                <q-select v-model="filtroAnio" :options="opcionesAnios" label="Filtrar por Año" dense outlined />
               </div>
-              <div class="col">
-                <q-select v-model="filtroMes" :options="opcionesMeses" label="Mes" dense outlined />
+              <div class="col-6">
+                <q-select v-model="filtroMes" :options="opcionesMesesDisponibles" label="Filtrar por Mes" dense outlined />
               </div>
+            </div>
+            <div class="row justify-end q-mb-md">
+              <q-btn v-if="filtroAnio !== null || filtroMes !== null" flat dense size="sm" icon="filter_alt_off"
+                label="Quitar filtros" color="negative"
+                @click="filtroAnio = new Date().getFullYear(); filtroMes = null" />
             </div>
 
             <div v-if="programasFiltradosPorMes.length">
@@ -453,6 +458,22 @@
             </q-btn-group>
             <q-btn v-if="filtrosVulnerabilidad.length > 0" @click="limpiarFiltros" label="Limpiar filtros" color="grey"
               flat dense class="q-mt-sm" />
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section class="q-pa-md">
+            <div class="section-title">
+              <q-icon name="event_year" class="q-mr-sm" color="primary" />
+              Filtrar por Año
+            </div>
+            <div class="row q-gutter-md q-mt-md items-end">
+              <div class="col-grow">
+                <q-select v-model="filtroAño" :options="años" label="Seleccionar año" outlined dense />
+              </div>
+              <q-btn label="Mostrar todos" color="primary" flat icon="clear" size="md" @click="mostrarTodosAños"
+                title="Mostrar marcadores de todos los años" />
+            </div>
           </q-card-section>
 
           <q-separator />
@@ -853,8 +874,10 @@
                         programa.tipo !== 'AYUDA SOCIAL SIN CONTRAPRESTACIÓN')
                       " />
 
-                  <q-select v-model="programa.detalle" label="Detalle" :options="(detallesAyuda as Record<string, string[]>)[programa.ayuda] || []"
-                    dense outlined class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'" />
+                  <q-select v-model="programa.detalle" label="Detalle"
+                    :options="(detallesAyuda as Record<string, string[]>)[programa.ayuda] || []" dense outlined
+                    class="col" :disable="!programa.ayuda || programa.ayuda !== 'Banco Materiales'
+                      " />
                 </div>
 
                 <div class="row q-col-gutter-md q-pr-lg q-mt-sm">
@@ -920,7 +943,7 @@
   </q-page>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import { useGisStore, Marcador } from 'src/stores/gisStore';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
@@ -974,7 +997,7 @@ const programasActivos = computed(
 );
 const programasInactivos = computed(
   () =>
-    gisStore.marcadorSeleccionadoProgramasCompletos?.filter(
+    gisStore.marcadorSeleccionado?.programas?.filter(
       (p) => p.estado !== 'activo'
     ) || []
 );
@@ -984,6 +1007,10 @@ const filtroMes = ref<string | null>(null);
 
 // Referencia para el filtro por año, por defecto el año actual
 const filtroAnio = ref<number | null>(new Date().getFullYear());
+
+watch(filtroAnio, () => {
+  filtroMes.value = null;
+});
 
 // ✅ NUEVO: Opciones de meses
 const opcionesMeses = [
@@ -1015,6 +1042,21 @@ const opcionesAnios = computed(() => {
     }
   });
   return Array.from(years).sort((a, b) => b - a);
+});
+
+// Meses disponibles según los programas activos del año seleccionado
+const opcionesMesesDisponibles = computed(() => {
+  const programas = gisStore.marcadorSeleccionado?.programas?.filter(
+    (p) => p.estado === 'activo'
+  ) || [];
+  const filtered = filtroAnio.value !== null
+    ? programas.filter((p) => {
+        if (!p.fechaInicio) return false;
+        return new Date(p.fechaInicio).getFullYear() === filtroAnio.value;
+      })
+    : programas;
+  const mesesPresentes = new Set(filtered.map((p) => p.mes).filter(Boolean));
+  return opcionesMeses.filter((m) => mesesPresentes.has(m));
 });
 
 // ✅ NUEVO: Propiedad computada para filtrar programas por año, mes y estado
@@ -1081,6 +1123,23 @@ const iconosDisponibles = [
 ];
 
 const filtrosVulnerabilidad = ref<string[]>([]);
+
+// ✅ NUEVO: Filtro por año
+const años = (() => {
+  const currentYear = new Date().getFullYear();
+  const startYear = 2025;
+  const result = [];
+  for (let year = startYear; year <= currentYear; year++) {
+    result.push(year.toString());
+  }
+  return result.reverse();
+})();
+
+const filtroAño = ref<string | null>(new Date().getFullYear().toString()); // Por defecto año actual
+
+function mostrarTodosAños() {
+  filtroAño.value = null;
+}
 
 function toggleFiltroVulnerabilidad(icono: string) {
   const index = filtrosVulnerabilidad.value.indexOf(icono);
@@ -1357,9 +1416,28 @@ const osmLayer = new TileLayer({
 const marcadoresFiltrados = computed(() => {
   const term = unifiedSearchTerm.value.toLowerCase();
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
+  const selectedYear = filtroAño.value;
 
-  return gisStore.marcadores
+  // 🔍 LOG para debuguear
+  const inicio = performance.now();
+  console.log(`🔄 [marcadoresFiltrados] Recalculando... Año seleccionado: "${selectedYear}", Total marcadores: ${gisStore.marcadores.length}`);
+
+  const filtered = gisStore.marcadores
     .filter((m) => {
+      // Filtrado por año - si filtroAño es null, muestra todos
+      if (selectedYear !== null && m.fechaCreacion) {
+        try {
+          const marcadorYear = new Date(m.fechaCreacion).getFullYear().toString();
+          if (marcadorYear !== selectedYear) {
+            return false; // NO coincide con el año seleccionado, excluir
+          }
+        } catch (error) {
+          console.warn('Error al parsear fecha:', m.fechaCreacion);
+          // Si hay error al parsear, incluir el marcador (mostrar en todos)
+        }
+      }
+      // Si no tiene fechaCreacion o filtroAño es null, continúa (se mostrará)
+
       // Filtrado por vulnerabilidad
       const matchesVulnerabilidad =
         vulnerabilidadFilters.length === 0 ||
@@ -1393,30 +1471,86 @@ const marcadoresFiltrados = computed(() => {
         return matchesMainSearch || matchesIntegrantesSearch;
       }
 
-      // Si no hay término de búsqueda, y pasó el filtro de vulnerabilidad
+      // Si no hay término de búsqueda, y pasó el filtro de vulnerabilidad y año
       return true;
     })
     .slice()
     .reverse();
+
+  const tiempo = (performance.now() - inicio).toFixed(2);
+  console.log(`✅ [marcadoresFiltrados] Resultado: ${filtered.length} elementos filtrados (${tiempo}ms)`);
+
+  return filtered;
 });
 
 const marcadoresFiltradosParaMapa = computed(() => {
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
-  if (vulnerabilidadFilters.length === 0) {
-    return gisStore.marcadores;
-  }
-  return gisStore.marcadores.filter((marcador) =>
-    vulnerabilidadFilters.includes(marcador.icono)
-  );
+  const selectedYear = filtroAño.value;
+
+  return gisStore.marcadores.filter((marcador) => {
+    // Filtrado por año - si selectedYear es null, muestra todos
+    if (selectedYear !== null && marcador.fechaCreacion) {
+      try {
+        const marcadorYear = new Date(marcador.fechaCreacion).getFullYear().toString();
+        if (marcadorYear !== selectedYear) {
+          return false;
+        }
+      } catch (error) {
+        console.warn('Error al parsear fecha del mapa:', marcador.fechaCreacion);
+        return false;
+      }
+    } else if (selectedYear !== null) {
+      // Si selectedYear no es null pero el marcador no tiene fecha, no mostrar
+      return false;
+    }
+    // Si selectedYear es null, mostrar todos los marcadores con fecha válida
+
+    // Filtrado por vulnerabilidad
+    if (vulnerabilidadFilters.length === 0) {
+      return true;
+    }
+    return vulnerabilidadFilters.includes(marcador.icono);
+  });
 });
 
 watch(marcadoresFiltradosParaMapa, (nuevosMarcadores) => {
   vectorSource.clear();
   nuevosMarcadores.forEach(agregarMarcadorAlMapa);
-});
+}, { immediate: true });
+
+// ✅ Watch para monitorear cambios de filtroAño y loguear
+watch(
+  () => filtroAño.value,
+  (nuevoAño, viejoAño) => {
+    console.log(`🎯 [Watch filtroAño] Cambio de año: ${viejoAño} → ${nuevoAño}`);
+    console.log(`   Marcadores totales: ${gisStore.marcadores.length}`);
+    console.log(`   Marcadores filtrados: ${marcadoresFiltrados.value.length}`);
+  },
+  { flush: 'post' }
+);
 
 onMounted(() => {
-  gisStore.cargarMarcadoresDesdeAPI();
+  // El filtroAño ya está inicializado al año actual por defecto
+  const currentYear = new Date().getFullYear().toString();
+  console.log(`🚀 onMounted iniciado. Año actual: ${currentYear}`);
+  console.log(`📅 filtroAño (año actual por defecto): ${filtroAño.value}`);
+  console.log(`3️⃣ marcadoresFiltrados ANTES de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
+
+  gisStore.cargarMarcadoresDesdeAPI().then(async () => {
+    // Esperar al siguiente tick para que Vue actualice los datos
+    await nextTick();
+
+    // Log para verificar si los marcadores tienen fechaCreacion
+    if (gisStore.marcadores.length > 0) {
+      console.log('🔍 Primeros 3 marcadores recibidos:', gisStore.marcadores.slice(0, 3));
+      console.log('✅ Propiedades disponibles:', Object.keys(gisStore.marcadores[0]));
+      const conFecha = gisStore.marcadores.filter(m => m.fechaCreacion).length;
+      const sinFecha = gisStore.marcadores.length - conFecha;
+      console.log(`📊 Total marcadores: ${gisStore.marcadores.length}, con fechaCreacion: ${conFecha}, sin fechaCreacion: ${sinFecha}`);
+      console.log(`📅 filtroAño en este momento: ${filtroAño.value} (null = mostrar todos)`);
+      console.log(`4️⃣ marcadoresFiltrados DESPUÉS de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
+    }
+  });
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
   // Definir los límites del área permitida
@@ -1443,15 +1577,8 @@ onMounted(() => {
     controls: [],
   });
 
-  // Agregar los marcadores cuando estén disponibles
-  watch(
-    () => gisStore.marcadores,
-    (marcadores) => {
-      vectorSource.clear();
-      marcadores.forEach(agregarMarcadorAlMapa);
-    },
-    { immediate: true }
-  );
+  // Ya no se necesita este watch aquí porque marcadoresFiltradosParaMapa
+  // está fuera del onMounted y maneja la renderización filtrada automáticamente
 
   map.on('pointermove', (event) => {
     const pixel = event.pixel;
@@ -2070,83 +2197,107 @@ async function generarPDF() {
         return false;
       }
 
-      // MEJORA: La función ahora recibe la coordenada 'y' para mayor control
+      // MEJORA: Función para crear tarjetas con mejor distribución y centrado
       _createCard(title: string, x: number, y: number, width: number, height: number, color: readonly number[] = CONFIG.colors.primary) {
-        // Sombra
-        this.doc.setFillColor(235, 235, 235);
-        this.doc.rect(x + 1, y + 1, width, height, 'F');
+        // Sombra más sutil
+        this.doc.setFillColor(240, 240, 240);
+        this.doc.rect(x + 0.5, y + 0.5, width, height, 'F');
 
-        // Fondo y borde de la tarjeta
+        // Fondo y borde de la tarjeta con mejor contraste
         this.doc.setFillColor(CONFIG.colors.cardBg[0]!, CONFIG.colors.cardBg[1]!, CONFIG.colors.cardBg[2]!);
         this.doc.setDrawColor(CONFIG.colors.cardBorder[0]!, CONFIG.colors.cardBorder[1]!, CONFIG.colors.cardBorder[2]!);
-        this.doc.setLineWidth(0.3);
+        this.doc.setLineWidth(0.2);
         this.doc.rect(x, y, width, height, 'FD');
 
-        // Header de la tarjeta
+        // Header de la tarjeta con gradiente visual
         this.doc.setFillColor(color[0]!, color[1]!, color[2]!);
         this.doc.rect(x, y, width, CONFIG.card.headerHeight, 'F');
 
-        // Título de la tarjeta
+        // Título de la tarjeta centrado
         this._setFont(CONFIG.fonts.cardTitle);
         this._setColor([255, 255, 255]);
-        this.doc.text(
-          this._getSafeValue(title).toUpperCase(),
-          x + CONFIG.card.padding,
-          y + 5
-        );
+        const titleText = this._getSafeValue(title).toUpperCase();
+        const titleWidth = this.doc.getTextWidth(titleText);
+        const titleX = x + (width - titleWidth) / 2; // Centrar el título
+        this.doc.text(titleText, titleX, y + 6);
 
         return {
           contentX: x + CONFIG.card.padding,
-          contentY: y + CONFIG.card.headerHeight + CONFIG.card.padding,
+          contentY: y + CONFIG.card.headerHeight + CONFIG.card.padding + 1,
           contentWidth: width - CONFIG.card.padding * 2,
         };
       }
 
-      // Función para agregar campos en una o más columnas
+      // Función para agregar campos en una o más columnas con mejor distribución
       _addCardFields(card: { contentX: number; contentY: number; contentWidth: number }, fields: { label: string; value: unknown }[], columns = 1) {
         let currentY = card.contentY;
-        let lastY = currentY;
+        let maxY = currentY;
         const columnWidth = card.contentWidth / columns;
         const lineHeight = 4;
-        const fieldVerticalSpace = 10;
+        const fieldSpacing = 8; // Espacio entre campos
+        const columnPadding = 3; // Padding entre columnas
 
-        fields.forEach((field: { label: string; value: unknown }, index: number) => {
-          if (this._getSafeValue(field.value) === 'N/A') return;
+        // Filtrar campos válidos primero
+        const validFields = fields.filter(
+          (field: { label: string; value: unknown }) => this._getSafeValue(field.value) !== 'N/A'
+        );
 
-          const colIndex = index % columns;
-          const colX = card.contentX + colIndex * columnWidth;
-
-          // Etiqueta del campo
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(`${field.label}:`, colX, currentY);
-
-          // Valor del campo
+        if (validFields.length === 0) {
           this._setFont(CONFIG.fonts.cardValue);
-          this._setColor(CONFIG.colors.text);
-
-          const valueLines = this.doc.splitTextToSize(
-            this._getSafeValue(field.value),
-            columnWidth - 5
+          this._setColor(CONFIG.colors.textSecondary);
+          this.doc.text(
+            'Sin información disponible',
+            card.contentX + 2,
+            currentY
           );
-          (valueLines as string[]).forEach((line: string, lineIndex: number) => {
-            this.doc.text(
-              line,
-              colX,
-              currentY + lineHeight + lineIndex * lineHeight
+          return currentY + lineHeight;
+        }
+
+        // Organizar campos en filas para mejor distribución
+        const fieldsPerRow = columns;
+        const rows = Math.ceil(validFields.length / fieldsPerRow);
+
+        for (let row = 0; row < rows; row++) {
+          let rowMaxY = currentY;
+
+          for (let col = 0; col < fieldsPerRow; col++) {
+            const fieldIndex = row * fieldsPerRow + col;
+            if (fieldIndex >= validFields.length) break;
+
+            const field = validFields[fieldIndex];
+            const colX = card.contentX + col * (columnWidth + columnPadding);
+            const availableWidth = columnWidth - columnPadding;
+
+            let fieldY = currentY;
+
+            // Etiqueta del campo con mejor posicionamiento
+            this._setFont(CONFIG.fonts.cardLabel);
+            this._setColor(CONFIG.colors.textSecondary);
+            this.doc.text(`${field.label}:`, colX + 1, fieldY);
+            fieldY += lineHeight;
+
+            // Valor del campo con texto justificado
+            this._setFont(CONFIG.fonts.cardValue);
+            this._setColor(CONFIG.colors.text);
+
+            const valueLines = this.doc.splitTextToSize(
+              this._getSafeValue(field.value),
+              availableWidth - 2
             );
-          });
 
-          lastY = Math.max(
-            lastY,
-            currentY + lineHeight * valueLines.length + 3
-          );
+            valueLines.forEach((line: string, lineIndex: number) => {
+              this.doc.text(line, colX + 1, fieldY + lineIndex * lineHeight);
+            });
 
-          if (colIndex === columns - 1 || index === fields.length - 1) {
-            currentY = lastY + 2;
+            fieldY += valueLines.length * lineHeight;
+            rowMaxY = Math.max(rowMaxY, fieldY);
           }
-        });
-        return lastY;
+
+          currentY = rowMaxY + fieldSpacing;
+          maxY = Math.max(maxY, currentY);
+        }
+
+        return maxY;
       }
 
       // --- FUNCIONES PARA GENERAR CADA SECCIÓN DEL PDF ---
@@ -2190,16 +2341,25 @@ async function generarPDF() {
           { label: 'Barrio', value: this.data.barrio },
           { label: 'Tiempo Residencia', value: this.data.tiempo_residencia },
         ];
-        const cardHeight = 25 + Math.ceil(fields.length / 2) * 12;
+
+        // Calcular altura dinámicamente basada en el contenido
+        const validFields = fields.filter(
+          (f) => this._getSafeValue(f.value) !== 'N/A'
+        );
+        const rows = Math.ceil(validFields.length / 2);
+        const cardHeight =
+          CONFIG.card.headerHeight + CONFIG.card.padding * 3 + rows * 12 + 5;
+
         this._checkPageBreak(cardHeight);
         const card = this._createCard(
-          'INFORMACION BASICA',
+          'INFORMACIÓN BÁSICA',
           CONFIG.margins.left,
           this.yPos,
           this.contentWidth,
           cardHeight,
           CONFIG.colors.primary
         );
+
         this._addCardFields(card, fields, 2);
         this.yPos += cardHeight + CONFIG.card.margin;
       }
@@ -2210,43 +2370,58 @@ async function generarPDF() {
           this.data.estudios
             ?.map((e) => this._getSafeValue(e.nivel))
             .filter((e) => e !== 'N/A') || [];
-        const alturaEstudios = 20 + estudios.length * 4;
+
         const saludItems = this.data.salud || [];
-        const alturaSalud = 20 + saludItems.length * 8;
+
+        // Calcular alturas dinámicamente
+        const alturaEstudios = Math.max(
+          35,
+          CONFIG.card.headerHeight +
+          CONFIG.card.padding * 2 +
+          estudios.length * 5 +
+          10
+        );
+        const alturaSalud = Math.max(
+          35,
+          CONFIG.card.headerHeight +
+          CONFIG.card.padding * 2 +
+          saludItems.length * 10 +
+          10
+        );
         const requiredHeight =
           Math.max(alturaEstudios, alturaSalud) + CONFIG.card.margin;
+
         this._checkPageBreak(requiredHeight);
 
-        // Tarjeta de Educación
+        // Tarjeta de Educación con mejor distribución
         const studyCard = this._createCard(
-          'EDUCACION',
+          'EDUCACIÓN',
           CONFIG.margins.left,
           this.yPos,
           cardWidth,
           alturaEstudios,
           CONFIG.colors.info
         );
+
+        let studyY = studyCard.contentY;
         if (estudios.length > 0) {
           estudios.forEach((item: string, index: number) => {
             this._setFont(CONFIG.fonts.cardValue);
             this._setColor(CONFIG.colors.text);
-            this.doc.text(
-              `• ${item}`,
-              studyCard.contentX,
-              studyCard.contentY + index * 4
-            );
+            this.doc.text(`• ${item}`, studyCard.contentX + 2, studyY);
+            studyY += 5;
           });
         } else {
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(
-            'Sin información',
-            studyCard.contentX,
-            studyCard.contentY
-          );
+          const noInfoText = 'Sin información disponible';
+          const textWidth = this.doc.getTextWidth(noInfoText);
+          const centeredX =
+            studyCard.contentX + (studyCard.contentWidth - textWidth) / 2;
+          this.doc.text(noInfoText, centeredX, studyY + 10);
         }
 
-        // Tarjeta de Salud
+        // Tarjeta de Salud con mejor organización
         const healthCard = this._createCard(
           'SALUD',
           CONFIG.margins.left + cardWidth + CONFIG.card.margin,
@@ -2255,39 +2430,57 @@ async function generarPDF() {
           alturaSalud,
           CONFIG.colors.error
         );
-        let healthY = healthCard.contentY;
 
+        let healthY = healthCard.contentY;
         if (saludItems.length > 0) {
           saludItems.forEach((item: (typeof saludItems)[number]) => {
             const problema = this._getSafeValue(item.problema_salud);
             if (problema !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
               this._setColor(CONFIG.colors.text);
-              this.doc.text(`• ${problema}`, healthCard.contentX, healthY);
-              healthY += 4;
+
+              // Dividir texto largo si es necesario
+              const problemLines = this.doc.splitTextToSize(
+                `• ${problema}`,
+                healthCard.contentWidth - 8
+              );
+
+              problemLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  healthCard.contentX + 2,
+                  healthY + lineIndex * 4
+                );
+              });
+
+              healthY += problemLines.length * 4;
+
+              // Información de cobertura en línea separada
               let cobertura = [];
               if (item.cud) cobertura.push('CUD');
-              if (item.obra_social) cobertura.push('O.S.');
+              if (item.obra_social) cobertura.push('Obra Social');
+
               if (cobertura.length > 0) {
                 this._setFont(CONFIG.fonts.tiny);
                 this._setColor(CONFIG.colors.textSecondary);
                 this.doc.text(
-                  `  (${cobertura.join(', ')})`,
-                  healthCard.contentX + 2,
+                  `    Cobertura: ${cobertura.join(', ')}`,
+                  healthCard.contentX + 4,
                   healthY
                 );
                 healthY += 4;
               }
+              healthY += 2; // Espacio entre items
             }
           });
         } else {
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(
-            'Sin información',
-            healthCard.contentX,
-            healthCard.contentY
-          );
+          const noInfoText = 'Sin información disponible';
+          const textWidth = this.doc.getTextWidth(noInfoText);
+          const centeredX =
+            healthCard.contentX + (healthCard.contentWidth - textWidth) / 2;
+          this.doc.text(noInfoText, centeredX, healthY + 10);
         }
 
         this.yPos += requiredHeight;
@@ -2296,27 +2489,33 @@ async function generarPDF() {
       _addHousingCard() {
         const viviendas = this.data.viviendas;
         if (!viviendas || viviendas.length === 0) {
+          const cardHeight = 35;
           const card = this._createCard(
             'VIVIENDA',
             CONFIG.margins.left,
             this.yPos,
             this.contentWidth,
-            22,
+            cardHeight,
             CONFIG.colors.warning
           );
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(
-            'Sin información de vivienda',
-            card.contentX,
-            card.contentY
-          );
-          this.yPos += 22 + CONFIG.card.margin;
+          const noInfoText = 'Sin información de vivienda disponible';
+          const textWidth = this.doc.getTextWidth(noInfoText);
+          const centeredX = card.contentX + (card.contentWidth - textWidth) / 2;
+          this.doc.text(noInfoText, centeredX, card.contentY + 8);
+          this.yPos += cardHeight + CONFIG.card.margin;
           return;
         }
 
-        const alturaVivienda = 20 + viviendas.length * 20;
+        // Calcular altura dinámicamente basada en el número de viviendas
+        const alturaVivienda =
+          CONFIG.card.headerHeight +
+          CONFIG.card.padding * 2 +
+          viviendas.length * 25 +
+          10;
         this._checkPageBreak(alturaVivienda);
+
         const card = this._createCard(
           'VIVIENDA',
           CONFIG.margins.left,
@@ -2325,9 +2524,31 @@ async function generarPDF() {
           alturaVivienda,
           CONFIG.colors.warning
         );
+
         let currentY = card.contentY;
 
-        viviendas.forEach((vivienda: (typeof viviendas)[number]) => {
+        viviendas.forEach((vivienda, index) => {
+          // Separador visual entre viviendas
+          if (index > 0) {
+            this.doc.setDrawColor(230, 230, 230);
+            this.doc.setLineWidth(0.1);
+            this.doc.line(
+              card.contentX,
+              currentY - 2,
+              card.contentX + card.contentWidth,
+              currentY - 2
+            );
+            currentY += 3;
+          }
+
+          // Título de la vivienda si hay más de una
+          if (viviendas.length > 1) {
+            this._setFont(CONFIG.fonts.cardLabel);
+            this._setColor(CONFIG.colors.primary);
+            this.doc.text(`VIVIENDA ${index + 1}:`, card.contentX, currentY);
+            currentY += 5;
+          }
+
           const fields = [
             { label: 'Tipo', value: vivienda.tipo },
             { label: 'Dominio', value: vivienda.dominio },
@@ -2339,9 +2560,12 @@ async function generarPDF() {
               )} (${this._getSafeValue(vivienda.baño_opcion)})`,
             },
           ];
+
+          // Usar distribución en 2 columnas para mejor aprovechamiento del espacio
           this._addCardFields({ ...card, contentY: currentY }, fields, 2);
-          currentY += 20; // Espacio para la siguiente vivienda
+          currentY += 18; // Espacio para la siguiente vivienda
         });
+
         this.yPos += alturaVivienda + CONFIG.card.margin;
       }
 
@@ -2406,37 +2630,48 @@ async function generarPDF() {
       _addMembersCard() {
         const integrantes = this.data.integrantes;
         if (!integrantes || integrantes.length === 0) {
+          const cardHeight = 35;
           const card = this._createCard(
             'INTEGRANTES DEL HOGAR',
             CONFIG.margins.left,
             this.yPos,
             this.contentWidth,
-            22,
+            cardHeight,
             CONFIG.colors.primary
           );
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(
-            'No hay integrantes registrados',
-            card.contentX,
-            card.contentY
-          );
-          this.yPos += 22 + CONFIG.card.margin;
+          const noInfoText = 'No hay integrantes registrados';
+          const textWidth = this.doc.getTextWidth(noInfoText);
+          const centeredX = card.contentX + (card.contentWidth - textWidth) / 2;
+          this.doc.text(noInfoText, centeredX, card.contentY + 8);
+          this.yPos += cardHeight + CONFIG.card.margin;
           return;
         }
 
-        const alturaIntegrantes = 30 + integrantes.length * 8;
-        this._checkPageBreak(alturaIntegrantes);
+        // Calcular altura dinámicamente
+        let alturaCalculada =
+          CONFIG.card.headerHeight + CONFIG.card.padding * 2 + 25; // Para estadísticas
+        integrantes.forEach((integrante) => {
+          alturaCalculada += 8; // Línea básica del integrante
+          if (integrante.ocupaciones && integrante.ocupaciones.length > 0) {
+            alturaCalculada += integrante.ocupaciones.length * 4; // Ocupaciones
+          }
+        });
+
+        this._checkPageBreak(alturaCalculada);
         const card = this._createCard(
           'INTEGRANTES DEL HOGAR',
           CONFIG.margins.left,
           this.yPos,
           this.contentWidth,
-          alturaIntegrantes,
+          alturaCalculada,
           CONFIG.colors.primary
         );
+
         let currentY = card.contentY;
 
+        // Estadísticas del hogar en un área destacada
         const totalIntegrantes = integrantes.length;
         const edadesValidas = integrantes
           .filter((i) => i.edad !== null && !isNaN(i.edad))
@@ -2444,73 +2679,126 @@ async function generarPDF() {
         const edadPromedio =
           edadesValidas.length > 0
             ? Math.round(
-              edadesValidas.reduce((sum: number, edad: number) => sum + edad, 0) /
+              edadesValidas.reduce((sum, edad) => sum + edad, 0) /
               edadesValidas.length
             )
             : 'N/A';
 
+        // Área de estadísticas con fondo sutil
+        this.doc.setFillColor(248, 249, 250);
+        this.doc.rect(card.contentX, currentY - 1, card.contentWidth, 12, 'F');
+
         const fields = [
-          { label: 'Total', value: `${totalIntegrantes} integrantes` },
+          { label: 'Total Integrantes', value: `${totalIntegrantes} personas` },
           {
             label: 'Edad Promedio',
             value: edadPromedio !== 'N/A' ? `${edadPromedio} años` : 'N/A',
           },
         ];
+
         currentY = this._addCardFields(
           { ...card, contentY: currentY },
           fields,
           2
         );
+        currentY += 5;
 
+        // Separador visual
+        this.doc.setDrawColor(CONFIG.colors.primary[0]!, CONFIG.colors.primary[1]!, CONFIG.colors.primary[2]!);
+        this.doc.setLineWidth(0.2);
+        this.doc.line(
+          card.contentX,
+          currentY,
+          card.contentX + card.contentWidth,
+          currentY
+        );
+        currentY += 5;
+
+        // Título de la sección de detalle
         this._setFont(CONFIG.fonts.cardLabel);
-        this._setColor(CONFIG.colors.textSecondary);
-        this.doc.text('DETALLE:', card.contentX, currentY + 2);
+        this._setColor(CONFIG.colors.primary);
+        this.doc.text('DETALLE DE INTEGRANTES:', card.contentX, currentY);
         currentY += 6;
 
-        integrantes.forEach((i, index) => {
+        // Lista de integrantes con mejor formato
+        integrantes.forEach((integrante, index) => {
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.text);
-          const text = `${index + 1}. ${this._getSafeValue(
-            i.nombre
-          )} ${this._getSafeValue(i.apellido)} (${this._getSafeValue(
-            i.edad
-          )} años) - ${this._getSafeValue(i.vinculo)}`;
-          this.doc.text(text, card.contentX, currentY);
-          currentY += 4;
 
-          // Ocupaciones del integrante
-          if (i.ocupaciones && i.ocupaciones.length > 0) {
-            i.ocupaciones.forEach((ocup, oidx) => {
-              const tipoPrincipal = this._getSafeValue(ocup.tipo_principal);
-              const tipo1 = this._getSafeValue(ocup.tipo_1);
-              const tipo2 = this._getSafeValue(ocup.tipo_2);
+          const nombre = this._getSafeValue(integrante.nombre);
+          const apellido = this._getSafeValue(integrante.apellido);
+          const edad = this._getSafeValue(integrante.edad);
+          const vinculo = this._getSafeValue(integrante.vinculo);
+
+          const integranteText = `${index + 1
+            }. ${nombre} ${apellido} (${edad} años) - ${vinculo}`;
+
+          // Dividir texto si es muy largo
+          const integranteLines = this.doc.splitTextToSize(
+            integranteText,
+            card.contentWidth - 8
+          );
+
+          integranteLines.forEach((line: string, lineIndex: number) => {
+            this.doc.text(line, card.contentX + 2, currentY + lineIndex * 4);
+          });
+
+          currentY += integranteLines.length * 4;
+
+          // Ocupaciones del integrante con indentación
+          if (integrante.ocupaciones && integrante.ocupaciones.length > 0) {
+            integrante.ocupaciones.forEach((ocupacion) => {
+              const tipoPrincipal = this._getSafeValue(
+                ocupacion.tipo_principal
+              );
+              const tipo1 = this._getSafeValue(ocupacion.tipo_1);
+              const tipo2 = this._getSafeValue(ocupacion.tipo_2);
               const ingresos =
-                ocup.ingresos && !isNaN(ocup.ingresos)
-                  ? `$${ocup.ingresos.toLocaleString('es-ES')}`
+                ocupacion.ingresos && !isNaN(ocupacion.ingresos)
+                  ? `$${ocupacion.ingresos.toLocaleString('es-ES')}`
                   : '';
 
-              let ocupacionLinea = `   - Ocupación: ${tipoPrincipal}`;
+              let ocupacionText = `    ⚬ Ocupación: ${tipoPrincipal}`;
               if (tipo1 !== 'N/A' || tipo2 !== 'N/A') {
-                ocupacionLinea += ` (${[tipo1, tipo2]
-                  .filter((t) => t && t !== 'N/A')
-                  .join(' - ')})`;
+                const tipos = [tipo1, tipo2].filter((t) => t && t !== 'N/A');
+                if (tipos.length > 0) {
+                  ocupacionText += ` (${tipos.join(' - ')})`;
+                }
               }
               if (ingresos) {
-                ocupacionLinea += ` | Ingresos: ${ingresos}`;
+                ocupacionText += ` | Ingresos: ${ingresos}`;
               }
 
               this._setFont(CONFIG.fonts.small);
               this._setColor(CONFIG.colors.textSecondary);
-              this.doc.text(ocupacionLinea, card.contentX + 4, currentY);
-              currentY += 3;
+
+              const ocupacionLines = this.doc.splitTextToSize(
+                ocupacionText,
+                card.contentWidth - 12
+              );
+
+              ocupacionLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  card.contentX + 6,
+                  currentY + lineIndex * 3
+                );
+              });
+
+              currentY += ocupacionLines.length * 3 + 1;
             });
           }
+
+          currentY += 2; // Espacio entre integrantes
         });
-        this.yPos += alturaIntegrantes + CONFIG.card.margin;
+
+        this.yPos += alturaCalculada + CONFIG.card.margin;
       }
 
       _addServicesAndProgramsCards() {
         const cardWidth = (this.contentWidth - CONFIG.card.margin) / 2;
+
+        // Procesar servicios
         const conectados =
           this.data.servicios?.filter(
             (s) => s.opcion_servicio === 'Conectado'
@@ -2519,29 +2807,55 @@ async function generarPDF() {
           this.data.servicios?.filter(
             (s) => s.opcion_servicio !== 'Conectado'
           ) || [];
-        let alturaServicios = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
 
-        if (conectados.length > 0) alturaServicios += 4 + conectados.length * 4;
+        // Calcular altura de servicios dinámicamente
+        let alturaServicios =
+          CONFIG.card.headerHeight + CONFIG.card.padding * 2 + 5;
+        if (conectados.length > 0) alturaServicios += 6 + conectados.length * 5;
         if (noConectados.length > 0)
-          alturaServicios += 4 + noConectados.length * 4;
+          alturaServicios += 6 + noConectados.length * 5;
         if (conectados.length === 0 && noConectados.length === 0)
-          alturaServicios += 4;
+          alturaServicios += 15;
 
+        // Procesar programas
         const activos =
           this.data.programas?.filter((p) => p.estado === 'activo') || [];
         const inactivos =
           this.data.programas?.filter((p) => p.estado !== 'activo') || [];
-        let alturaProgramas = CONFIG.card.headerHeight + CONFIG.card.padding * 2;
 
-        if (activos.length > 0) alturaProgramas += 4 + activos.length * 10;
-        if (inactivos.length > 0) alturaProgramas += 4 + inactivos.length * 4;
-        if (activos.length === 0 && inactivos.length === 0) alturaProgramas += 4;
+        // Calcular altura de programas dinámicamente
+        let alturaProgramas =
+          CONFIG.card.headerHeight + CONFIG.card.padding * 2 + 5;
+        if (activos.length > 0) {
+          alturaProgramas += 6;
+          activos.forEach((p) => {
+            alturaProgramas += 5; // Línea principal
+            alturaProgramas += 3; // Espacio para fechas
+            const notas = this._getSafeValue(p.notas);
+            if (notas !== 'N/A') {
+              const noteLines = this.doc.splitTextToSize(
+                `Notas: ${notas}`,
+                cardWidth - 15
+              );
+              alturaProgramas += noteLines.length * 3 + 2;
+            }
+          });
+        }
+        if (inactivos.length > 0) {
+          alturaProgramas += 6;
+          inactivos.forEach((p) => {
+            alturaProgramas += 5; // Línea principal
+            alturaProgramas += 3; // Espacio para fechas
+          });
+        }
+        if (activos.length === 0 && inactivos.length === 0)
+          alturaProgramas += 15;
 
         const requiredHeight =
           Math.max(alturaServicios, alturaProgramas) + CONFIG.card.margin;
         this._checkPageBreak(requiredHeight);
 
-        // Tarjeta de Servicios
+        // Tarjeta de Servicios con mejor organización
         const servicesCard = this._createCard(
           'SERVICIOS',
           CONFIG.margins.left,
@@ -2550,129 +2864,209 @@ async function generarPDF() {
           alturaServicios,
           CONFIG.colors.info
         );
-        let servicesY = servicesCard.contentY;
-        if (conectados.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.success);
-          this.doc.text('CONECTADOS:', servicesCard.contentX, servicesY);
-          servicesY += 4;
 
-          conectados.forEach((s) => {
-            const nombre = this._getSafeValue(s.nombre);
-            const opcion = this._getSafeValue(s.opcion_servicio);
+        let servicesY = servicesCard.contentY;
+
+        if (conectados.length > 0) {
+          conectados.forEach((servicio) => {
+            const nombre = this._getSafeValue(servicio.nombre);
+            const opcion = this._getSafeValue(servicio.opcion_servicio);
             if (nombre !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
+              this._setColor(CONFIG.colors.success); // Verde para conectados
               let serviceText = `• ${nombre}`;
-              if (opcion !== 'N/A') {
+              if (opcion !== 'N/A' && opcion !== 'Conectado') {
                 serviceText += ` (${opcion})`;
               }
-              this.doc.text(serviceText, servicesCard.contentX, servicesY);
-              servicesY += 4;
+              // Dividir texto si es muy largo
+              const serviceLines = this.doc.splitTextToSize(
+                serviceText,
+                cardWidth - 10
+              );
+              serviceLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  servicesCard.contentX + 2,
+                  servicesY + lineIndex * 4
+                );
+              });
+              servicesY += serviceLines.length * 4 + 1;
             }
           });
         }
 
         if (noConectados.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.error);
-          this.doc.text('NO CONECTADOS:', servicesCard.contentX, servicesY);
-          servicesY += 4;
-
-          noConectados.forEach((s) => {
-            const nombre = this._getSafeValue(s.nombre);
-            const opcion = this._getSafeValue(s.opcion_servicio);
+          noConectados.forEach((servicio) => {
+            const nombre = this._getSafeValue(servicio.nombre);
+            const opcion = this._getSafeValue(servicio.opcion_servicio);
             if (nombre !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
+              this._setColor(CONFIG.colors.error); // Rojo para no conectados
               let serviceText = `• ${nombre}`;
-              if (opcion !== 'N/A') {
+              if (opcion !== 'N/A' && opcion !== 'No conectado') {
                 serviceText += ` (${opcion})`;
               }
-              this.doc.text(serviceText, servicesCard.contentX, servicesY);
-              servicesY += 4;
+              const serviceLines = this.doc.splitTextToSize(
+                serviceText,
+                cardWidth - 10
+              );
+              serviceLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  servicesCard.contentX + 2,
+                  servicesY + lineIndex * 4
+                );
+              });
+              servicesY += serviceLines.length * 4 + 1;
             }
           });
         }
 
-
         if (conectados.length === 0 && noConectados.length === 0) {
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text('Sin servicios registrados', servicesCard.contentX, servicesY);
+          const noServicesText = 'Sin servicios registrados';
+          const textWidth = this.doc.getTextWidth(noServicesText);
+          const centeredX =
+            servicesCard.contentX + (servicesCard.contentWidth - textWidth) / 2;
+          this.doc.text(noServicesText, centeredX, servicesY + 8);
         }
 
-        // Tarjeta de Programas
+        // Tarjeta de Programas con mejor distribución
         const programsCard = this._createCard(
-          'PROGRAMAS',
+          'PROGRAMAS SOCIALES',
           CONFIG.margins.left + cardWidth + CONFIG.card.margin,
           this.yPos,
           cardWidth,
           alturaProgramas,
           CONFIG.colors.warning
         );
+
         let programsY = programsCard.contentY;
+
         if (activos.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.success);
-          this.doc.text('ACTIVOS:', programsCard.contentX, programsY);
-          programsY += 4;
-          activos.forEach((p) => {
-            const tipo = this._getSafeValue(p.tipo);
-            const ayuda = this._getSafeValue(p.ayuda);
-            const detalle = this._getSafeValue(p.detalle);
-            const notas = this._getSafeValue(p.notas);
+          activos.forEach((programa) => {
+            const tipo = this._getSafeValue(programa.tipo);
+            const ayuda = this._getSafeValue(programa.ayuda);
+            const detalle = this._getSafeValue(programa.detalle);
+            const notas = this._getSafeValue(programa.notas);
+
+            // Formatear fechas
+            const fechaInicio = programa.fechaInicio
+              ? new Date(programa.fechaInicio).toLocaleDateString('es-ES')
+              : 'N/A';
+            const fechaFin = programa.fechaFin
+              ? new Date(programa.fechaFin).toLocaleDateString('es-ES')
+              : 'Sin fecha final';
 
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
-              this._setColor(CONFIG.colors.text);
-              let programText = `• ${tipo} - ${ayuda}`;
-              if (detalle !== 'N/A') {
-                programText += ` (${detalle})`;
-              }
-              this.doc.text(programText, programsCard.contentX, programsY);
-              programsY += 4;
+              this._setColor(CONFIG.colors.success); // Verde para activos
+              let programText = `• ${tipo}`;
+              if (ayuda !== 'N/A') programText += ` - ${ayuda}`;
+              if (detalle !== 'N/A') programText += ` (${detalle})`;
+
+              const programLines = this.doc.splitTextToSize(
+                programText,
+                cardWidth - 10
+              );
+              programLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  programsCard.contentX + 2,
+                  programsY + lineIndex * 4
+                );
+              });
+              programsY += programLines.length * 4;
+
+              // Agregar fechas
+              this._setFont(CONFIG.fonts.tiny);
+              this._setColor(CONFIG.colors.textSecondary);
+              const dateText = `Desde: ${fechaInicio} | Hasta: ${fechaFin}`;
+              const dateLines = this.doc.splitTextToSize(
+                dateText,
+                cardWidth - 15
+              );
+              dateLines.forEach((line: string) => {
+                this.doc.text(line, programsCard.contentX + 4, programsY);
+                programsY += 3;
+              });
+              programsY += 1;
 
               if (notas !== 'N/A') {
                 this._setFont(CONFIG.fonts.tiny);
                 this._setColor(CONFIG.colors.textSecondary);
-                const noteLines = this.doc.splitTextToSize(`  Notas: ${notas}`, cardWidth - 10);
+                const noteLines = this.doc.splitTextToSize(
+                  `Notas: ${notas}`,
+                  cardWidth - 15
+                );
                 noteLines.forEach((line: string) => {
-                  this.doc.text(line, programsCard.contentX, programsY);
+                  this.doc.text(line, programsCard.contentX + 4, programsY);
                   programsY += 3;
                 });
+                programsY += 2;
+              } else {
+                programsY += 1;
               }
             }
           });
         }
 
         if (inactivos.length > 0) {
-          this._setFont(CONFIG.fonts.cardLabel);
-          this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text('FINALIZADOS:', programsCard.contentX, programsY);
-          programsY += 4;
+          inactivos.forEach((programa) => {
+            const tipo = this._getSafeValue(programa.tipo);
+            const ayuda = this._getSafeValue(programa.ayuda);
+            const fechaInicio = programa.fechaInicio
+              ? new Date(programa.fechaInicio).toLocaleDateString('es-ES')
+              : 'N/A';
+            const fechaFin = programa.fechaFin
+              ? new Date(programa.fechaFin).toLocaleDateString('es-ES')
+              : 'Sin fecha final';
 
-          inactivos.forEach((p) => {
-            const tipo = this._getSafeValue(p.tipo);
-            const ayuda = this._getSafeValue(p.ayuda);
             if (tipo !== 'N/A' || ayuda !== 'N/A') {
               this._setFont(CONFIG.fonts.cardValue);
+              this._setColor(CONFIG.colors.textSecondary); // Gris para inactivos
+              let programText = `• ${tipo}`;
+              if (ayuda !== 'N/A') programText += ` - ${ayuda}`;
+
+              const programLines = this.doc.splitTextToSize(
+                programText,
+                cardWidth - 10
+              );
+              programLines.forEach((line: string, lineIndex: number) => {
+                this.doc.text(
+                  line,
+                  programsCard.contentX + 2,
+                  programsY + lineIndex * 4
+                );
+              });
+              programsY += programLines.length * 4;
+
+              // Agregar fechas para inactivos
+              this._setFont(CONFIG.fonts.tiny);
               this._setColor(CONFIG.colors.textSecondary);
-              this.doc.text(`• ${tipo} - ${ayuda}`, programsCard.contentX, programsY);
-              programsY += 4;
+              const dateText = `Desde: ${fechaInicio} | Hasta: ${fechaFin}`;
+              const dateLines = this.doc.splitTextToSize(
+                dateText,
+                cardWidth - 15
+              );
+              dateLines.forEach((line: string) => {
+                this.doc.text(line, programsCard.contentX + 4, programsY);
+                programsY += 3;
+              });
+              programsY += 2;
             }
           });
         }
 
-
         if (activos.length === 0 && inactivos.length === 0) {
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.textSecondary);
-          this.doc.text(
-            'Sin programas asignados',
-            programsCard.contentX,
-            programsCard.contentY
-          );
+          const noProgramsText = 'Sin programas asignados';
+          const textWidth = this.doc.getTextWidth(noProgramsText);
+          const centeredX =
+            programsCard.contentX + (programsCard.contentWidth - textWidth) / 2;
+          this.doc.text(noProgramsText, centeredX, programsY + 8);
         }
 
         this.yPos += requiredHeight;
@@ -2681,11 +3075,17 @@ async function generarPDF() {
       _addNotesCard() {
         const notasLimpias = this._getSafeValue(this.data.notas);
         if (notasLimpias !== 'N/A') {
+          // Calcular altura dinámicamente con mejor espaciado
           const notasLines = this.doc.splitTextToSize(
             notasLimpias,
-            this.contentWidth
+            this.contentWidth - CONFIG.card.padding * 2 - 4 // Margen interno adicional
           );
-          const notasAltura = 20 + notasLines.length * 4;
+          const notasAltura =
+            CONFIG.card.headerHeight +
+            CONFIG.card.padding * 2 +
+            notasLines.length * 5 +
+            8;
+
           this._checkPageBreak(notasAltura);
           const notesCard = this._createCard(
             'NOTAS ADICIONALES',
@@ -2693,15 +3093,20 @@ async function generarPDF() {
             this.yPos,
             this.contentWidth,
             notasAltura,
-            [121, 85, 72]
+            [121, 85, 72] // Color marrón para notas
           );
-          let notesY = notesCard.contentY;
+
+          let notesY = notesCard.contentY + 2; // Espaciado inicial
           this._setFont(CONFIG.fonts.cardValue);
           this._setColor(CONFIG.colors.text);
-          notasLines.forEach((linea: string) => {
-            this.doc.text(linea, notesCard.contentX, notesY);
-            notesY += 4;
+
+          // Agregar las notas con mejor espaciado y alineación
+          notasLines.forEach((linea: string, index: number) => {
+            // Agregar un pequeño margen izquierdo para mejor legibilidad
+            this.doc.text(linea.trim(), notesCard.contentX + 2, notesY);
+            notesY += 5; // Espaciado entre líneas mejorado
           });
+
           this.yPos += notasAltura + CONFIG.card.margin;
         }
       }
