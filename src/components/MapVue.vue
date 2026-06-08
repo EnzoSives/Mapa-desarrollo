@@ -455,7 +455,7 @@
       </q-card>
     </q-dialog>
 
-    <q-drawer v-model="drawerVisible" side="right" :width="440" overlay behavior="desktop" bordered>
+    <q-drawer v-model="drawerVisible" side="right" :width="500" overlay behavior="desktop" bordered>
       <div class="drawer-header bg-blue-6 text-white">
         <div class="row items-center justify-between q-pa-md q-pb-sm">
           <div>
