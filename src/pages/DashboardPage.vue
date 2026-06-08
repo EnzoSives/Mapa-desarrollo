@@ -1,11 +1,25 @@
 <template>
   <q-page class="dashboard-page dashboard-scrollable">
-    <!-- Header simplificado -->
+    <!-- Header -->
     <div class="dashboard-header bg-primary">
-      <div class="row items-center justify-center q-mb-lg">
-        <div class="text-center">
-          <h4 class="text-h4 q-my-none text-weight-bold text-white">Dashboard de Informes Sociales</h4>
+      <div class="row items-center q-mb-sm">
+        <div class="col">
+          <div class="text-white text-h6" style="opacity: 0.8">
+            Resumen estadístico del sistema
+          </div>
         </div>
+        <div class="col-auto">
+          <q-select v-model="selectedYear" :options="yearOptions" emit-value map-options dense outlined dark
+            label="Filtrar por año" style="min-width: 180px" class="year-filter-select">
+            <template #prepend>
+              <q-icon name="calendar_today" />
+            </template>
+          </q-select>
+        </div>
+      </div>
+      <div v-if="selectedYear !== null" class="text-white text-caption" style="opacity: 0.7">
+        <q-icon name="filter_list" size="xs" class="q-mr-xs" />
+        Mostrando datos del año {{ selectedYear }} — {{ filteredMarcadores.length }} informes
       </div>
     </div>
 
@@ -13,17 +27,13 @@
       <!-- Tarjetas de métricas principales -->
       <div class="row q-col-gutter-md q-mb-lg">
 
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-sm-6 col-md-3">
           <q-card class="metric-card bg-secondary text-white">
             <q-card-section class="q-pa-lg">
               <div class="row items-center no-wrap">
                 <div class="col">
                   <div class="metric-value">{{ totalInformes }}</div>
                   <div class="metric-label">Total de Informes</div>
-                  <div class="metric-change positive">
-                    <q-icon name="trending_up" size="sm" />
-                    +8.2%
-                  </div>
                 </div>
                 <div class="metric-icon">
                   <q-icon name="description" size="xl" />
@@ -33,17 +43,13 @@
           </q-card>
         </div>
 
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-sm-6 col-md-3">
           <q-card class="metric-card bg-warning text-white">
             <q-card-section class="q-pa-lg">
               <div class="row items-center no-wrap">
                 <div class="col">
                   <div class="metric-value">{{ totalIntegrantes }}</div>
                   <div class="metric-label">Total Integrantes</div>
-                  <div class="metric-change positive">
-                    <q-icon name="trending_up" size="sm" />
-                    +15.3%
-                  </div>
                 </div>
                 <div class="metric-icon">
                   <q-icon name="people" size="xl" />
@@ -53,20 +59,32 @@
           </q-card>
         </div>
 
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-sm-6 col-md-3">
           <q-card class="metric-card bg-info text-white">
             <q-card-section class="q-pa-lg">
               <div class="row items-center no-wrap">
                 <div class="col">
                   <div class="metric-value">{{ totalProgramas }}</div>
                   <div class="metric-label">Programas Activos</div>
-                  <div class="metric-change positive">
-                    <q-icon name="trending_up" size="sm" />
-                    +5.7%
-                  </div>
                 </div>
                 <div class="metric-icon">
                   <q-icon name="assignment" size="xl" />
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-3">
+          <q-card class="metric-card metric-card-barrios text-white">
+            <q-card-section class="q-pa-lg">
+              <div class="row items-center no-wrap">
+                <div class="col">
+                  <div class="metric-value">{{ barriosActivos }}</div>
+                  <div class="metric-label">Barrios Activos</div>
+                </div>
+                <div class="metric-icon">
+                  <q-icon name="location_city" size="xl" />
                 </div>
               </div>
             </q-card-section>
@@ -76,20 +94,23 @@
 
       <!-- Primera fila de gráficos -->
       <div class="row q-col-gutter-md q-mb-lg">
-        <!-- Gráfico de barras - Informes por mes -->
         <div class="col-12 col-lg-8">
           <q-card class="chart-card">
             <q-card-section>
               <div class="chart-header">
                 <div class="chart-title">Informes Cargados</div>
-                <div class="chart-subtitle">Evolución mensual de informes registrados</div>
+                <div class="chart-subtitle">
+                  Evolución mensual de informes registrados
+                  <span v-if="selectedYear !== null" class="q-ml-xs">
+                    — {{ selectedYear }}
+                  </span>
+                </div>
               </div>
-              <apexchart type="bar" height="350" :options="chartOptionsInformes" :series="seriesInformes"></apexchart>
+              <apexchart type="bar" height="350" :options="chartOptionsInformes" :series="seriesInformes" />
             </q-card-section>
           </q-card>
         </div>
 
-        <!-- Gráfico circular - Distribución por vulnerabilidad -->
         <div class="col-12 col-lg-4">
           <q-card class="chart-card">
             <q-card-section>
@@ -97,8 +118,8 @@
                 <div class="chart-title">Vulnerabilidad</div>
                 <div class="chart-subtitle">Distribución por nivel</div>
               </div>
-              <apexchart type="donut" height="350" :options="chartOptionsVulnerabilidad" :series="seriesVulnerabilidad">
-              </apexchart>
+              <apexchart type="donut" height="350" :options="chartOptionsVulnerabilidad"
+                :series="seriesVulnerabilidad" />
             </q-card-section>
           </q-card>
         </div>
@@ -106,7 +127,6 @@
 
       <!-- Segunda fila de gráficos -->
       <div class="row q-col-gutter-md q-mb-lg">
-        <!-- Gráfico de donut - Marcadores por barrios -->
         <div class="col-12 col-lg-8">
           <q-card class="chart-card">
             <q-card-section>
@@ -114,12 +134,11 @@
                 <div class="chart-title">Marcadores por Barrios</div>
                 <div class="chart-subtitle">Distribución geográfica</div>
               </div>
-              <apexchart type="donut" height="350" :options="chartOptionsBarrios" :series="seriesBarrios"></apexchart>
+              <apexchart type="donut" height="350" :options="chartOptionsBarrios" :series="seriesBarrios" />
             </q-card-section>
           </q-card>
         </div>
 
-        <!-- Gráfico de barras horizontales - Programas por tipo -->
         <div class="col-12 col-lg-4">
           <q-card class="chart-card">
             <q-card-section>
@@ -127,15 +146,14 @@
                 <div class="chart-title">Programas por Tipo</div>
                 <div class="chart-subtitle">Distribución de programas activos</div>
               </div>
-              <apexchart type="bar" height="350" :options="chartOptionsProgramas" :series="seriesProgramas"></apexchart>
+              <apexchart type="bar" height="350" :options="chartOptionsProgramas" :series="seriesProgramas" />
             </q-card-section>
           </q-card>
         </div>
       </div>
 
-      <!-- Tercera fila - Métricas adicionales -->
+      <!-- Métricas clave -->
       <div class="row q-col-gutter-md">
-        <!-- Tabla de métricas adicionales -->
         <div class="col-12">
           <q-card class="chart-card">
             <q-card-section>
@@ -144,28 +162,32 @@
                 <div class="chart-subtitle">Resumen estadístico</div>
               </div>
               <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                   <div class="metric-item">
+                    <q-icon name="group" size="md" color="primary" class="q-mb-sm" />
                     <div class="metric-item-label">Promedio de integrantes por familia</div>
                     <div class="metric-item-value">{{ promedioIntegrantes }}</div>
                   </div>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                   <div class="metric-item">
+                    <q-icon name="accessibility_new" size="md" color="negative" class="q-mb-sm" />
                     <div class="metric-item-label">Familias con CUD</div>
                     <div class="metric-item-value">{{ familiasConCUD }}%</div>
                   </div>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                   <div class="metric-item">
+                    <q-icon name="health_and_safety" size="md" color="positive" class="q-mb-sm" />
                     <div class="metric-item-label">Familias con obra social</div>
                     <div class="metric-item-value">{{ familiasConObraSocial }}%</div>
                   </div>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                   <div class="metric-item">
+                    <q-icon name="place" size="md" color="warning" class="q-mb-sm" />
                     <div class="metric-item-label">Barrio más representado</div>
-                    <div class="metric-item-value">{{ barrioMasRepresentado }}</div>
+                    <div class="metric-item-value text-ellipsis">{{ barrioMasRepresentado }}</div>
                   </div>
                 </div>
               </div>
@@ -184,23 +206,47 @@ import { ApexOptions } from 'apexcharts';
 
 const gisStore = useGisStore();
 
-const filteredMarcadores = computed(() => {
-  return gisStore.marcadores;
+// --- Filtro de año ---
+const selectedYear = ref<number | null>(null);
+
+const availableYears = computed(() => {
+  const years = new Set<number>();
+  gisStore.marcadores.forEach(m => {
+    if (m.fechaCreacion) {
+      years.add(new Date(m.fechaCreacion).getFullYear());
+    }
+  });
+  return Array.from(years).sort((a, b) => b - a);
 });
 
+const yearOptions = computed(() => [
+  { label: 'Todos los años', value: null },
+  ...availableYears.value.map(y => ({ label: String(y), value: y }))
+]);
+
+const filteredMarcadores = computed(() => {
+  if (selectedYear.value === null) return gisStore.marcadores;
+  return gisStore.marcadores.filter(m => {
+    if (!m.fechaCreacion) return false;
+    return new Date(m.fechaCreacion).getFullYear() === selectedYear.value;
+  });
+});
+
+// --- Métricas principales ---
 const totalInformes = computed(() => filteredMarcadores.value.length);
+
 const totalIntegrantes = computed(() =>
-  filteredMarcadores.value.reduce(
-    (acc, m) => acc + (m.integrantes?.length || 0),
-    0
-  )
+  filteredMarcadores.value.reduce((acc, m) => acc + (m.integrantes?.length || 0), 0)
 );
 
-// Nuevas computed properties para las métricas adicionales
-const totalProgramas = computed(() => {
-  return filteredMarcadores.value.reduce((acc, m) => {
-    return acc + (m.programas?.length || 0);
-  }, 0);
+const totalProgramas = computed(() =>
+  filteredMarcadores.value.reduce((acc, m) => acc + (m.programas?.length || 0), 0)
+);
+
+const barriosActivos = computed(() => {
+  const barrios = new Set<string>();
+  filteredMarcadores.value.forEach(m => { if (m.barrio) barrios.add(m.barrio); });
+  return barrios.size;
 });
 
 const promedioIntegrantes = computed(() => {
@@ -209,125 +255,45 @@ const promedioIntegrantes = computed(() => {
 });
 
 const familiasConCUD = computed(() => {
-  // Porcentaje más realista basado en estadísticas sociales
-  const basePercentage = 15; // 15% base
-  const variance = Math.random() * 10; // Variación de 0-10%
-  return Math.round(basePercentage + variance);
+  if (filteredMarcadores.value.length === 0) return 0;
+  const conCUD = filteredMarcadores.value.filter(m =>
+    m.integrantes?.some(i => i.salud?.some(s => s.cud))
+  ).length;
+  return Math.round((conCUD / filteredMarcadores.value.length) * 100);
 });
 
 const familiasConObraSocial = computed(() => {
-  // Porcentaje más realista para obra social
-  const basePercentage = 45; // 45% base
-  const variance = Math.random() * 20; // Variación de 0-20%
-  return Math.round(basePercentage + variance);
+  if (filteredMarcadores.value.length === 0) return 0;
+  const conOS = filteredMarcadores.value.filter(m =>
+    m.integrantes?.some(i => i.salud?.some(s => s.obra_social))
+  ).length;
+  return Math.round((conOS / filteredMarcadores.value.length) * 100);
 });
 
 const barrioMasRepresentado = computed(() => {
   const barrios = filteredMarcadores.value.reduce((acc, m) => {
-    if (m.barrio) {
-      acc[m.barrio] = (acc[m.barrio] || 0) + 1;
-    }
+    if (m.barrio) acc[m.barrio] = (acc[m.barrio] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
   if (Object.keys(barrios).length === 0) return 'N/A';
   return Object.keys(barrios).reduce((a, b) => (barrios[a] > barrios[b] ? a : b));
 });
 
+// --- Vulnerabilidad ---
 const vulnerabilidadCounts = computed(() => {
+  if (filteredMarcadores.value.length === 0) {
+    return { 'Alta': 0, 'Media': 0, 'Baja': 0, 'Específica': 0 };
+  }
   const counts: Record<string, number> = {};
-
-  // Si no hay marcadores, retornar datos por defecto
-  if (gisStore.marcadores.length === 0) {
-    return {
-      'Alta': 0,
-      'Media': 0,
-      'Baja': 0,
-      'Específica': 0
-    };
-  }
-
-  gisStore.marcadores.forEach(marcador => {
-    if (marcador.icono && typeof marcador.icono === 'string') {
-      // Mapear los iconos específicos a niveles de vulnerabilidad
-      let vulnerabilidad = 'Sin clasificar';
-
-      if (marcador.icono.includes('/marker-icon.png')) {
-        vulnerabilidad = 'Alta';
-      } else if (marcador.icono.includes('/marker-icon-2.png')) {
-        vulnerabilidad = 'Media';
-      } else if (marcador.icono.includes('/marker-icon-3.png')) {
-        vulnerabilidad = 'Baja';
-      } else if (marcador.icono.includes('/marker-icon-4.png')) {
-        vulnerabilidad = 'Específica';
-      }
-
-      counts[vulnerabilidad] = (counts[vulnerabilidad] || 0) + 1;
-    } else {
-      // Si no hay icono específico, categorizar como "Sin clasificar"
-      counts['Sin clasificar'] = (counts['Sin clasificar'] || 0) + 1;
-    }
+  filteredMarcadores.value.forEach(m => {
+    let vulnerabilidad = 'Sin clasificar';
+    if (m.icono?.includes('/marker-icon.png')) vulnerabilidad = 'Alta';
+    else if (m.icono?.includes('/marker-icon-2.png')) vulnerabilidad = 'Media';
+    else if (m.icono?.includes('/marker-icon-3.png')) vulnerabilidad = 'Baja';
+    else if (m.icono?.includes('/marker-icon-4.png')) vulnerabilidad = 'Específica';
+    counts[vulnerabilidad] = (counts[vulnerabilidad] || 0) + 1;
   });
-
-  // Si después del procesamiento no hay datos, usar fallback
-  if (Object.keys(counts).length === 0) {
-    return {
-      'Sin clasificar': gisStore.marcadores.length || 1
-    };
-  }
-
-  return counts;
-});
-
-const vulnerabilidadPredominante = computed(() => {
-  const data = vulnerabilidadCounts.value;
-  if (!data || Object.keys(data).length === 0) return 'N/A';
-  return Object.keys(data).reduce((a, b) => (data[a] > data[b] ? a : b));
-});
-
-// Función helper para obtener mes-año de una fecha
-const getMonthYear = (dateString: string) => {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  return `${year}-${String(month).padStart(2, '0')}`;
-};
-
-// Función helper para obtener nombre del mes
-const getMonthName = (monthYear: string) => {
-  const [year, month] = monthYear.split('-');
-  const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-};
-
-// Computed para informes por mes
-const informesPorMes = computed(() => {
-  const data: Record<string, number> = {};
-
-  // Si no hay marcadores, generar algunos meses de ejemplo
-  if (gisStore.marcadores.length === 0) {
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthYear = getMonthYear(date.toISOString());
-      data[monthYear] = Math.floor(Math.random() * 10) + 1;
-    }
-  } else {
-    // Procesar marcadores reales
-    gisStore.marcadores.forEach(marcador => {
-      if (marcador.fechaCreacion) {
-        const monthYear = getMonthYear(marcador.fechaCreacion);
-        data[monthYear] = (data[monthYear] || 0) + 1;
-      }
-    });
-  }
-
-  // Convertir a array ordenado por fecha
-  const sortedMonths = Object.keys(data).sort();
-  return sortedMonths.map(monthYear => ({
-    x: getMonthName(monthYear),
-    y: data[monthYear]
-  }));
+  return Object.keys(counts).length ? counts : { 'Sin clasificar': filteredMarcadores.value.length || 1 };
 });
 
 const chartOptionsVulnerabilidad = shallowRef<ApexOptions>({
@@ -347,234 +313,141 @@ const chartOptionsVulnerabilidad = shallowRef<ApexOptions>({
         size: '65%',
         labels: {
           show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }
+          total: { show: true, label: 'Total', fontSize: '16px', fontWeight: 'bold' }
         }
       }
     }
   },
   dataLabels: {
     enabled: true,
-    formatter: function (val: number) {
-      return Math.round(val) + '%';
-    },
-    style: {
-      fontSize: '12px',
-      fontWeight: 'bold'
-    }
+    formatter: (val: number) => Math.round(val) + '%',
+    style: { fontSize: '12px', fontWeight: 'bold' }
   },
-  legend: {
-    position: 'bottom',
-    fontSize: '12px'
-  },
-  tooltip: {
-    theme: 'light',
-    y: {
-      formatter: function (val: number) {
-        return val + ' casos';
-      }
-    }
-  }
+  legend: { position: 'bottom', fontSize: '12px' },
+  tooltip: { theme: 'light', y: { formatter: (val: number) => val + ' casos' } }
 });
 
-// Actualizar etiquetas sin recrear todo el objeto de opciones
 watch(
   () => Object.keys(vulnerabilidadCounts.value),
-  (labels) => {
-    chartOptionsVulnerabilidad.value.labels = labels.length > 0 ? labels : ['Alto', 'Medio', 'Bajo'];
-  },
+  (labels) => { chartOptionsVulnerabilidad.value.labels = labels.length > 0 ? labels : ['Alto', 'Medio', 'Bajo']; },
   { immediate: true }
 );
 
 const seriesVulnerabilidad = computed(() => {
-  const data = vulnerabilidadCounts.value;
-  const values = Object.values(data);
-
-  // Si hay datos reales, usarlos
-  if (values.length > 0 && values.some(v => v > 0)) {
-    return values;
-  }
-
-  // Si no hay datos reales (todos ceros), devolver una serie que
-  // mantenga la misma cantidad de etiquetas para evitar desincronización
-  const labelCount = Object.keys(data).length;
-  if (labelCount > 0) {
-    return Array(labelCount).fill(1);
-  }
-  // Fallback final cuando no hay etiquetas
-  return [1];
+  const values = Object.values(vulnerabilidadCounts.value);
+  if (values.some(v => v > 0)) return values;
+  const count = values.length;
+  return count > 0 ? Array(count).fill(1) : [1];
 });
 
-// Eliminado: claves y banderas de readiness para evitar ciclos de actualización
-
-// Nuevos gráficos
+// --- Programas por tipo ---
 const programasPorTipo = computed(() => {
   const tipos = ['CONTRAPRESTACIÓN', 'PROGRAMAS ALIMENTARIOS', 'SUBSIDIO ECONÓMICO', 'ALQUILER', 'OTRAS AYUDAS'];
-  return tipos.map(tipo => {
-    const count = filteredMarcadores.value.reduce((acc, m) => {
-      return acc + (m.programas?.filter(p => p.tipo === tipo)?.length || 0);
-    }, 0);
-    return { tipo, count };
-  });
+  return tipos.map(tipo => ({
+    tipo,
+    count: filteredMarcadores.value.reduce((acc, m) =>
+      acc + (m.programas?.filter(p => p.tipo === tipo)?.length || 0), 0)
+  }));
 });
 
 const chartOptionsProgramas = computed<ApexOptions>(() => ({
-  chart: {
-    id: 'programas-por-tipo',
-    type: 'bar',
-    toolbar: {
-      show: false
-    }
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      borderRadius: 8,
-    }
-  },
-  dataLabels: {
-    enabled: true
-  },
-  xaxis: {
-    categories: programasPorTipo.value.map(p => p.tipo)
-  },
-  colors: ['#26A69A'], // Usando secondary del sistema
-  title: {
-    text: 'Distribución de Programas por Tipo',
-    style: {
-      fontSize: '16px',
-      fontWeight: 'bold'
-    }
-  }
+  chart: { id: 'programas-por-tipo', type: 'bar', toolbar: { show: false } },
+  plotOptions: { bar: { horizontal: true, borderRadius: 6 } },
+  dataLabels: { enabled: true },
+  xaxis: { categories: programasPorTipo.value.map(p => p.tipo) },
+  colors: ['#26A69A'],
 }));
 
 const seriesProgramas = computed(() => [
-  {
-    name: 'Cantidad',
-    data: programasPorTipo.value.map(p => p.count)
-  }
+  { name: 'Cantidad', data: programasPorTipo.value.map(p => p.count) }
 ]);
 
-// Configuración del gráfico de informes por mes
-const chartOptionsInformes = computed<ApexOptions>(() => ({
-  chart: {
-    id: 'informes-por-mes',
-    type: 'bar',
-    toolbar: {
-      show: false
-    },
-    fontFamily: 'Roboto, sans-serif'
-  },
-  plotOptions: {
-    bar: {
-      borderRadius: 8,
-      columnWidth: '60%',
+// --- Informes por mes ---
+const getMonthYear = (dateString: string) => {
+  const d = new Date(dateString);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+};
+
+const getMonthName = (monthYear: string) => {
+  const [year, month] = monthYear.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+};
+
+const informesPorMes = computed(() => {
+  const data: Record<string, number> = {};
+
+  if (filteredMarcadores.value.length === 0) {
+    const base = selectedYear.value ?? new Date().getFullYear();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(base, i, 1);
+      data[getMonthYear(d.toISOString())] = 0;
     }
-  },
-  dataLabels: {
-    enabled: false
-  },
-  colors: ['#1976D2'], // Usando el color primary del sistema
+  } else {
+    filteredMarcadores.value.forEach(m => {
+      if (m.fechaCreacion) {
+        const key = getMonthYear(m.fechaCreacion);
+        data[key] = (data[key] || 0) + 1;
+      }
+    });
+
+    // Si hay año seleccionado, completar los 12 meses
+    if (selectedYear.value !== null) {
+      for (let i = 0; i < 12; i++) {
+        const key = `${selectedYear.value}-${String(i + 1).padStart(2, '0')}`;
+        if (!(key in data)) data[key] = 0;
+      }
+    }
+  }
+
+  return Object.keys(data).sort().map(k => ({ x: getMonthName(k), y: data[k] }));
+});
+
+const chartOptionsInformes = computed<ApexOptions>(() => ({
+  chart: { id: 'informes-por-mes', type: 'bar', toolbar: { show: false }, fontFamily: 'Roboto, sans-serif' },
+  plotOptions: { bar: { borderRadius: 8, columnWidth: '60%' } },
+  dataLabels: { enabled: false },
+  colors: ['#1976D2'],
   fill: {
     type: 'gradient',
     gradient: {
       shade: 'light',
       type: 'vertical',
       shadeIntensity: 0.3,
-      gradientToColors: ['#26A69A'], // Usando secondary del sistema
+      gradientToColors: ['#26A69A'],
       inverseColors: false,
       opacityFrom: 0.8,
       opacityTo: 0.6,
     }
   },
   xaxis: {
-    categories: informesPorMes.value.map((d) => d.x),
-    title: {
-      text: 'Meses',
-      style: {
-        fontWeight: 'bold'
-      }
-    },
-    labels: {
-      style: {
-        colors: '#666'
-      }
-    }
+    categories: informesPorMes.value.map(d => d.x),
+    title: { text: 'Meses', style: { fontWeight: 'bold' } },
+    labels: { style: { colors: '#666' } }
   },
   yaxis: {
-    title: {
-      text: 'Cantidad de Informes',
-      style: {
-        fontWeight: 'bold'
-      }
-    },
-    labels: {
-      style: {
-        colors: '#666'
-      }
-    }
+    title: { text: 'Cantidad de Informes', style: { fontWeight: 'bold' } },
+    labels: { style: { colors: '#666' } }
   },
-  grid: {
-    borderColor: '#e7e7e7',
-    strokeDashArray: 4,
-  },
-  tooltip: {
-    theme: 'light',
-    style: {
-      fontSize: '12px'
-    }
-  },
-  title: {
-    text: 'Evolución de Informes Cargados',
-    style: {
-      fontSize: '16px',
-      fontWeight: 'bold'
-    }
-  }
+  grid: { borderColor: '#e7e7e7', strokeDashArray: 4 },
+  tooltip: { theme: 'light' },
 }));
 
 const seriesInformes = computed(() => [
-  {
-    name: 'Informes',
-    data: informesPorMes.value.map((d) => d.y),
-  },
+  { name: 'Informes', data: informesPorMes.value.map(d => d.y) }
 ]);
 
-// Datos para el gráfico de marcadores por barrios
+// --- Barrios ---
 const barriosDelSistema = [
-  'San Martin A',
-  'San Martin B',
-  'Kenedy',
-  'Los Pinos',
-  'Belgrano',
-  'Barrio Norte',
-  'Barrio Centro',
-  'Quintanilla',
-  'Zona Rural',
-  'Otro'
+  'San Martin A', 'San Martin B', 'Kenedy', 'Los Pinos', 'Belgrano',
+  'Barrio Norte', 'Barrio Centro', 'Quintanilla', 'Zona Rural', 'Otro'
 ];
 
-// Normalización de nombres de barrios (sin tildes, minúsculas y sin espacios extra)
 const normalize = (s?: string) =>
-  (s || '')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // remover tildes
-    .replace(/\s+/g, ' ');
+  (s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
 
-// Mapa de equivalencias: variantes -> nombre canónico del sistema
 const barrioCanonicalMap: Record<string, string> = (() => {
   const map: Record<string, string> = {};
-  // Todas las claves canónicas por defecto
-  barriosDelSistema.forEach((b) => {
-    map[normalize(b)] = b;
-  });
-  // Alias comunes y errores frecuentes
+  barriosDelSistema.forEach(b => { map[normalize(b)] = b; });
   map[normalize('Kennedy')] = 'Kenedy';
   map[normalize('San Martín A')] = 'San Martin A';
   map[normalize('San Martín B')] = 'San Martin B';
@@ -586,60 +459,27 @@ const barrioCanonicalMap: Record<string, string> = (() => {
 })();
 
 const marcadoresPorBarrio = computed(() => {
-  const barriosCounts: Record<string, number> = {};
+  const counts: Record<string, number> = {};
+  barriosDelSistema.forEach(b => { counts[b] = 0; });
 
-  // Inicializar todos los barrios del sistema con 0
-  barriosDelSistema.forEach(barrio => {
-    barriosCounts[barrio] = 0;
-  });
-
-  // Si no hay marcadores, retornar los barrios con 0
-  if (gisStore.marcadores.length === 0) {
-    barriosCounts['Sin datos'] = 1;
-    return barriosCounts;
-  }
-
-  gisStore.marcadores.forEach(marcador => {
-    // Normalizar y mapear a nombre canónico
-    const norm = normalize(marcador.barrio);
-    const canonical = barrioCanonicalMap[norm] || 'Otro';
-    barriosCounts[canonical] = (barriosCounts[canonical] || 0) + 1;
-  });
-
-  // Filtrar barrios con 0 marcadores para no mostrarlos en el gráfico
-  const barriosConDatos = Object.entries(barriosCounts)
-    .filter(([_, count]) => count > 0)
-    .reduce((obj, [barrio, count]) => {
-      obj[barrio] = count;
-      return obj;
-    }, {} as Record<string, number>);
-
-  // Si no hay datos después del filtrado, mostrar mensaje
-  if (Object.keys(barriosConDatos).length === 0) {
+  if (filteredMarcadores.value.length === 0) {
     return { 'Sin datos': 1 };
   }
 
-  return barriosConDatos;
+  filteredMarcadores.value.forEach(m => {
+    const canonical = barrioCanonicalMap[normalize(m.barrio)] || 'Otro';
+    counts[canonical] = (counts[canonical] || 0) + 1;
+  });
+
+  const withData = Object.fromEntries(Object.entries(counts).filter(([, v]) => v > 0));
+  return Object.keys(withData).length ? withData : { 'Sin datos': 1 };
 });
 
 const seriesBarrios = computed(() => {
   const values = Object.values(marcadoresPorBarrio.value);
-
-  // Si hay datos reales, usarlos
-  if (values.length > 0 && values.some(v => v > 0)) {
-    return values;
-  }
-
-  // Si no hay datos reales (todos ceros), devolver una serie que
-  // mantenga la misma cantidad de etiquetas para evitar desincronización
-  const labelCount = Object.keys(marcadoresPorBarrio.value).length;
-  if (labelCount > 0) {
-    return Array(labelCount).fill(1);
-  }
-  return [1];
+  if (values.some(v => v > 0)) return values;
+  return values.length ? Array(values.length).fill(1) : [1];
 });
-
-// Eliminado: readiness y claves reactivas para evitar ciclos de actualización
 
 const chartOptionsBarrios = shallowRef<ApexOptions>({
   chart: {
@@ -650,18 +490,7 @@ const chartOptionsBarrios = shallowRef<ApexOptions>({
     redrawOnParentResize: true,
     redrawOnWindowResize: true,
   },
-  colors: [
-    '#1976D2',
-    '#26A69A',
-    '#F2C037',
-    '#31CCEC',
-    '#21BA45',
-    '#9C27B0',
-    '#FF5722',
-    '#795548',
-    '#607D8B',
-    '#E91E63'
-  ],
+  colors: ['#1976D2', '#26A69A', '#F2C037', '#31CCEC', '#21BA45', '#9C27B0', '#FF5722', '#795548', '#607D8B', '#E91E63'],
   labels: [],
   plotOptions: {
     pie: {
@@ -669,79 +498,31 @@ const chartOptionsBarrios = shallowRef<ApexOptions>({
         size: '65%',
         labels: {
           show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            color: '#1976D2'
-          }
+          total: { show: true, label: 'Total', fontSize: '16px', fontWeight: 'bold', color: '#1976D2' }
         }
       }
     }
   },
   dataLabels: {
     enabled: true,
-    formatter: function (val: number) {
-      return Math.round(val) + '%';
-    },
-    style: {
-      fontSize: '12px',
-      fontWeight: 'bold'
-    }
+    formatter: (val: number) => Math.round(val) + '%',
+    style: { fontSize: '12px', fontWeight: 'bold' }
   },
-  legend: {
-    position: 'bottom',
-    fontSize: '12px',
-    fontWeight: '500'
-  },
-  tooltip: {
-    theme: 'light',
-    y: {
-      formatter: function (val: number) {
-        return val + ' marcadores';
-      }
-    }
-  }
+  legend: { position: 'bottom', fontSize: '12px', fontWeight: '500' },
+  tooltip: { theme: 'light', y: { formatter: (val: number) => val + ' marcadores' } }
 });
 
-// Actualizar etiquetas sin recrear todo el objeto de opciones
 watch(
   () => Object.keys(marcadoresPorBarrio.value),
-  (labels) => {
-    chartOptionsBarrios.value.labels = labels.length > 0 ? labels : ['Sin datos'];
-  },
+  (labels) => { chartOptionsBarrios.value.labels = labels.length > 0 ? labels : ['Sin datos']; },
   { immediate: true }
 );
-
-// Eliminado: variables de prueba y versión simplificada del gráfico de vulnerabilidad
-
-// Eliminado: testSeriesBarrios y testChartOptionsBarrios (ya usamos datos reales)
 
 onMounted(() => {
   if (gisStore.marcadores.length === 0) {
     gisStore.cargarMarcadoresDesdeAPI();
   }
 
-  // Debug: Verificar datos de los gráficos
-  setTimeout(() => {
-    console.log('=== DEBUG DASHBOARD ===');
-    console.log('Marcadores total:', gisStore.marcadores.length);
-    console.log('Muestra de marcadores:', gisStore.marcadores.slice(0, 3).map(m => ({
-      icono: m.icono,
-      nombre: m.nombre,
-      fechaCreacion: m.fechaCreacion
-    })));
-    console.log('Vulnerabilidad counts:', vulnerabilidadCounts.value);
-    console.log('Informes por mes:', informesPorMes.value);
-    console.log('Barrios counts:', marcadoresPorBarrio.value);
-    console.log('Series vulnerabilidad:', seriesVulnerabilidad.value);
-    console.log('Series informes:', seriesInformes.value);
-    console.log('Series barrios:', seriesBarrios.value);
-    console.log('=======================');
-  }, 1000);
-
-  // Forzar scroll en el dashboard programáticamente
   const pageContainer = document.querySelector('.q-page-container') as HTMLElement;
   const layout = document.querySelector('.q-layout') as HTMLElement;
   const page = document.querySelector('.q-page') as HTMLElement;
@@ -750,23 +531,15 @@ onMounted(() => {
     pageContainer.style.setProperty('overflow-y', 'auto', 'important');
     pageContainer.style.setProperty('height', '100vh', 'important');
   }
-
-  if (layout) {
-    layout.style.setProperty('overflow', 'auto', 'important');
-  }
-
+  if (layout) layout.style.setProperty('overflow', 'auto', 'important');
   if (page) {
     page.style.setProperty('overflow-y', 'auto', 'important');
     page.style.setProperty('height', 'auto', 'important');
   }
 });
-
-// Debug reactivo: observar cambios y estado de readiness de los donuts
-// Eliminado: watchers profundos que podían causar ciclos con apexcharts
 </script>
 
 <style scoped>
-/* Solución específica para permitir scroll solo en el dashboard */
 .dashboard-page {
   background: #f5f7fa;
   min-height: 100vh;
@@ -776,20 +549,17 @@ onMounted(() => {
   padding-bottom: 2rem;
 }
 
-/* Forzar scroll en el contenedor específico del dashboard */
 :deep(.q-page-container) {
   overflow-y: auto !important;
   height: 100vh !important;
 }
 
-/* Remover restricciones de scroll específicamente para esta página */
 .dashboard-scrollable {
   overflow-y: auto !important;
   height: 100vh !important;
   max-height: 100vh !important;
 }
 
-/* Asegurar que el contenido pueda hacer scroll */
 :deep(.q-page.dashboard-scrollable) {
   overflow-y: auto !important;
   height: auto !important;
@@ -797,7 +567,7 @@ onMounted(() => {
 }
 
 .dashboard-header {
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   margin: -1rem -1rem 0 -1rem;
   position: relative;
   z-index: 1;
@@ -823,6 +593,10 @@ onMounted(() => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.metric-card-barrios {
+  background: linear-gradient(135deg, #7B1FA2, #9C27B0) !important;
+}
+
 .metric-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
@@ -839,20 +613,6 @@ onMounted(() => {
   font-size: 0.9rem;
   opacity: 0.9;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.metric-change {
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.metric-change.positive {
-  color: #21BA45;
-  /* Usando positive del sistema */
 }
 
 .metric-icon {
@@ -892,39 +652,10 @@ onMounted(() => {
   color: #666;
 }
 
-/* Lista de métricas */
-.metrics-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.metric-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #1976D2;
-  /* Usando primary del sistema */
-}
-
-.metric-item-label {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.metric-item-value {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #333;
-}
-
+/* Métricas clave */
 .metric-item {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1.5rem 1rem;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   border: 1px solid #e0e0e0;
@@ -950,11 +681,27 @@ onMounted(() => {
   color: #1976D2;
 }
 
-/* Responsive adjustments */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.2rem;
+}
+
+/* Selector de año */
+.year-filter-select :deep(.q-field__label) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.year-filter-select :deep(.q-field__native),
+.year-filter-select :deep(.q-field__input) {
+  color: white !important;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .dashboard-header {
     padding: 1rem;
-    text-align: center;
   }
 
   .metric-value {
@@ -984,13 +731,8 @@ onMounted(() => {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Colores personalizados para los gráficos */
 :deep(.apexcharts-tooltip) {
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-}
-
-:deep(.apexcharts-legend) {
-  padding: 0 !important;
 }
 </style>

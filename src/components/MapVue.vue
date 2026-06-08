@@ -54,6 +54,24 @@
             </div>
           </q-card-section>
 
+          <!-- Selector de año en el panel de info -->
+          <q-card-section class="q-pa-sm q-pt-none">
+            <div class="row items-center q-gutter-sm">
+              <q-select v-model="anioInfoPanel" :options="aniosInfoPanel" option-label="label" option-value="value"
+                emit-value map-options dense outlined class="col" :loading="cargandoAnioInfo"
+                @update:model-value="cambiarAnioInfoPanel">
+                <template v-slot:prepend>
+                  <q-icon name="calendar_month" size="xs" />
+                </template>
+              </q-select>
+            </div>
+            <q-badge v-if="gisStore.marcadorSeleccionado.esDatoVivo === false" color="orange"
+              class="q-mt-xs full-width text-center">
+              <q-icon name="lock" size="xs" class="q-mr-xs" />
+              Datos históricos (solo lectura)
+            </q-badge>
+          </q-card-section>
+
           <q-separator />
 
           <q-card-section class="q-pa-md">
@@ -280,22 +298,19 @@
             <div class="text-subtitle1 text-weight-medium q-mb-md flex items-center">
               <q-icon name="assignment" class="q-mr-xs" />
               Programas
-              <q-chip v-if="programasFiltradosPorMes.length" :label="programasFiltradosPorMes.length" color="primary"
-                text-color="white" size="sm" class="q-ml-sm" />
+              <q-chip v-if="programasActivos.length" :label="programasActivos.length" color="primary" text-color="white"
+                size="sm" class="q-ml-sm" />
             </div>
 
             <div class="row q-col-gutter-sm q-mb-xs">
-              <div class="col-6">
-                <q-select v-model="filtroAnio" :options="opcionesAnios" label="Filtrar por Año" dense outlined />
-              </div>
-              <div class="col-6">
-                <q-select v-model="filtroMes" :options="opcionesMesesDisponibles" label="Filtrar por Mes" dense outlined />
+              <div class="col-12">
+                <q-select v-model="filtroMes" :options="opcionesMesesDisponibles" label="Filtrar por Mes" dense outlined
+                  clearable />
               </div>
             </div>
             <div class="row justify-end q-mb-md">
-              <q-btn v-if="filtroAnio !== null || filtroMes !== null" flat dense size="sm" icon="filter_alt_off"
-                label="Quitar filtros" color="negative"
-                @click="filtroAnio = new Date().getFullYear(); filtroMes = null" />
+              <q-btn v-if="filtroMes !== null" flat dense size="sm" icon="filter_alt_off" label="Quitar filtro"
+                color="negative" @click="filtroMes = null" />
             </div>
 
             <div v-if="programasFiltradosPorMes.length">
@@ -371,11 +386,18 @@
             <HistorialMarcador :idMarcador="gisStore.marcadorSeleccionado.id"
               :marcador="gisStore.marcadorSeleccionado" />
 
-            <q-btn flat v-if="permisos.puedeEditar" label="Editar" @click="editarMarcadorSeleccionado" color="orange-8"
-              size="md" />
+            <HistorialAnual :idMarcador="gisStore.marcadorSeleccionado.id" :marcador="gisStore.marcadorSeleccionado" />
 
-            <q-btn flat v-if="permisos.puedeEliminar" label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red"
-              size="md" />
+            <q-btn flat v-if="permisos.puedeEditar && gisStore.marcadorSeleccionado.esDatoVivo !== false" label="Editar"
+              @click="editarMarcadorSeleccionado" color="orange-8" size="md" />
+
+            <q-btn flat v-if="permisos.puedeEliminar && gisStore.marcadorSeleccionado.esDatoVivo !== false"
+              label="Eliminar" @click="eliminarMarcadorSeleccionado" color="red" size="md" />
+
+            <q-badge v-if="gisStore.marcadorSeleccionado.esDatoVivo === false" color="orange" class="q-ml-sm">
+              <q-icon name="lock" size="xs" class="q-mr-xs" />
+              Datos históricos (solo lectura)
+            </q-badge>
           </q-card-actions>
         </div>
       </q-card>
@@ -433,93 +455,100 @@
       </q-card>
     </q-dialog>
 
-    <q-drawer v-model="drawerVisible" side="right" :width="500" overlay behavior="desktop" bordered>
-      <div class="drawer-header bg-blue-5 text-white">
-        <div class="row items-center justify-between q-pa-md">
-          <div class="text-h6">Panel de Control</div>
+    <q-drawer v-model="drawerVisible" side="right" :width="440" overlay behavior="desktop" bordered>
+      <div class="drawer-header bg-blue-6 text-white">
+        <div class="row items-center justify-between q-pa-md q-pb-sm">
+          <div>
+            <div class="text-h6 text-weight-bold">Panel de Control</div>
+            <div class="text-caption opacity-80">
+              {{ marcadoresFiltrados.length }} de {{ gisStore.marcadores.length }} registros
+            </div>
+          </div>
           <q-btn icon="close" flat round color="white" @click="drawerVisible = false" class="close-btn" />
         </div>
       </div>
 
       <q-scroll-area class="drawer-content">
         <q-card flat class="no-shadow">
-          <q-card-section class="q-pa-md">
-            <div class="section-title">
-              <q-icon name="bookmark" class="q-mr-sm" color="primary" />
-              Filtrar por Vulnerabilidad
+
+          <!-- Filtro de vulnerabilidad -->
+          <q-card-section class="q-pa-md q-pb-sm">
+            <div class="section-title q-mb-sm">
+              <q-icon name="filter_alt" class="q-mr-xs" color="primary" size="sm" />
+              <span class="text-subtitle2 text-weight-medium">Vulnerabilidad</span>
+              <q-space />
+              <q-btn v-if="filtrosVulnerabilidad.length > 0" @click="limpiarFiltros" label="Limpiar" color="negative"
+                flat dense size="sm" icon="clear" no-caps />
             </div>
-            <q-btn-group unelevated class="q-mt-md">
-              <q-btn v-for="icono in iconosDisponibles" :key="icono.value" :class="{
-                'bg-blue-2': filtrosVulnerabilidad.includes(icono.value),
-              }" @click="toggleFiltroVulnerabilidad(icono.value)" padding="sm md">
-                <img :src="icono.value" width="24" height="24" class="q-mr-sm" />
+            <div class="row q-gutter-xs">
+              <q-chip v-for="icono in iconosDisponibles" :key="icono.value" clickable
+                :selected="filtrosVulnerabilidad.includes(icono.value)"
+                :color="filtrosVulnerabilidad.includes(icono.value) ? 'blue-7' : 'grey-3'"
+                :text-color="filtrosVulnerabilidad.includes(icono.value) ? 'white' : 'grey-8'"
+                @click="toggleFiltroVulnerabilidad(icono.value)" class="q-ma-none">
+                <q-avatar>
+                  <img :src="icono.value" />
+                </q-avatar>
                 {{ icono.label }}
-              </q-btn>
-            </q-btn-group>
-            <q-btn v-if="filtrosVulnerabilidad.length > 0" @click="limpiarFiltros" label="Limpiar filtros" color="grey"
-              flat dense class="q-mt-sm" />
-          </q-card-section>
-
-          <q-separator />
-
-          <q-card-section class="q-pa-md">
-            <div class="section-title">
-              <q-icon name="event_year" class="q-mr-sm" color="primary" />
-              Filtrar por Año
-            </div>
-            <div class="row q-gutter-md q-mt-md items-end">
-              <div class="col-grow">
-                <q-select v-model="filtroAño" :options="años" label="Seleccionar año" outlined dense />
-              </div>
-              <q-btn label="Mostrar todos" color="primary" flat icon="clear" size="md" @click="mostrarTodosAños"
-                title="Mostrar marcadores de todos los años" />
+              </q-chip>
             </div>
           </q-card-section>
 
           <q-separator />
 
-          <q-card-section class="q-pa-md">
-            <div class="section-title">
-              <q-icon name="database" class="q-mr-sm" color="primary" />
-              Datos cargados
+          <!-- Búsqueda y lista -->
+          <q-card-section class="q-pa-md q-pb-sm">
+            <div class="section-title q-mb-sm">
+              <q-icon name="people" class="q-mr-xs" color="primary" size="sm" />
+              <span class="text-subtitle2 text-weight-medium">Registros</span>
+              <q-space />
+              <q-badge color="blue-7" :label="marcadoresFiltrados.length" />
+            </div>
+            <q-input dense outlined debounce="300" v-model="unifiedSearchTerm"
+              placeholder="Buscar titular o integrante..." clearable>
+              <template v-slot:prepend>
+                <q-icon name="search" size="sm" />
+              </template>
+            </q-input>
+          </q-card-section>
+
+          <div class="marcadores-lista q-px-sm q-pb-md">
+            <div v-if="marcadoresFiltrados.length === 0" class="text-center text-grey-6 q-pa-lg">
+              <q-icon name="search_off" size="40px" class="q-mb-sm" />
+              <div class="text-body2">Sin resultados</div>
             </div>
 
-            <q-input dense outlined debounce="300" v-model="unifiedSearchTerm" placeholder="Buscar titular o integrante"
-              class="q-mt-md search-input" clearable prepend-inner-icon="search" />
-
-            <div class="marcadores-lista q-mt-md">
-              <div v-for="(marcador, index) in marcadoresFiltrados" :key="marcador.id" class="marcador-item"
-                @click="verInfoMarcador(marcador)">
-                <div class="marcador-content">
-                  <div class="marcador-numero">{{ index + 1 }}</div>
-                  <div class="marcador-info">
-                    <div class="marcador-nombre">
-                      {{ marcador.nombre }} {{ marcador.apellido }}
-                    </div>
-                    <div class="marcador-direccion">
-                      {{ marcador.direccion }}
-                    </div>
-                    <div v-if="
-                      marcador.integrantes && marcador.integrantes.length > 0
-                    " class="marcador-integrantes">
-                      <span class="text-caption text-grey-7">Integrantes:
-                      </span>
-                      <q-chip v-for="integrante in marcador.integrantes.slice(0, 2)" :key="integrante.dni"
-                        color="blue-1" text-color="blue-9" size="sm" class="q-ma-none q-mr-xs"
-                        :title="`${integrante.nombre} ${integrante.apellido} - DNI: ${integrante.dni}`">
-                        {{ integrante.nombre.split(' ')[0] }}
-                      </q-chip>
-                      <q-chip v-if="marcador.integrantes.length > 2" color="grey-3" text-color="grey-7" size="sm"
-                        class="q-ma-none" :title="`Y ${marcador.integrantes.length - 2} más`">
-                        +{{ marcador.integrantes.length - 2 }}
-                      </q-chip>
-                    </div>
+            <div v-for="marcador in marcadoresFiltrados" :key="marcador.id" class="marcador-item"
+              @click="verInfoMarcador(marcador)">
+              <div class="marcador-content">
+                <q-avatar size="36px" class="q-mr-sm marcador-avatar" square>
+                  <img :src="marcador.icono" />
+                </q-avatar>
+                <div class="marcador-info">
+                  <div class="marcador-nombre">
+                    {{ marcador.nombre }} {{ marcador.apellido }}
                   </div>
-                  <q-icon name="chevron_right" class="marcador-arrow" />
+                  <div class="marcador-direccion">
+                    <q-icon name="place" size="11px" class="q-mr-xs" />{{ marcador.direccion }}
+                  </div>
+                  <div v-if="marcador.integrantes && marcador.integrantes.length > 0"
+                    class="marcador-integrantes q-mt-xs">
+                    <q-chip v-for="integrante in marcador.integrantes.slice(0, 2)" :key="integrante.dni" color="blue-1"
+                      text-color="blue-9" size="xs" class="q-ma-none q-mr-xs"
+                      :title="`${integrante.nombre} ${integrante.apellido} - DNI: ${integrante.dni}`">
+                      {{ integrante.nombre.split(' ')[0] }}
+                    </q-chip>
+                    <q-chip v-if="marcador.integrantes.length > 2" color="grey-3" text-color="grey-7" size="xs"
+                      class="q-ma-none">
+                      +{{ marcador.integrantes.length - 2 }}
+                    </q-chip>
+                  </div>
                 </div>
+                <q-icon name="chevron_right" class="marcador-arrow" size="18px" />
               </div>
             </div>
-          </q-card-section>
+          </div>
+
         </q-card>
       </q-scroll-area>
     </q-drawer>
@@ -959,11 +988,10 @@ import { Geometry } from 'ol/geom';
 import Modify from 'ol/interaction/Modify';
 import { jsPDF } from 'jspdf';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 import HistorialMarcador from 'src/components/HistorialMarcador.vue';
+import HistorialAnual from 'src/components/HistorialAnual.vue';
 import InfoCard from 'src/components/InfoCard.vue';
 
-const router = useRouter();
 
 let modifyInteraction: Modify | null = null;
 let marcadorTemporal: Feature<Point> | null = null;
@@ -973,8 +1001,6 @@ const gisStore = useGisStore();
 const mapContainer = ref<HTMLElement | null>(null);
 const modalVisible = ref(false);
 const editando = ref(false);
-const mostrarReferencias = ref(false);
-const mostrarDatosActuales = ref(false);
 const unifiedSearchTerm = ref('');
 const guardando = ref(false);
 const drawerVisible = ref(false);
@@ -988,6 +1014,74 @@ const tooltipPosition = ref({ x: 0, y: 0 });
 const rol = ref(localStorage.getItem('rol') || 'Visor');
 
 const mostrarModalHistorial = ref(false);
+
+// === Selector de año en el panel de info del marcador ===
+const anioInfoPanel = ref<number | null>(null);
+const aniosInfoPanel = ref<Array<{ label: string; value: number }>>([]);
+const cargandoAnioInfo = ref(false);
+
+// Cuando se selecciona un marcador DIFERENTE, cargar los años disponibles
+watch(
+  () => gisStore.marcadorSeleccionado?.id,
+  async (nuevoId) => {
+    if (nuevoId) {
+      const currentYear = new Date().getFullYear();
+      try {
+        const anios = await gisStore.cargarAniosDisponibles(nuevoId);
+        console.log(`[AñoPanel] Años disponibles para marcador id=${nuevoId}:`, anios);
+        aniosInfoPanel.value = anios.map((a: number) => ({
+          label: a === currentYear ? `${a} (actual)` : `${a}`,
+          value: a,
+        }));
+        // Establecer el año según el filtro global o el más reciente
+        if (filtroAño.value !== null) {
+          anioInfoPanel.value = parseInt(filtroAño.value);
+        } else {
+          anioInfoPanel.value = anios.length > 0 ? anios[0] : currentYear;
+        }
+      } catch {
+        aniosInfoPanel.value = [{ label: `${currentYear} (actual)`, value: currentYear }];
+        anioInfoPanel.value = currentYear;
+      }
+    }
+  },
+  { flush: 'post' }
+);
+
+async function cambiarAnioInfoPanel(anio: number) {
+  if (!gisStore.marcadorSeleccionado) return;
+  const marcadorId = gisStore.marcadorSeleccionado.id;
+  const currentYear = new Date().getFullYear();
+  cargandoAnioInfo.value = true;
+
+  console.log(`[AñoPanel] Cambiando a año ${anio} para marcador id=${marcadorId}`);
+
+  try {
+    if (anio === currentYear) {
+      // Año actual: cargar datos vivos completos
+      await gisStore.seleccionarMarcador(marcadorId);
+      console.log('[AñoPanel] Año actual - datos vivos:', gisStore.marcadorSeleccionado);
+    } else {
+      // Año pasado: cargar datos del endpoint anual
+      const datos = await gisStore.cargarDatosAnuales(marcadorId, anio);
+      console.log(`[AñoPanel] Respuesta del endpoint /anual/${anio}:`, datos);
+      console.log(`[AñoPanel] esDatoVivo: ${datos?.esDatoVivo}, anio: ${datos?.anio}`);
+      console.log('[AñoPanel] Dirección recibida:', datos?.marcador?.direccion);
+      if (datos && datos.marcador) {
+        gisStore.marcadorSeleccionado = {
+          ...datos.marcador,
+          esDatoVivo: datos.esDatoVivo,
+          anio_dato: datos.anio,
+        };
+        gisStore.marcadorSeleccionadoProgramasCompletos = datos.marcador.programas || [];
+      }
+    }
+  } catch (error) {
+    console.error('[AñoPanel] Error al cambiar año del marcador:', error);
+  } finally {
+    cargandoAnioInfo.value = false;
+  }
+}
 
 const programasActivos = computed(
   () =>
@@ -1005,14 +1099,7 @@ const programasInactivos = computed(
 // ✅ NUEVO: Referencia para el filtro por mes
 const filtroMes = ref<string | null>(null);
 
-// Referencia para el filtro por año, por defecto el año actual
-const filtroAnio = ref<number | null>(new Date().getFullYear());
-
-watch(filtroAnio, () => {
-  filtroMes.value = null;
-});
-
-// ✅ NUEVO: Opciones de meses
+// Opciones de meses
 const opcionesMeses = [
   'Enero',
   'Febrero',
@@ -1028,66 +1115,30 @@ const opcionesMeses = [
   'Diciembre',
 ];
 
-// Opciones de años derivadas de los programas activos del marcador seleccionado
-const opcionesAnios = computed(() => {
-  const programas = gisStore.marcadorSeleccionado?.programas?.filter(
-    (p) => p.estado === 'activo'
-  ) || [];
-  const years = new Set<number>();
-  years.add(new Date().getFullYear());
-  programas.forEach((p) => {
-    if (p.fechaInicio) {
-      const y = new Date(p.fechaInicio).getFullYear();
-      if (!isNaN(y)) years.add(y);
-    }
-  });
-  return Array.from(years).sort((a, b) => b - a);
-});
-
-// Meses disponibles según los programas activos del año seleccionado
+// Meses disponibles según los programas activos del marcador seleccionado
 const opcionesMesesDisponibles = computed(() => {
   const programas = gisStore.marcadorSeleccionado?.programas?.filter(
     (p) => p.estado === 'activo'
   ) || [];
-  const filtered = filtroAnio.value !== null
-    ? programas.filter((p) => {
-        if (!p.fechaInicio) return false;
-        return new Date(p.fechaInicio).getFullYear() === filtroAnio.value;
-      })
-    : programas;
-  const mesesPresentes = new Set(filtered.map((p) => p.mes).filter(Boolean));
+  const mesesPresentes = new Set(programas.map((p) => p.mes).filter(Boolean));
   return opcionesMeses.filter((m) => mesesPresentes.has(m));
 });
 
-// ✅ NUEVO: Propiedad computada para filtrar programas por año, mes y estado
+// Programas activos filtrados solo por mes
 const programasFiltradosPorMes = computed(() => {
-  if (!gisStore.marcadorSeleccionado?.programas) {
-    return [];
-  }
+  if (!gisStore.marcadorSeleccionado?.programas) return [];
   let programas = gisStore.marcadorSeleccionado.programas.filter(
     (p) => p.estado === 'activo'
   );
-  if (filtroAnio.value !== null) {
-    programas = programas.filter((p) => {
-      if (!p.fechaInicio) return false;
-      return new Date(p.fechaInicio).getFullYear() === filtroAnio.value;
-    });
-  }
   if (filtroMes.value) {
     programas = programas.filter((p) => p.mes === filtroMes.value);
   }
   return programas;
 });
 
-// ✅ NUEVO: Propiedad computada para calcular la cantidad total del mes filtrado
-const totalCantidadPorMes = computed(() => {
-  if (!programasFiltradosPorMes.value) {
-    return 0;
-  }
-  return programasFiltradosPorMes.value.reduce((total, programa) => {
-    return total + (programa.cantidad || 0);
-  }, 0);
-});
+const totalCantidadPorMes = computed(() =>
+  programasFiltradosPorMes.value.reduce((total, programa) => total + (programa.cantidad || 0), 0)
+);
 
 function colorPorEstado(estado: any) {
   switch (estado) {
@@ -1124,21 +1175,15 @@ const iconosDisponibles = [
 
 const filtrosVulnerabilidad = ref<string[]>([]);
 
-// ✅ NUEVO: Filtro por año
-const años = (() => {
-  const currentYear = new Date().getFullYear();
-  const startYear = 2025;
-  const result = [];
-  for (let year = startYear; year <= currentYear; year++) {
-    result.push(year.toString());
-  }
-  return result.reverse();
-})();
-
 const filtroAño = ref<string | null>(new Date().getFullYear().toString()); // Por defecto año actual
 
-function mostrarTodosAños() {
-  filtroAño.value = null;
+// Helper para recargar marcadores respetando el filtro de año actual
+async function recargarMarcadoresDesdeAPI() {
+  if (filtroAño.value !== null) {
+    await gisStore.cargarMarcadoresPorAnio(parseInt(filtroAño.value));
+  } else {
+    await gisStore.cargarMarcadoresDesdeAPI();
+  }
 }
 
 function toggleFiltroVulnerabilidad(icono: string) {
@@ -1416,28 +1461,9 @@ const osmLayer = new TileLayer({
 const marcadoresFiltrados = computed(() => {
   const term = unifiedSearchTerm.value.toLowerCase();
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
-  const selectedYear = filtroAño.value;
-
-  // 🔍 LOG para debuguear
-  const inicio = performance.now();
-  console.log(`🔄 [marcadoresFiltrados] Recalculando... Año seleccionado: "${selectedYear}", Total marcadores: ${gisStore.marcadores.length}`);
 
   const filtered = gisStore.marcadores
     .filter((m) => {
-      // Filtrado por año - si filtroAño es null, muestra todos
-      if (selectedYear !== null && m.fechaCreacion) {
-        try {
-          const marcadorYear = new Date(m.fechaCreacion).getFullYear().toString();
-          if (marcadorYear !== selectedYear) {
-            return false; // NO coincide con el año seleccionado, excluir
-          }
-        } catch (error) {
-          console.warn('Error al parsear fecha:', m.fechaCreacion);
-          // Si hay error al parsear, incluir el marcador (mostrar en todos)
-        }
-      }
-      // Si no tiene fechaCreacion o filtroAño es null, continúa (se mostrará)
-
       // Filtrado por vulnerabilidad
       const matchesVulnerabilidad =
         vulnerabilidadFilters.length === 0 ||
@@ -1471,40 +1497,18 @@ const marcadoresFiltrados = computed(() => {
         return matchesMainSearch || matchesIntegrantesSearch;
       }
 
-      // Si no hay término de búsqueda, y pasó el filtro de vulnerabilidad y año
       return true;
     })
     .slice()
     .reverse();
-
-  const tiempo = (performance.now() - inicio).toFixed(2);
-  console.log(`✅ [marcadoresFiltrados] Resultado: ${filtered.length} elementos filtrados (${tiempo}ms)`);
 
   return filtered;
 });
 
 const marcadoresFiltradosParaMapa = computed(() => {
   const vulnerabilidadFilters = filtrosVulnerabilidad.value;
-  const selectedYear = filtroAño.value;
 
   return gisStore.marcadores.filter((marcador) => {
-    // Filtrado por año - si selectedYear es null, muestra todos
-    if (selectedYear !== null && marcador.fechaCreacion) {
-      try {
-        const marcadorYear = new Date(marcador.fechaCreacion).getFullYear().toString();
-        if (marcadorYear !== selectedYear) {
-          return false;
-        }
-      } catch (error) {
-        console.warn('Error al parsear fecha del mapa:', marcador.fechaCreacion);
-        return false;
-      }
-    } else if (selectedYear !== null) {
-      // Si selectedYear no es null pero el marcador no tiene fecha, no mostrar
-      return false;
-    }
-    // Si selectedYear es null, mostrar todos los marcadores con fecha válida
-
     // Filtrado por vulnerabilidad
     if (vulnerabilidadFilters.length === 0) {
       return true;
@@ -1518,38 +1522,26 @@ watch(marcadoresFiltradosParaMapa, (nuevosMarcadores) => {
   nuevosMarcadores.forEach(agregarMarcadorAlMapa);
 }, { immediate: true });
 
-// ✅ Watch para monitorear cambios de filtroAño y loguear
+// Watch para recargar marcadores desde la API cuando cambia el año
 watch(
   () => filtroAño.value,
-  (nuevoAño, viejoAño) => {
-    console.log(`🎯 [Watch filtroAño] Cambio de año: ${viejoAño} → ${nuevoAño}`);
-    console.log(`   Marcadores totales: ${gisStore.marcadores.length}`);
-    console.log(`   Marcadores filtrados: ${marcadoresFiltrados.value.length}`);
+  async (nuevoAño, viejoAño) => {
+    if (nuevoAño === viejoAño) return;
+    if (nuevoAño !== null) {
+      await gisStore.cargarMarcadoresPorAnio(parseInt(nuevoAño));
+    } else {
+      await gisStore.cargarMarcadoresDesdeAPI();
+    }
   },
   { flush: 'post' }
 );
 
 onMounted(() => {
-  // El filtroAño ya está inicializado al año actual por defecto
-  const currentYear = new Date().getFullYear().toString();
-  console.log(`🚀 onMounted iniciado. Año actual: ${currentYear}`);
-  console.log(`📅 filtroAño (año actual por defecto): ${filtroAño.value}`);
-  console.log(`3️⃣ marcadoresFiltrados ANTES de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
+  const currentYear = new Date().getFullYear();
 
-  gisStore.cargarMarcadoresDesdeAPI().then(async () => {
-    // Esperar al siguiente tick para que Vue actualice los datos
+  // Cargar marcadores por el año actual (usando el nuevo endpoint por-anio)
+  gisStore.cargarMarcadoresPorAnio(currentYear).then(async () => {
     await nextTick();
-
-    // Log para verificar si los marcadores tienen fechaCreacion
-    if (gisStore.marcadores.length > 0) {
-      console.log('🔍 Primeros 3 marcadores recibidos:', gisStore.marcadores.slice(0, 3));
-      console.log('✅ Propiedades disponibles:', Object.keys(gisStore.marcadores[0]));
-      const conFecha = gisStore.marcadores.filter(m => m.fechaCreacion).length;
-      const sinFecha = gisStore.marcadores.length - conFecha;
-      console.log(`📊 Total marcadores: ${gisStore.marcadores.length}, con fechaCreacion: ${conFecha}, sin fechaCreacion: ${sinFecha}`);
-      console.log(`📅 filtroAño en este momento: ${filtroAño.value} (null = mostrar todos)`);
-      console.log(`4️⃣ marcadoresFiltrados DESPUÉS de cargar API:`, marcadoresFiltrados.value.length, 'elementos');
-    }
   });
 
   const vectorLayer = new VectorLayer({ source: vectorSource });
@@ -1644,16 +1636,29 @@ onMounted(() => {
 
   map.on('singleclick', (event) => {
     let marcadorSeleccionado = false;
+    const anioActual = new Date().getFullYear().toString();
+    const esAnioPasado = filtroAño.value !== null && filtroAño.value !== anioActual;
 
     map.forEachFeatureAtPixel(event.pixel, (feature) => {
       const id = feature.get('id');
       if (id) {
-        gisStore.seleccionarMarcador(id);
+        if (esAnioPasado) {
+          // Año pasado: usar datos ya cargados del endpoint por-anio (incluye relaciones)
+          gisStore.seleccionarMarcadorDesdeCache(id);
+        } else {
+          // Año actual: fetch individual con datos completos
+          gisStore.seleccionarMarcador(id);
+        }
         marcadorSeleccionado = true;
       }
     });
 
     if (!marcadorSeleccionado) {
+      // No permitir crear marcadores si estamos viendo un año pasado
+      const anioActual = new Date().getFullYear().toString();
+      if (filtroAño.value !== null && filtroAño.value !== anioActual) {
+        return;
+      }
       const coords = toLonLat(event.coordinate) as [number, number];
       abrirModal(coords);
     }
@@ -1725,21 +1730,6 @@ async function validarYGuardar() {
   }
 }
 
-// Validar que haya al menos un programa
-function validarProgramas(): boolean {
-  return (
-    nuevoMarcador.value.programas && nuevoMarcador.value.programas.length > 0
-  );
-}
-
-// Validar que haya al menos un integrante
-function validarIntegrantes(): boolean {
-  return (
-    nuevoMarcador.value.integrantes &&
-    nuevoMarcador.value.integrantes.length > 0
-  );
-}
-
 // ====== MÉTODOS EXISTENTES MODIFICADOS ======
 
 function cerrarModal() {
@@ -1782,7 +1772,7 @@ async function guardarMarcador() {
         fechaCreacion: gisStore.marcadorSeleccionado!.fechaCreacion,
       };
       await gisStore.editarMarcador(marcadorConId as unknown as Marcador);
-      await gisStore.cargarMarcadoresDesdeAPI();
+      await recargarMarcadoresDesdeAPI();
       $q.notify({
         type: 'positive',
         message: 'Marcador actualizado correctamente',
@@ -1806,7 +1796,7 @@ async function guardarMarcador() {
           position: 'top',
         });
       } else {
-        await gisStore.cargarMarcadoresDesdeAPI();
+        await recargarMarcadoresDesdeAPI();
         $q.notify({
           type: 'positive',
           message: 'Marcador creado correctamente',
@@ -2004,30 +1994,6 @@ function eliminarSalud(index: number) {
   if (nuevoMarcador.value.salud) {
     nuevoMarcador.value.salud.splice(index, 1);
   }
-}
-
-// Función para limpiar el formulario
-function limpiarFormulario() {
-  nuevoMarcador.value = {
-    nombre: '',
-    apellido: '',
-    direccion: '',
-    telefono: '',
-    dni: '',
-    barrio: '',
-    tiempo_residencia: '',
-    latitud: null,
-    longitud: null,
-    notas: '',
-    icono: '',
-    programas: [],
-    integrantes: [],
-    estudios: [],
-    ocupaciones: [],
-    viviendas: [],
-    servicios: [],
-    salud: [],
-  };
 }
 
 // Nuevos métodos para ocupaciones
@@ -3273,11 +3239,6 @@ function agregarMarcadorAlMapa(marcador: Marcador) {
   vectorSource.addFeature(feature);
 }
 
-function recargarMarcadores() {
-  vectorSource.clear();
-  gisStore.marcadores.forEach(agregarMarcadorAlMapa);
-}
-
 function editarMarcadorSeleccionado() {
   if (!gisStore.marcadorSeleccionado) return;
 
@@ -3568,6 +3529,12 @@ function verInfoMarcador(marcador: Marcador) {
   font-weight: bold;
   margin-right: 12px;
   flex-shrink: 0;
+}
+
+.marcador-avatar {
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: transparent;
 }
 
 .marcador-info {

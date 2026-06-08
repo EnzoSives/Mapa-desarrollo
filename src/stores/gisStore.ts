@@ -78,6 +78,25 @@ export interface Marcador {
   servicios?: Servicio[];
   notas?: string;
   fechaCreacion: string;
+  // Campos del endpoint por-anio
+  esDatoVivo?: boolean;
+  anio_dato?: number;
+}
+
+export interface DatosAnuales {
+  anio: number;
+  esDatoVivo: boolean;
+  marcador: Marcador;
+  fechaCierre?: string;
+}
+
+export interface DiferenciaAnual {
+  marcadorId: number;
+  anio1: number;
+  anio2: number;
+  diferencias: Record<string, { [key: string]: string }>;
+  datos_anio1: Marcador;
+  datos_anio2: Marcador;
 }
 
 export const useGisStore = defineStore('gis', {
@@ -85,6 +104,10 @@ export const useGisStore = defineStore('gis', {
     marcadores: [] as Marcador[],
     marcadorSeleccionado: null as Marcador | null,
     marcadorSeleccionadoProgramasCompletos: [] as Programa[], // ⬅️ nueva propiedad
+    // Historial anual
+    aniosDisponibles: [] as number[],
+    datosAnuales: null as DatosAnuales | null,
+    comparacionAnual: null as DiferenciaAnual | null,
   }),
 
   actions: {
@@ -97,7 +120,18 @@ export const useGisStore = defineStore('gis', {
       }
     },
 
-    async agregarMarcador(marcador: Omit<Marcador, 'id'>) {
+    async cargarMarcadoresPorAnio(anio: number) {
+      try {
+        const response = await axios.get(
+          `http://179.43.127.133:3006/marcador/por-anio/${anio}`
+        );
+        this.marcadores = response.data;
+      } catch (error) {
+        console.error('Error al cargar marcadores por año:', error);
+      }
+    },
+
+    async agregarMarcador(marcador: Omit<Marcador, 'id'>): Promise<Marcador> {
       try {
         const response = await axios.post(
           'http://179.43.127.133:3006/marcador',
@@ -126,6 +160,7 @@ export const useGisStore = defineStore('gis', {
         );
 
         const marcadorActualizado: Marcador = response.data;
+        console.log('Marcador actualizado desde el backend:', marcadorActualizado);
 
         const index = this.marcadores.findIndex(
           (m) => m.id === marcadorActualizado.id
@@ -180,8 +215,88 @@ export const useGisStore = defineStore('gis', {
       }
     },
 
+    // Seleccionar marcador desde los datos ya cargados (para años históricos)
+    seleccionarMarcadorDesdeCache(id: number) {
+      const marcador = this.marcadores.find((m) => m.id === id);
+      if (marcador) {
+        this.marcadorSeleccionadoProgramasCompletos = marcador.programas || [];
+        this.marcadorSeleccionado = { ...marcador };
+      }
+    },
+
     cerrarInfo() {
       this.marcadorSeleccionado = null;
+this.aniosDisponibles = [];
+      this.datosAnuales = null;
+      this.comparacionAnual = null;
+    },
+
+    // ===== HISTORIAL ANUAL =====
+
+    async cargarAniosDisponibles(marcadorId: number) {
+      try {
+        const response = await axios.get(
+          `http://179.43.127.133:3006/marcador/${marcadorId}/anual/anios`
+        );
+        this.aniosDisponibles = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Error al cargar años disponibles:', error);
+        this.aniosDisponibles = [];
+        return [];
+      }
+    },
+
+    async cargarDatosAnuales(marcadorId: number, anio: number) {
+      try {
+        const response = await axios.get(
+          `http://179.43.127.133:3006/marcador/${marcadorId}/anual/${anio}`
+        );
+        this.datosAnuales = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Error al cargar datos anuales:', error);
+        this.datosAnuales = null;
+        throw error;
+      }
+    },
+
+    async cerrarAnioMarcador(marcadorId: number, anio: number) {
+      try {
+        const response = await axios.post(
+          `http://179.43.127.133:3006/marcador/${marcadorId}/anual/${anio}/cerrar`
+        );
+        return response.data;
+      } catch (error) {
+        console.error('Error al cerrar año del marcador:', error);
+        throw error;
+      }
+    },
+
+    async cerrarAnioMasivo(anio: number) {
+      try {
+        const response = await axios.post(
+          `http://179.43.127.133:3006/marcador/anual/${anio}/cerrar-masivo`
+        );
+        return response.data;
+      } catch (error) {
+        console.error('Error al cerrar año masivo:', error);
+        throw error;
+      }
+    },
+
+    async compararAnios(marcadorId: number, anio1: number, anio2: number) {
+      try {
+        const response = await axios.get(
+          `http://179.43.127.133:3006/marcador/${marcadorId}/anual/comparar?anio1=${anio1}&anio2=${anio2}`
+        );
+        this.comparacionAnual = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Error al comparar años:', error);
+        this.comparacionAnual = null;
+        throw error;
+      }
     },
   },
 });
