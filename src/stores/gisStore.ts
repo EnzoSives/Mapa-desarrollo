@@ -78,6 +78,7 @@ export interface Marcador {
   servicios?: Servicio[];
   notas?: string;
   fechaCreacion: string;
+  anios?: number[];
   // Campos del endpoint por-anio
   esDatoVivo?: boolean;
   anio_dato?: number;
@@ -151,11 +152,13 @@ export const useGisStore = defineStore('gis', {
       try {
         console.log('Marcador que se enviará al backend:', marcadorEditado);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { anio_dato, esDatoVivo, ...marcadorLimpio } = marcadorEditado;
         const response = await axios.put(
           `http://179.43.127.133:3006/marcador/${marcadorEditado.id}`,
           {
-            ...marcadorEditado,
-            programas: marcadorEditado.programas, // 👈 asegurate de que esto esté presente
+            ...marcadorLimpio,
+            programas: marcadorEditado.programas,
           }
         );
 
@@ -282,6 +285,51 @@ this.aniosDisponibles = [];
       } catch (error) {
         console.error('Error al cerrar año masivo:', error);
         throw error;
+      }
+    },
+
+    async actualizarAniosMarcador(marcadorId: number, anios: number[]) {
+      try {
+        // Siempre fetchea el marcador vivo para no sobreescribir con snapshot histórico
+        const liveRes = await axios.get(`http://localhost:3006/marcador/${marcadorId}`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { anio_dato, esDatoVivo, ...marcadorVivo } = liveRes.data as Marcador;
+        const response = await axios.put(
+          `http://localhost:3006/marcador/${marcadorId}`,
+          { ...marcadorVivo, anios }
+        );
+        const actualizado: Marcador = response.data;
+        const index = this.marcadores.findIndex((m) => m.id === marcadorId);
+        if (index !== -1) {
+          this.marcadores[index] = { ...this.marcadores[index], anios };
+        }
+        if (this.marcadorSeleccionado?.id === marcadorId) {
+          this.marcadorSeleccionado = { ...this.marcadorSeleccionado, anios };
+        }
+        return actualizado;
+      } catch (error) {
+        console.error('Error al actualizar años del marcador:', error);
+        throw error;
+      }
+    },
+
+    async cargarAniosActivosMarcador(marcadorId: number): Promise<number[]> {
+      try {
+        const response = await axios.get(`http://localhost:3006/marcador/${marcadorId}`);
+        return response.data.anios || [];
+      } catch {
+        return [];
+      }
+    },
+
+    async buscarMarcadorPorDni(dni: string): Promise<Marcador | null> {
+      try {
+        const response = await axios.get('http://localhost:3006/marcador');
+        const todos: Marcador[] = response.data;
+        const dniBuscado = String(dni || '').trim();
+        return todos.find((m) => String(m.dni || '').trim() === dniBuscado) || null;
+      } catch {
+        return null;
       }
     },
 
