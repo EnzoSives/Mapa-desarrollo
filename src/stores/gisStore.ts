@@ -291,11 +291,11 @@ this.aniosDisponibles = [];
     async actualizarAniosMarcador(marcadorId: number, anios: number[]) {
       try {
         // Siempre fetchea el marcador vivo para no sobreescribir con snapshot histórico
-        const liveRes = await axios.get(`http://localhost:3006/marcador/${marcadorId}`);
+        const liveRes = await axios.get(`http://179.43.127.133:3006/marcador/${marcadorId}`);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { anio_dato, esDatoVivo, ...marcadorVivo } = liveRes.data as Marcador;
         const response = await axios.put(
-          `http://localhost:3006/marcador/${marcadorId}`,
+          `http://179.43.127.133:3006/marcador/${marcadorId}`,
           { ...marcadorVivo, anios }
         );
         const actualizado: Marcador = response.data;
@@ -315,7 +315,7 @@ this.aniosDisponibles = [];
 
     async cargarAniosActivosMarcador(marcadorId: number): Promise<number[]> {
       try {
-        const response = await axios.get(`http://localhost:3006/marcador/${marcadorId}`);
+        const response = await axios.get(`http://179.43.127.133:3006/marcador/${marcadorId}`);
         return response.data.anios || [];
       } catch {
         return [];
@@ -324,7 +324,7 @@ this.aniosDisponibles = [];
 
     async buscarMarcadorPorDni(dni: string): Promise<Marcador | null> {
       try {
-        const response = await axios.get('http://localhost:3006/marcador');
+        const response = await axios.get('http://179.43.127.133:3006/marcador');
         const todos: Marcador[] = response.data;
         const dniBuscado = String(dni || '').trim();
         return todos.find((m) => String(m.dni || '').trim() === dniBuscado) || null;
